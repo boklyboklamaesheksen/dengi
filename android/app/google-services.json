@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1020087782119",
+    "project_id": "rabochiyvpn-app",
+    "storage_bucket": "rabochiyvpn-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1020087782119:android:805f3a2b80b55db333f042",
+        "android_client_info": {
+          "package_name": "app.rabochiy.vpn"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLzpiRcWCdsq70ZxxxaUNwclcpi1bWerw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

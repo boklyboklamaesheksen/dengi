@@ -1,0 +1,1204 @@
+﻿> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:compileKotlin UP-TO-DATE
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:pluginDescriptors UP-TO-DATE
+> Task :gradle:processResources UP-TO-DATE
+> Task :gradle:classes UP-TO-DATE
+> Task :gradle:jar UP-TO-DATE
+> Task :amneziawg-tunnel:preBuild UP-TO-DATE
+> Task :amneziawg-tunnel:preReleaseBuild UP-TO-DATE
+> Task :amneziawg-tunnel:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :amneziawg-tunnel:mergeReleaseNativeLibs UP-TO-DATE
+> Task :amneziawg-tunnel:stripReleaseDebugSymbols UP-TO-DATE
+> Task :amneziawg-tunnel:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :amneziawg-tunnel:generateReleaseResValues UP-TO-DATE
+> Task :amneziawg-tunnel:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :amneziawg-tunnel:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :amneziawg-tunnel:generateReleaseResources UP-TO-DATE
+> Task :amneziawg-tunnel:packageReleaseResources UP-TO-DATE
+> Task :amneziawg-tunnel:parseReleaseLocalResources UP-TO-DATE
+> Task :amneziawg-tunnel:generateReleaseRFile UP-TO-DATE
+> Task :amneziawg-tunnel:compileReleaseKotlin NO-SOURCE
+> Task :amneziawg-tunnel:extractReleaseAnnotations UP-TO-DATE
+> Task :amneziawg-tunnel:mergeReleaseShaders UP-TO-DATE
+> Task :amneziawg-tunnel:compileReleaseShaders NO-SOURCE
+> Task :amneziawg-tunnel:generateReleaseAssets UP-TO-DATE
+> Task :amneziawg-tunnel:mergeReleaseAssets UP-TO-DATE
+> Task :amneziawg-tunnel:javaPreCompileRelease UP-TO-DATE
+> Task :amneziawg-tunnel:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :amneziawg-tunnel:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :amneziawg-tunnel:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :amneziawg-tunnel:prepareLintJarForPublish UP-TO-DATE
+> Task :amneziawg-tunnel:prepareReleaseArtProfile UP-TO-DATE
+> Task :amneziawg-tunnel:processReleaseManifest UP-TO-DATE
+> Task :amneziawg-tunnel:processReleaseJavaRes NO-SOURCE
+> Task :amneziawg-tunnel:mergeReleaseJavaResource UP-TO-DATE
+> Task :amneziawg-tunnel:syncReleaseLibJars UP-TO-DATE
+> Task :amneziawg-tunnel:writeReleaseAarMetadata UP-TO-DATE
+> Task :amneziawg-tunnel:bundleReleaseAar UP-TO-DATE
+> Task :amneziawg-tunnel:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :amneziawg-tunnel:mergeReleaseResources UP-TO-DATE
+> Task :amneziawg-tunnel:verifyReleaseResources UP-TO-DATE
+> Task :amneziawg-tunnel:assembleRelease UP-TO-DATE
+> Task :app:ReleaseMinSdkCheck
+> Task :amneziawg-tunnel:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :app:compileFlutterBuildRelease UP-TO-DATE
+> Task :app:packJniLibsflutterBuildRelease UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:configureCMakeRelease[arm64-v8a]
+> Task :app:buildCMakeRelease[arm64-v8a]
+> Task :app:configureCMakeRelease[armeabi-v7a]
+> Task :app:buildCMakeRelease[armeabi-v7a]
+> Task :app:configureCMakeRelease[x86_64]
+> Task :app:buildCMakeRelease[x86_64]
+> Task :app:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :firebase_analytics:preBuild UP-TO-DATE
+> Task :firebase_analytics:preReleaseBuild UP-TO-DATE
+> Task :firebase_analytics:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :firebase_analytics:mergeReleaseNativeLibs NO-SOURCE
+> Task :firebase_analytics:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :firebase_core:preBuild UP-TO-DATE
+> Task :firebase_core:preReleaseBuild UP-TO-DATE
+> Task :firebase_core:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :firebase_core:mergeReleaseNativeLibs NO-SOURCE
+> Task :firebase_core:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :firebase_crashlytics:preBuild UP-TO-DATE
+> Task :firebase_crashlytics:preReleaseBuild UP-TO-DATE
+> Task :firebase_crashlytics:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :firebase_crashlytics:mergeReleaseNativeLibs NO-SOURCE
+> Task :firebase_crashlytics:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :installed_apps:preBuild UP-TO-DATE
+> Task :installed_apps:preReleaseBuild UP-TO-DATE
+> Task :installed_apps:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :installed_apps:mergeReleaseNativeLibs NO-SOURCE
+> Task :installed_apps:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :package_info_plus:preBuild UP-TO-DATE
+> Task :package_info_plus:preReleaseBuild UP-TO-DATE
+> Task :package_info_plus:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :package_info_plus:mergeReleaseNativeLibs NO-SOURCE
+> Task :package_info_plus:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :shared_preferences_android:preBuild UP-TO-DATE
+> Task :shared_preferences_android:preReleaseBuild UP-TO-DATE
+> Task :shared_preferences_android:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :shared_preferences_android:mergeReleaseNativeLibs NO-SOURCE
+> Task :shared_preferences_android:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :url_launcher_android:preBuild UP-TO-DATE
+> Task :url_launcher_android:preReleaseBuild UP-TO-DATE
+> Task :url_launcher_android:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :url_launcher_android:mergeReleaseNativeLibs NO-SOURCE
+> Task :url_launcher_android:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeReleaseNativeLibs UP-TO-DATE
+> Task :app:stripReleaseDebugSymbols UP-TO-DATE
+> Task :app:extractReleaseNativeSymbolTables UP-TO-DATE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :firebase_analytics:prepareReleaseArtProfile UP-TO-DATE
+> Task :firebase_core:prepareReleaseArtProfile UP-TO-DATE
+> Task :firebase_crashlytics:prepareReleaseArtProfile UP-TO-DATE
+> Task :installed_apps:prepareReleaseArtProfile UP-TO-DATE
+> Task :package_info_plus:prepareReleaseArtProfile UP-TO-DATE
+> Task :shared_preferences_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :url_launcher_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :app:mergeReleaseArtProfile UP-TO-DATE
+> Task :app:expandReleaseL8ArtProfileWildcards UP-TO-DATE
+> Task :amneziawg-tunnel:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :firebase_analytics:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :firebase_analytics:generateReleaseBuildConfig UP-TO-DATE
+> Task :firebase_analytics:generateReleaseResValues UP-TO-DATE
+> Task :firebase_analytics:generateReleaseResources UP-TO-DATE
+> Task :firebase_analytics:packageReleaseResources UP-TO-DATE
+> Task :firebase_analytics:parseReleaseLocalResources UP-TO-DATE
+> Task :firebase_analytics:generateReleaseRFile UP-TO-DATE
+> Task :firebase_core:generateReleaseBuildConfig UP-TO-DATE
+> Task :firebase_core:generateReleaseResValues UP-TO-DATE
+> Task :firebase_core:generateReleaseResources UP-TO-DATE
+> Task :firebase_core:packageReleaseResources UP-TO-DATE
+> Task :firebase_core:parseReleaseLocalResources UP-TO-DATE
+> Task :firebase_core:generateReleaseRFile UP-TO-DATE
+> Task :firebase_core:javaPreCompileRelease UP-TO-DATE
+> Task :firebase_core:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :firebase_core:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :firebase_analytics:compileReleaseKotlin UP-TO-DATE
+> Task :firebase_analytics:javaPreCompileRelease UP-TO-DATE
+> Task :firebase_analytics:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :firebase_analytics:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :firebase_analytics:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :firebase_crashlytics:generateReleaseBuildConfig UP-TO-DATE
+> Task :firebase_crashlytics:generateReleaseResValues UP-TO-DATE
+> Task :firebase_crashlytics:generateReleaseResources UP-TO-DATE
+> Task :firebase_crashlytics:packageReleaseResources UP-TO-DATE
+> Task :firebase_crashlytics:parseReleaseLocalResources UP-TO-DATE
+> Task :firebase_crashlytics:generateReleaseRFile UP-TO-DATE
+> Task :firebase_crashlytics:javaPreCompileRelease UP-TO-DATE
+> Task :firebase_crashlytics:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :firebase_crashlytics:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :firebase_crashlytics:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :firebase_core:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :firebase_core:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :installed_apps:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :installed_apps:generateReleaseResValues UP-TO-DATE
+> Task :installed_apps:generateReleaseResources UP-TO-DATE
+> Task :installed_apps:packageReleaseResources UP-TO-DATE
+> Task :installed_apps:parseReleaseLocalResources UP-TO-DATE
+> Task :installed_apps:generateReleaseRFile UP-TO-DATE
+> Task :installed_apps:compileReleaseKotlin UP-TO-DATE
+> Task :installed_apps:javaPreCompileRelease UP-TO-DATE
+> Task :installed_apps:compileReleaseJavaWithJavac NO-SOURCE
+> Task :installed_apps:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :installed_apps:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :package_info_plus:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :package_info_plus:generateReleaseResValues UP-TO-DATE
+> Task :package_info_plus:generateReleaseResources UP-TO-DATE
+> Task :package_info_plus:packageReleaseResources UP-TO-DATE
+> Task :package_info_plus:parseReleaseLocalResources UP-TO-DATE
+> Task :package_info_plus:generateReleaseRFile UP-TO-DATE
+> Task :package_info_plus:compileReleaseKotlin UP-TO-DATE
+> Task :package_info_plus:javaPreCompileRelease UP-TO-DATE
+> Task :package_info_plus:compileReleaseJavaWithJavac NO-SOURCE
+> Task :package_info_plus:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :package_info_plus:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :shared_preferences_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared_preferences_android:generateReleaseResValues UP-TO-DATE
+> Task :shared_preferences_android:generateReleaseResources UP-TO-DATE
+> Task :shared_preferences_android:packageReleaseResources UP-TO-DATE
+> Task :shared_preferences_android:parseReleaseLocalResources UP-TO-DATE
+> Task :shared_preferences_android:generateReleaseRFile UP-TO-DATE
+> Task :shared_preferences_android:compileReleaseKotlin UP-TO-DATE
+> Task :shared_preferences_android:javaPreCompileRelease UP-TO-DATE
+> Task :shared_preferences_android:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :shared_preferences_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :shared_preferences_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :url_launcher_android:generateReleaseBuildConfig UP-TO-DATE
+> Task :url_launcher_android:generateReleaseResValues UP-TO-DATE
+> Task :url_launcher_android:generateReleaseResources UP-TO-DATE
+> Task :url_launcher_android:packageReleaseResources UP-TO-DATE
+> Task :url_launcher_android:parseReleaseLocalResources UP-TO-DATE
+> Task :url_launcher_android:generateReleaseRFile UP-TO-DATE
+> Task :url_launcher_android:javaPreCompileRelease UP-TO-DATE
+> Task :url_launcher_android:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :url_launcher_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :url_launcher_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :amneziawg-tunnel:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :amneziawg-tunnel:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :app:buildKotlinToolingMetadata UP-TO-DATE
+> Task :app:checkReleaseDuplicateClasses UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:generateReleaseBuildConfig UP-TO-DATE
+> Task :firebase_analytics:writeReleaseAarMetadata UP-TO-DATE
+> Task :firebase_core:writeReleaseAarMetadata UP-TO-DATE
+> Task :firebase_crashlytics:writeReleaseAarMetadata UP-TO-DATE
+> Task :installed_apps:writeReleaseAarMetadata UP-TO-DATE
+> Task :package_info_plus:writeReleaseAarMetadata UP-TO-DATE
+> Task :shared_preferences_android:writeReleaseAarMetadata UP-TO-DATE
+> Task :url_launcher_android:writeReleaseAarMetadata UP-TO-DATE
+> Task :app:checkReleaseAarMetadata UP-TO-DATE
+> Task :app:cleanMergeReleaseAssets
+> Task :app:mergeReleaseShaders UP-TO-DATE
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :firebase_analytics:mergeReleaseShaders UP-TO-DATE
+> Task :firebase_analytics:compileReleaseShaders NO-SOURCE
+> Task :firebase_analytics:generateReleaseAssets UP-TO-DATE
+> Task :firebase_analytics:mergeReleaseAssets UP-TO-DATE
+> Task :firebase_core:mergeReleaseShaders UP-TO-DATE
+> Task :firebase_core:compileReleaseShaders NO-SOURCE
+> Task :firebase_core:generateReleaseAssets UP-TO-DATE
+> Task :firebase_core:mergeReleaseAssets UP-TO-DATE
+> Task :firebase_crashlytics:mergeReleaseShaders UP-TO-DATE
+> Task :firebase_crashlytics:compileReleaseShaders NO-SOURCE
+> Task :firebase_crashlytics:generateReleaseAssets UP-TO-DATE
+> Task :firebase_crashlytics:mergeReleaseAssets UP-TO-DATE
+> Task :installed_apps:mergeReleaseShaders UP-TO-DATE
+> Task :installed_apps:compileReleaseShaders NO-SOURCE
+> Task :installed_apps:generateReleaseAssets UP-TO-DATE
+> Task :installed_apps:mergeReleaseAssets UP-TO-DATE
+> Task :package_info_plus:mergeReleaseShaders UP-TO-DATE
+> Task :package_info_plus:compileReleaseShaders NO-SOURCE
+> Task :package_info_plus:generateReleaseAssets UP-TO-DATE
+> Task :package_info_plus:mergeReleaseAssets UP-TO-DATE
+> Task :shared_preferences_android:mergeReleaseShaders UP-TO-DATE
+> Task :shared_preferences_android:compileReleaseShaders NO-SOURCE
+> Task :shared_preferences_android:generateReleaseAssets UP-TO-DATE
+> Task :shared_preferences_android:mergeReleaseAssets UP-TO-DATE
+> Task :url_launcher_android:mergeReleaseShaders UP-TO-DATE
+> Task :url_launcher_android:compileReleaseShaders NO-SOURCE
+> Task :url_launcher_android:generateReleaseAssets UP-TO-DATE
+> Task :url_launcher_android:mergeReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets
+> Task :app:copyFlutterAssetsRelease
+> Task :app:generateReleaseResValues UP-TO-DATE
+> Task :app:injectCrashlyticsMappingFileIdRelease UP-TO-DATE
+> Task :app:processReleaseGoogleServices UP-TO-DATE
+> Task :app:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :app:generateReleaseResources UP-TO-DATE
+> Task :app:mergeReleaseResources UP-TO-DATE
+> Task :app:packageReleaseResources UP-TO-DATE
+> Task :app:parseReleaseLocalResources UP-TO-DATE
+> Task :app:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :amneziawg-tunnel:extractDeepLinksRelease UP-TO-DATE
+> Task :app:extractDeepLinksRelease UP-TO-DATE
+> Task :firebase_analytics:extractDeepLinksRelease UP-TO-DATE
+> Task :firebase_analytics:processReleaseManifest UP-TO-DATE
+> Task :firebase_core:extractDeepLinksRelease UP-TO-DATE
+> Task :firebase_core:processReleaseManifest UP-TO-DATE
+> Task :firebase_crashlytics:extractDeepLinksRelease UP-TO-DATE
+> Task :firebase_crashlytics:processReleaseManifest UP-TO-DATE
+> Task :installed_apps:extractDeepLinksRelease UP-TO-DATE
+> Task :installed_apps:processReleaseManifest UP-TO-DATE
+> Task :package_info_plus:extractDeepLinksRelease UP-TO-DATE
+> Task :package_info_plus:processReleaseManifest UP-TO-DATE
+> Task :shared_preferences_android:extractDeepLinksRelease UP-TO-DATE
+> Task :shared_preferences_android:processReleaseManifest UP-TO-DATE
+> Task :url_launcher_android:extractDeepLinksRelease UP-TO-DATE
+> Task :url_launcher_android:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseMainManifest UP-TO-DATE
+> Task :app:outputReleaseAppLinkSettings UP-TO-DATE
+> Task :app:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseManifestForPackage UP-TO-DATE
+> Task :app:processReleaseResources UP-TO-DATE
+> Task :firebase_analytics:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :firebase_crashlytics:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :installed_apps:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :package_info_plus:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :shared_preferences_android:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :url_launcher_android:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :app:compileReleaseKotlin UP-TO-DATE
+> Task :app:javaPreCompileRelease UP-TO-DATE
+
+> Task :app:compileReleaseJavaWithJavac FAILED
+.\gradlew : D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\Remediati
+onInstructionAdapter.java:25: error: package com.witvpn.ikev2 does not exist
+строка:1 знак:214
++ ... \vpn_subscription_app\android; .\gradlew assembleRelease 2>&1 | Out-F ...
++                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (D:\top\mobil\vp... does not exist:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\SelectedApplicationsA
+dapter.java:29: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\TrustedCertificateAda
+pter.java:29: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\VpnProfileAdapter.jav
+a:34: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\CertificateDeleteConfirmation
+Dialog.java:23: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AlertDialog;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\CertificateDeleteConfirmation
+Dialog.java:24: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatDialogFragment;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\CertificateDeleteConfirmation
+Dialog.java:26: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\CertificateDeleteConfirmation
+Dialog.java:32: error: cannot find symbol
+public class CertificateDeleteConfirmationDialog extends AppCompatDialogFragment
+                                                         ^
+  symbol: class AppCompatDialogFragment
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\ImcStateFragment.java:48: err
+or: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\LogActivity.java:25: error: p
+ackage androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatActivity;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\LogActivity.java:32: error: p
+ackage com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\LogActivity.java:34: error: c
+annot find symbol
+public class LogActivity extends AppCompatActivity
+                                 ^
+  symbol: class AppCompatActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\LogFragment.java:40: error: p
+ackage com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:31: er
+ror: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.ActionBar;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:32: er
+ror: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AlertDialog;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:33: er
+ror: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatActivity;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:34: er
+ror: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatDialogFragment;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileListFragment.java:4
+1: error: package androidx.localbroadcastmanager.content does not exist
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+                                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileListFragment.java:5
+4: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:47: er
+ror: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:49: er
+ror: cannot find symbol
+public class MainIKEV2Activity extends AppCompatActivity implements OnVpnProfileSelectedListener {
+                                       ^
+  symbol: class AppCompatActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:175: e
+rror: cannot find symbol
+    public static class CRLCacheDialog extends AppCompatDialogFragment {
+                                               ^
+  symbol:   class AppCompatDialogFragment
+  location: class MainIKEV2Activity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\RemediationInstructionFragmen
+t.java:30: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\RemediationInstructionsActivi
+ty.java:21: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatActivity;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\RemediationInstructionsFragme
+nt.java:30: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\RemediationInstructionsActivi
+ty.java:28: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\RemediationInstructionsActivi
+ty.java:30: error: cannot find symbol
+public class RemediationInstructionsActivity extends AppCompatActivity implements OnRemediationInstructionSelectedListe
+ner
+                                                     ^
+  symbol: class AppCompatActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SelectedApplicationsActivity.
+java:23: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.ActionBar;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SelectedApplicationsActivity.
+java:24: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatActivity;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SelectedApplicationsActivity.
+java:29: error: cannot find symbol
+public class SelectedApplicationsActivity extends AppCompatActivity
+                                                  ^
+  symbol: class AppCompatActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SelectedApplicationsListFragm
+ent.java:33: error: package androidx.appcompat.widget does not exist
+import androidx.appcompat.widget.SearchView;
+                                ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SelectedApplicationsListFragm
+ent.java:49: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SelectedApplicationsListFragm
+ent.java:51: error: package SearchView does not exist
+public class SelectedApplicationsListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Pair<List<S
+electedApplicationEntry>, List<String>>>, SearchView.OnQueryTextListener
+                                                                                                                       
+                                                    ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsActivity.java:21: err
+or: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatActivity;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsActivity.java:23: err
+or: cannot find symbol
+public class SettingsActivity extends AppCompatActivity
+                                      ^
+  symbol: class AppCompatActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:22: err
+or: cannot find symbol
+import androidx.preference.ListPreference;
+                          ^
+  symbol:   class ListPreference
+  location: package androidx.preference
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:23: err
+or: cannot find symbol
+import androidx.preference.Preference;
+                          ^
+  symbol:   class Preference
+  location: package androidx.preference
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:24: err
+or: cannot find symbol
+import androidx.preference.PreferenceFragmentCompat;
+                          ^
+  symbol:   class PreferenceFragmentCompat
+  location: package androidx.preference
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:25: err
+or: cannot find symbol
+import androidx.preference.PreferenceManager;
+                          ^
+  symbol:   class PreferenceManager
+  location: package androidx.preference
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:35: err
+or: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:40: err
+or: cannot find symbol
+public class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener
+                                      ^
+  symbol: class PreferenceFragmentCompat
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:40: err
+or: package Preference does not exist
+public class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener
+                                                                                    ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:42: err
+or: cannot find symbol
+	private ListPreference mDefaultVPNProfile;
+	        ^
+  symbol:   class ListPreference
+  location: class SettingsFragment
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:103: er
+ror: cannot find symbol
+	public boolean onPreferenceChange(Preference preference, Object newValue)
+	                                  ^
+  symbol:   class Preference
+  location: class SettingsFragment
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateImportActiv
+ity.java:29: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AlertDialog;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateImportActiv
+ity.java:30: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatActivity;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateImportActiv
+ity.java:31: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatDialogFragment;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateImportActiv
+ity.java:44: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateImportActiv
+ity.java:46: error: cannot find symbol
+public class TrustedCertificateImportActivity extends AppCompatActivity
+                                                      ^
+  symbol: class AppCompatActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateImportActiv
+ity.java:196: error: cannot find symbol
+	public static class ConfirmImportDialog extends AppCompatDialogFragment
+	                                                ^
+  symbol:   class AppCompatDialogFragment
+  location: class TrustedCertificateImportActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateListFragmen
+t.java:49: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificatesActivity.j
+ava:26: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.ActionBar;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificatesActivity.j
+ava:27: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatActivity;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificatesActivity.j
+ava:33: error: package com.google.android.material.tabs does not exist
+import com.google.android.material.tabs.TabLayout;
+                                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificatesActivity.j
+ava:43: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificatesActivity.j
+ava:45: error: cannot find symbol
+public class TrustedCertificatesActivity extends AppCompatActivity implements TrustedCertificateListFragment.OnTrustedC
+ertificateSelectedListener, OnCertificateDeleteListener
+                                                 ^
+  symbol: class AppCompatActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.jav
+a:41: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AlertDialog;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.jav
+a:42: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatActivity;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.jav
+a:43: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatDialogFragment;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.jav
+a:55: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.jav
+a:57: error: cannot find symbol
+public class VpnProfileControlActivity extends AppCompatActivity
+                                               ^
+  symbol: class AppCompatActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.jav
+a:462: error: cannot find symbol
+	public static class ConfirmationDialog extends AppCompatDialogFragment
+	                                               ^
+  symbol:   class AppCompatDialogFragment
+  location: class VpnProfileControlActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.jav
+a:555: error: cannot find symbol
+	public static class LoginDialog extends AppCompatDialogFragment
+	                                        ^
+  symbol:   class AppCompatDialogFragment
+  location: class VpnProfileControlActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.jav
+a:602: error: cannot find symbol
+	public static class PowerWhitelistRequired extends AppCompatDialogFragment
+	                                                   ^
+  symbol:   class AppCompatDialogFragment
+  location: class VpnProfileControlActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.jav
+a:630: error: cannot find symbol
+	public static class VpnNotSupportedError extends AppCompatDialogFragment
+	                                                 ^
+  symbol:   class AppCompatDialogFragment
+  location: class VpnProfileControlActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.jav
+a:634: error: cannot find symbol
+		public static void showWithMessage(AppCompatActivity activity, int messageId)
+		                                   ^
+  symbol:   class AppCompatActivity
+  location: class VpnNotSupportedError
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.java
+:56: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AlertDialog;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.java
+:57: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatActivity;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.java
+:58: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatDialogFragment;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.java
+:60: error: package androidx.localbroadcastmanager.content does not exist
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+                                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.java
+:82: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.java
+:84: error: cannot find symbol
+public class VpnProfileDetailActivity extends AppCompatActivity
+                                              ^
+  symbol: class AppCompatActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\widget\TextInputLayoutHelper.
+java:34: error: package com.google.android.material.textfield does not exist
+import com.google.android.material.textfield.TextInputLayout;
+                                            ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\widget\TextInputLayoutHelper.
+java:36: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\widget\TextInputLayoutHelper.
+java:44: error: cannot find symbol
+public class TextInputLayoutHelper extends TextInputLayout
+                                           ^
+  symbol: class TextInputLayout
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.java
+:1020: error: cannot find symbol
+	public static class TncNoticeDialog extends AppCompatDialogFragment
+	                                            ^
+  symbol:   class AppCompatDialogFragment
+  location: class VpnProfileDetailActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileImportActivity.java
+:42: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatActivity;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileImportActivity.java
+:46: error: package androidx.localbroadcastmanager.content does not exist
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+                                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileImportActivity.java
+:82: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileImportActivity.java
+:84: error: cannot find symbol
+public class VpnProfileImportActivity extends AppCompatActivity
+                                              ^
+  symbol: class AppCompatActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileSelectActivity.java
+:21: error: package androidx.appcompat.app does not exist
+import androidx.appcompat.app.AppCompatActivity;
+                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileSelectActivity.java
+:29: error: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileSelectActivity.java
+:31: error: cannot find symbol
+public class VpnProfileSelectActivity extends AppCompatActivity implements OnVpnProfileSelectedListener
+                                              ^
+  symbol: class AppCompatActivity
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnStateFragment.java:44: err
+or: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnTileService.java:39: error
+: package com.witvpn.ikev2 does not exist
+import com.witvpn.ikev2.R;
+                       ^
+
+[Incubating] Problems report is available at: file:///D:/top/mobil/vpn/vpn_subscription_app/android/build/reports/problems/problems-report.html
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\logic\CharonVpnService.java:504:
+ error: cannot find symbol
+                mService.setImcState(state);
+                        ^
+  symbol:   method setImcState(ImcState)
+  location: variable mService of type VpnStateService
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\logic\CharonVpnService.java:588:
+ error: cannot find symbol
+                    mService.addRemediationInstruction(instruction);
+                            ^
+  symbol:   method addRemediationInstruction(RemediationInstruction)
+  location: variable mService of type VpnStateService
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\RemediationInstructio
+nAdapter.java:55: error: package R does not exist
+            view = inflater.inflate(R.layout.remediation_instruction_item, parent, false);
+                                     ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\SelectedApplicationsA
+dapter.java:86: error: package R does not exist
+            view = inflater.inflate(R.layout.selected_application_item, parent, false);
+                                     ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\SelectedApplicationsA
+dapter.java:91: error: package R does not exist
+        ImageView icon = (ImageView) view.findViewById(R.id.app_icon);
+                                                        ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\SelectedApplicationsA
+dapter.java:93: error: package R does not exist
+        TextView text = (TextView) view.findViewById(R.id.app_name);
+                                                      ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\TrustedCertificateAda
+pter.java:35: error: package R does not exist
+		super(context, R.layout.trusted_certificates_item);
+		                ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\TrustedCertificateAda
+pter.java:63: error: package R does not exist
+			view = inflater.inflate(R.layout.trusted_certificates_item, parent, false);
+			                         ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\TrustedCertificateAda
+pter.java:66: error: package R does not exist
+		TextView text = (TextView)view.findViewById(R.id.subject_primary);
+		                                             ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\TrustedCertificateAda
+pter.java:68: error: package R does not exist
+		text = (TextView)view.findViewById(R.id.subject_secondary);
+		                                    ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\VpnProfileAdapter.jav
+a:58: error: package R does not exist
+        TextView tv = (TextView) vpnProfileView.findViewById(R.id.profile_item_name);
+                                                              ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\VpnProfileAdapter.jav
+a:60: error: package R does not exist
+        tv = (TextView) vpnProfileView.findViewById(R.id.profile_item_gateway);
+                                                     ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\VpnProfileAdapter.jav
+a:61: error: package R does not exist
+        tv.setText(getContext().getString(R.string.profile_gateway_label) + ": " + profile.getGateway());
+                                           ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\VpnProfileAdapter.jav
+a:62: error: package R does not exist
+        tv = (TextView) vpnProfileView.findViewById(R.id.profile_item_username);
+                                                     ^
+D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\VpnProfileAdapter.jav
+a:65: error: package R does not exist
+            tv.setText(getContext().getString(R.string.profile_username_label) + ": " + profile.getUsername());
+                                               ^
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+100 errors
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileReleaseJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  Note: Recompile with -Xlint:deprecation for details.
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:175:
+ error: cannot find symbol
+      public static class CRLCacheDialog extends AppCompatDialogFragment {
+                                                 ^
+    symbol:   class AppCompatDialogFragment
+    location: class MainIKEV2Activity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:22: e
+rror: cannot find symbol
+  import androidx.preference.ListPreference;
+                            ^
+    symbol:   class ListPreference
+    location: package androidx.preference
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:23: e
+rror: cannot find symbol
+  import androidx.preference.Preference;
+                            ^
+    symbol:   class Preference
+    location: package androidx.preference
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:24: e
+rror: cannot find symbol
+  import androidx.preference.PreferenceFragmentCompat;
+                            ^
+    symbol:   class PreferenceFragmentCompat
+    location: package androidx.preference
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:25: e
+rror: cannot find symbol
+  import androidx.preference.PreferenceManager;
+                            ^
+    symbol:   class PreferenceManager
+    location: package androidx.preference
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:42: e
+rror: cannot find symbol
+  	private ListPreference mDefaultVPNProfile;
+  	        ^
+    symbol:   class ListPreference
+    location: class SettingsFragment
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:103: 
+error: cannot find symbol
+  	public boolean onPreferenceChange(Preference preference, Object newValue)
+  	                                  ^
+    symbol:   class Preference
+    location: class SettingsFragment
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateImportAct
+ivity.java:196: error: cannot find symbol
+  	public static class ConfirmImportDialog extends AppCompatDialogFragment
+  	                                                ^
+    symbol:   class AppCompatDialogFragment
+    location: class TrustedCertificateImportActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.j
+ava:462: error: cannot find symbol
+  	public static class ConfirmationDialog extends AppCompatDialogFragment
+  	                                               ^
+    symbol:   class AppCompatDialogFragment
+    location: class VpnProfileControlActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.j
+ava:555: error: cannot find symbol
+  	public static class LoginDialog extends AppCompatDialogFragment
+  	                                        ^
+    symbol:   class AppCompatDialogFragment
+    location: class VpnProfileControlActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.j
+ava:602: error: cannot find symbol
+  	public static class PowerWhitelistRequired extends AppCompatDialogFragment
+  	                                                   ^
+    symbol:   class AppCompatDialogFragment
+    location: class VpnProfileControlActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.j
+ava:630: error: cannot find symbol
+  	public static class VpnNotSupportedError extends AppCompatDialogFragment
+  	                                                 ^
+    symbol:   class AppCompatDialogFragment
+    location: class VpnProfileControlActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.j
+ava:634: error: cannot find symbol
+  		public static void showWithMessage(AppCompatActivity activity, int messageId)
+  		                                   ^
+    symbol:   class AppCompatActivity
+    location: class VpnNotSupportedError
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.ja
+va:1020: error: cannot find symbol
+  	public static class TncNoticeDialog extends AppCompatDialogFragment
+  	                                            ^
+    symbol:   class AppCompatDialogFragment
+    location: class VpnProfileDetailActivity
+  Note: Some input files use or override a deprecated API.
+  Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\CertificateDeleteConfirmati
+onDialog.java:32: error: cannot find symbol
+  public class CertificateDeleteConfirmationDialog extends AppCompatDialogFragment
+                                                           ^
+    symbol: class AppCompatDialogFragment
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\LogActivity.java:34: error:
+ cannot find symbol
+  public class LogActivity extends AppCompatActivity
+                                   ^
+    symbol: class AppCompatActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:49: 
+error: cannot find symbol
+  public class MainIKEV2Activity extends AppCompatActivity implements OnVpnProfileSelectedListener {
+                                         ^
+    symbol: class AppCompatActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\RemediationInstructionsActi
+vity.java:30: error: cannot find symbol
+  public class RemediationInstructionsActivity extends AppCompatActivity implements OnRemediationInstructionSelectedLis
+tener
+                                                       ^
+    symbol: class AppCompatActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SelectedApplicationsActivit
+y.java:29: error: cannot find symbol
+  public class SelectedApplicationsActivity extends AppCompatActivity
+                                                    ^
+    symbol: class AppCompatActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsActivity.java:23: e
+rror: cannot find symbol
+  public class SettingsActivity extends AppCompatActivity
+                                        ^
+    symbol: class AppCompatActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:40: e
+rror: cannot find symbol
+  public class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener
+                                        ^
+    symbol: class PreferenceFragmentCompat
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateImportAct
+ivity.java:46: error: cannot find symbol
+  public class TrustedCertificateImportActivity extends AppCompatActivity
+                                                        ^
+    symbol: class AppCompatActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificatesActivity
+.java:45: error: cannot find symbol
+  public class TrustedCertificatesActivity extends AppCompatActivity implements TrustedCertificateListFragment.OnTruste
+dCertificateSelectedListener, OnCertificateDeleteListener
+                                                   ^
+    symbol: class AppCompatActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.j
+ava:57: error: cannot find symbol
+  public class VpnProfileControlActivity extends AppCompatActivity
+                                                 ^
+    symbol: class AppCompatActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.ja
+va:84: error: cannot find symbol
+  public class VpnProfileDetailActivity extends AppCompatActivity
+                                                ^
+    symbol: class AppCompatActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\widget\TextInputLayoutHelpe
+r.java:44: error: cannot find symbol
+  public class TextInputLayoutHelper extends TextInputLayout
+                                             ^
+    symbol: class TextInputLayout
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileImportActivity.ja
+va:84: error: cannot find symbol
+  public class VpnProfileImportActivity extends AppCompatActivity
+                                                ^
+    symbol: class AppCompatActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileSelectActivity.ja
+va:31: error: cannot find symbol
+  public class VpnProfileSelectActivity extends AppCompatActivity implements OnVpnProfileSelectedListener
+                                                ^
+    symbol: class AppCompatActivity
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\logic\CharonVpnService.java:50
+4: error: cannot find symbol
+                  mService.setImcState(state);
+                          ^
+    symbol:   method setImcState(ImcState)
+    location: variable mService of type VpnStateService
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\logic\CharonVpnService.java:58
+8: error: cannot find symbol
+                      mService.addRemediationInstruction(instruction);
+                              ^
+    symbol:   method addRemediationInstruction(RemediationInstruction)
+    location: variable mService of type VpnStateService
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\RemediationInstruct
+ionAdapter.java:25: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\SelectedApplication
+sAdapter.java:29: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\TrustedCertificateA
+dapter.java:29: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\VpnProfileAdapter.j
+ava:34: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\CertificateDeleteConfirmati
+onDialog.java:23: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AlertDialog;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\CertificateDeleteConfirmati
+onDialog.java:24: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatDialogFragment;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\CertificateDeleteConfirmati
+onDialog.java:26: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\ImcStateFragment.java:48: e
+rror: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\LogActivity.java:25: error:
+ package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatActivity;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\LogActivity.java:32: error:
+ package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\LogFragment.java:40: error:
+ package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:31: 
+error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.ActionBar;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:32: 
+error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AlertDialog;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:33: 
+error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatActivity;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:34: 
+error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatDialogFragment;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileListFragment.java
+:41: error: package androidx.localbroadcastmanager.content does not exist
+  import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+                                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileListFragment.java
+:54: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\MainIKEV2Activity.java:47: 
+error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\RemediationInstructionFragm
+ent.java:30: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\RemediationInstructionsActi
+vity.java:21: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatActivity;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\RemediationInstructionsFrag
+ment.java:30: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\RemediationInstructionsActi
+vity.java:28: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SelectedApplicationsActivit
+y.java:23: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.ActionBar;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SelectedApplicationsActivit
+y.java:24: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatActivity;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SelectedApplicationsListFra
+gment.java:33: error: package androidx.appcompat.widget does not exist
+  import androidx.appcompat.widget.SearchView;
+                                  ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SelectedApplicationsListFra
+gment.java:49: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SelectedApplicationsListFra
+gment.java:51: error: package SearchView does not exist
+  public class SelectedApplicationsListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Pair<List
+<SelectedApplicationEntry>, List<String>>>, SearchView.OnQueryTextListener
+                                                                                                                       
+                                                      ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsActivity.java:21: e
+rror: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatActivity;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:35: e
+rror: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\SettingsFragment.java:40: e
+rror: package Preference does not exist
+  public class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener
+                                                                                      ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateImportAct
+ivity.java:29: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AlertDialog;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateImportAct
+ivity.java:30: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatActivity;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateImportAct
+ivity.java:31: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatDialogFragment;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateImportAct
+ivity.java:44: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificateListFragm
+ent.java:49: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificatesActivity
+.java:26: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.ActionBar;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificatesActivity
+.java:27: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatActivity;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificatesActivity
+.java:33: error: package com.google.android.material.tabs does not exist
+  import com.google.android.material.tabs.TabLayout;
+                                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\TrustedCertificatesActivity
+.java:43: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.j
+ava:41: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AlertDialog;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.j
+ava:42: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatActivity;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.j
+ava:43: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatDialogFragment;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileControlActivity.j
+ava:55: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.ja
+va:56: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AlertDialog;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.ja
+va:57: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatActivity;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.ja
+va:58: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatDialogFragment;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.ja
+va:60: error: package androidx.localbroadcastmanager.content does not exist
+  import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+                                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileDetailActivity.ja
+va:82: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\widget\TextInputLayoutHelpe
+r.java:34: error: package com.google.android.material.textfield does not exist
+  import com.google.android.material.textfield.TextInputLayout;
+                                              ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\widget\TextInputLayoutHelpe
+r.java:36: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileImportActivity.ja
+va:42: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatActivity;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileImportActivity.ja
+va:46: error: package androidx.localbroadcastmanager.content does not exist
+  import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+                                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileImportActivity.ja
+va:82: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileSelectActivity.ja
+va:21: error: package androidx.appcompat.app does not exist
+  import androidx.appcompat.app.AppCompatActivity;
+                               ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnProfileSelectActivity.ja
+va:29: error: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnStateFragment.java:44: e
+rror: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\VpnTileService.java:39: err
+or: package com.witvpn.ikev2 does not exist
+  import com.witvpn.ikev2.R;
+                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\RemediationInstruct
+ionAdapter.java:55: error: package R does not exist
+              view = inflater.inflate(R.layout.remediation_instruction_item, parent, false);
+                                       ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\SelectedApplication
+sAdapter.java:86: error: package R does not exist
+              view = inflater.inflate(R.layout.selected_application_item, parent, false);
+                                       ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\SelectedApplication
+sAdapter.java:91: error: package R does not exist
+          ImageView icon = (ImageView) view.findViewById(R.id.app_icon);
+                                                          ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\SelectedApplication
+sAdapter.java:93: error: package R does not exist
+          TextView text = (TextView) view.findViewById(R.id.app_name);
+                                                        ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\TrustedCertificateA
+dapter.java:35: error: package R does not exist
+  		super(context, R.layout.trusted_certificates_item);
+  		                ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\TrustedCertificateA
+dapter.java:63: error: package R does not exist
+  			view = inflater.inflate(R.layout.trusted_certificates_item, parent, false);
+  			                         ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\TrustedCertificateA
+dapter.java:66: error: package R does not exist
+  		TextView text = (TextView)view.findViewById(R.id.subject_primary);
+  		                                             ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\TrustedCertificateA
+dapter.java:68: error: package R does not exist
+  		text = (TextView)view.findViewById(R.id.subject_secondary);
+  		                                    ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\VpnProfileAdapter.j
+ava:58: error: package R does not exist
+          TextView tv = (TextView) vpnProfileView.findViewById(R.id.profile_item_name);
+                                                                ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\VpnProfileAdapter.j
+ava:60: error: package R does not exist
+          tv = (TextView) vpnProfileView.findViewById(R.id.profile_item_gateway);
+                                                       ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\VpnProfileAdapter.j
+ava:61: error: package R does not exist
+          tv.setText(getContext().getString(R.string.profile_gateway_label) + ": " + profile.getGateway());
+                                             ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\VpnProfileAdapter.j
+ava:62: error: package R does not exist
+          tv = (TextView) vpnProfileView.findViewById(R.id.profile_item_username);
+                                                       ^
+  D:\top\mobil\vpn\vpn_subscription_app\android\app\src\main\java\org\strongswan\android\ui\adapter\VpnProfileAdapter.j
+ava:65: error: package R does not exist
+              tv.setText(getContext().getString(R.string.profile_username_label) + ": " + profile.getUsername());
+                                                 ^
+  100 errors
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+BUILD FAILED in 4s
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+209 actionable tasks: 11 executed, 198 up-to-date

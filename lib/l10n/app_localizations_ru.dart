@@ -1,0 +1,699 @@
+import 'app_localizations.dart';
+
+class AppLocalizationsRu extends AppLocalizations {
+  AppLocalizationsRu([super.locale = 'ru']);
+
+  @override
+  String get appTitle => 'Rabochiy VPN';
+
+  @override
+  String get connect => 'Подключить';
+
+  @override
+  String get disconnect => 'Отключить';
+
+  @override
+  String get connected => 'Подключено';
+
+  @override
+  String get disconnected => 'Отключено';
+
+  @override
+  String get connecting => 'Подключение…';
+
+  @override
+  String get securelyConnected => 'VPN ПОДКЛЮЧЁН';
+
+  @override
+  String get connectingUpper => 'ПОДКЛЮЧЕНИЕ…';
+  String get cancelConnecting => 'Нажмите, чтобы отменить';
+
+  @override
+  String get disconnectingUpper => 'ОТКЛЮЧЕНИЕ…';
+
+  @override
+  String get notConnected => 'VPN ОТКЛЮЧЁН';
+
+  @override
+  String get connectNow => 'ПОДКЛЮЧИТЬ';
+
+  @override
+  String get disconnectUpper => 'ОТКЛЮЧИТЬ';
+
+  @override
+  String get download => 'ЗАГРУЗКА';
+
+  @override
+  String get upload => 'ОТДАЧА';
+
+  @override
+  String get selectServer => 'Выберите сервер';
+
+  @override
+  String get clickToSelect => 'Нажмите, чтобы выбрать';
+
+  @override
+  String get autoSelectBest => 'Авто · лучший сервер';
+
+  @override
+  String get autoSelect => 'Автовыбор';
+
+  @override
+  String get optimized => 'Оптимизация скорости';
+
+  @override
+  String get manualSelection => 'Ручной выбор';
+
+  @override
+  String get optimalServer => 'Самый быстрый сервер';
+
+  @override
+  String get selectLocation => 'Выбор локации';
+
+  @override
+  String get searchServers => 'Поиск серверов…';
+
+  @override
+  String get serversNotFound => 'Сервера не найдены';
+
+  @override
+  String get refresh => 'Обновить';
+
+  @override
+  String get serverNotSelected => 'Сервер не выбран';
+
+  @override
+  String get failedToLoadServers => 'Не удалось загрузить список серверов';
+
+  @override
+  String serversCount(num count) {
+    final n = count.toInt();
+    final mod10 = n % 10;
+    final mod100 = n % 100;
+    if (n == 0) return 'Нет серверов';
+    if (mod10 == 1 && mod100 != 11) return '$n сервер';
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) {
+      return '$n сервера';
+    }
+    return '$n серверов';
+  }
+
+  @override
+  String get settings => 'Настройки';
+
+  @override
+  String get supportTelegram => 'Поддержка в Telegram';
+
+  @override
+  String get privacyPolicy => 'Политика конфиденциальности';
+
+  @override
+  String get version => 'Версия';
+
+  @override
+  String get settingsAbout => 'О приложении';
+
+  @override
+  String get privacyPolicyContent => _privacyPolicyRu;
+
+  @override
+  String get privacyPolicyLastUpdated => 'Обновлено 20 апреля 2026 г.';
+
+  // ── Bottom navigation ────────────────────────────────────────────────
+  @override
+  String get tabHome => 'VPN';
+
+  @override
+  String get tabAccount => 'Аккаунт';
+
+  @override
+  String get tabSupport => 'Поддержка';
+
+  @override
+  String get tabSettings => 'Настройки';
+
+  // ── Support screen ───────────────────────────────────────────────────
+  @override
+  String get homeGetProPrefix => 'Купить';
+
+  @override
+  String get homeGetProAccent => 'PRO';
+
+  @override
+  String get homeGetProSuffix => '';
+
+  @override
+  String get supportTitle => 'Поддержка';
+
+  @override
+  String get supportSubtitle =>
+      'Если у вас возникли проблемы с подключением VPN, оплатой, скоростью или доступом к серверам, обращайтесь к нам в Telegram. Мы поможем разобраться и решить вопрос как можно быстрее.';
+
+  @override
+  String get supportChannelTelegramChat => 'Чат в Telegram';
+
+  @override
+  String get supportChannelTelegramChatDesc =>
+      'Живой чат с поддержкой и другими пользователями';
+
+  @override
+  String get supportChannelTelegramNews => 'Канал новостей';
+
+  @override
+  String get supportChannelTelegramNewsDesc =>
+      'Обновления, скидки и анонсы серверов';
+
+  @override
+  String get supportChannelEmail => 'Написать на почту';
+
+  @override
+  String get supportChannelEmailDesc =>
+      'Для детальных обращений и сотрудничества';
+
+  @override
+  String get supportChannelRate => 'Оценить приложение';
+
+  @override
+  String get supportChannelRateDesc =>
+      'Ваша оценка помогает развитию приложения';
+
+  @override
+  String get supportOpen => 'Открыть';
+
+  // ── Traffic stats ────────────────────────────────────────────────────
+  @override
+  String get statsTitle => 'Статистика трафика';
+
+  @override
+  String get statsSubtitle =>
+      'Сколько данных прошло через VPN-туннель за разные периоды.';
+
+  @override
+  String get statsPeriodHour => '1 час';
+
+  @override
+  String get statsPeriodDay => '24 часа';
+
+  @override
+  String get statsPeriodWeek => '7 дней';
+
+  @override
+  String get statsPeriodMonth => '1 месяц';
+
+  @override
+  String get statsPeriodHalfYear => '6 месяцев';
+
+  @override
+  String get statsPeriodYear => '1 год';
+
+  @override
+  String get statsPeriodAll => 'Всё время';
+
+  @override
+  String get statsTotalTraffic => 'Всего трафика';
+
+  @override
+  String get statsReceived => 'Получено';
+
+  @override
+  String get statsSent => 'Отправлено';
+
+  @override
+  String get statsSessions => 'Сессий';
+
+  @override
+  String get statsOnlineTime => 'Время онлайн';
+
+  @override
+  String get statsEmpty => 'Пока нет данных за выбранный период';
+
+  @override
+  String get statsResetHint => 'Сбросить всю статистику';
+
+  @override
+  String get statsResetConfirm =>
+      'Вся история трафика будет удалена. Действие необратимо.';
+
+  @override
+  String get statsResetButton => 'Удалить';
+
+  @override
+  String get statsCancel => 'Отмена';
+
+  // ── Split tunneling ──────────────────────────────────────────────────
+  @override
+  String get splitTunnelTitle => 'Туннелирование приложений';
+
+  @override
+  String get splitTunnelSubtitle =>
+      'Выберите, какие приложения должны проходить через VPN, а какие — напрямую.';
+
+  @override
+  String get splitTunnelEnable => 'Включить раздельное туннелирование';
+
+  @override
+  String get splitTunnelEnableDesc =>
+      'Когда выключено — все приложения идут через VPN.';
+
+  @override
+  String get splitTunnelModeInclude => 'Только выбранные через VPN';
+
+  @override
+  String get splitTunnelModeIncludeDesc =>
+      'Через туннель пойдут только отмеченные приложения. Остальные — в обход.';
+
+  @override
+  String get splitTunnelModeExclude => 'Выбранные в обход VPN';
+
+  @override
+  String get splitTunnelModeExcludeDesc =>
+      'Отмеченные приложения будут идти в обход туннеля. Остальные — через VPN.';
+
+  @override
+  String get splitTunnelSearchApps => 'Поиск по приложениям…';
+
+  @override
+  String get splitTunnelSelected => 'Выбрано';
+
+  @override
+  String get splitTunnelSelectAll => 'Выбрать всё';
+
+  @override
+  String get splitTunnelClearAll => 'Снять всё';
+
+  @override
+  String get splitTunnelLoading => 'Загружаем список приложений…';
+
+  @override
+  String get splitTunnelReconnectHint =>
+      'Изменения применяются при следующем подключении.';
+
+  @override
+  String get splitTunnelSystemApps => 'Системные приложения';
+
+  @override
+  String get splitTunnelShowSystem => 'Показывать системные';
+
+  @override
+  String get splitTunnelDisclosureTitle => 'Доступ к приложениям';
+
+  @override
+  String get splitTunnelDisclosureBody =>
+      'Чтобы вы могли выбрать, какие приложения работают через VPN, приложению нужен доступ к списку установленных приложений. Эти данные не покидают ваше устройство и не передаются нам или третьим лицам.';
+
+  @override
+  String get splitTunnelDisclosureButton => 'Понятно';
+
+  // ── Splash / Onboarding ──────────────────────────────────────────────
+  @override
+  String get splashSaveRecoveryPhrase => 'Сохраните фразу восстановления';
+
+  @override
+  String get splashWarningMnemonic =>
+      'Без этой фразы вы НАВСЕГДА потеряете доступ к аккаунту. Запишите или сохраните её в надёжном месте.';
+
+  @override
+  String get splashCopy => 'Копировать';
+
+  @override
+  String get splashCopied => 'Фраза скопирована!';
+
+  @override
+  String get splashSavedConfirm =>
+      'Я сохранил фразу восстановления в надёжном месте';
+
+  @override
+  String get splashContinue => 'Продолжить';
+
+  @override
+  String get splashRetry => 'Повторить';
+
+  @override
+  String get splashConnectError =>
+      'Не удалось подключиться к серверу. Проверьте подключение к интернету и попробуйте снова.';
+
+  @override
+  String get splashServerError =>
+      'Ошибка соединения с сервером. Проверьте интернет и попробуйте снова.';
+
+  // ── Server list filter chips ─────────────────────────────────────────
+  @override
+  String get filterAll => 'Все';
+
+  // ── Runtime errors ───────────────────────────────────────────────────
+  @override
+  String get errorLoadServers => 'Не удалось загрузить список серверов';
+
+  @override
+  String get errorNoServers => 'Серверов нет — попробуйте позже';
+
+  @override
+  String get errorNoServerSelected => 'Выберите сервер для подключения';
+
+  @override
+  String get errorVpnPermission => 'Нужно разрешить VPN-подключение в системе';
+
+  @override
+  String get errorEngineNotReady =>
+      'Движок VPN ещё не готов. Перезапустите приложение.';
+
+  @override
+  String get errorPlatformUnsupported =>
+      'VPN сейчас работает только на Android';
+
+  @override
+  String errorGeneric(String details) => 'Ошибка: $details';
+
+  // ── Login / Restore screen ───────────────────────────────────────────
+  @override
+  String get loginTitle => 'Восстановить аккаунт';
+
+  @override
+  String get loginSubtitle =>
+      'Введите фразу восстановления (12 слов), чтобы вернуть свой аккаунт на этом устройстве.';
+
+  @override
+  String get loginPlaceholder => 'слово1 слово2 слово3 … слово12';
+
+  @override
+  String get loginRestoreButton => 'Восстановить аккаунт';
+
+  @override
+  String get loginCreateNew => 'Или создать новый аккаунт';
+
+  @override
+  String get loginErrorEmpty => 'Введите фразу восстановления';
+
+  @override
+  String get loginErrorWords => 'Фраза должна содержать 12 слов';
+
+  @override
+  String get loginErrorInvalid =>
+      'Секретная фраза не подошла. Проверьте правильность ввода или создайте новый аккаунт.';
+
+  @override
+  String get loginErrorNetwork =>
+      'Не удалось связаться с сервером. Проверьте интернет.';
+
+  @override
+  String get loginErrorServer =>
+      'Серверная ошибка. Попробуйте снова чуть позже.';
+
+  // ── Account screen ───────────────────────────────────────────────────
+  @override
+  String get accountTitle => 'Аккаунт';
+
+  @override
+  String get accountUserId => 'ID пользователя';
+
+  @override
+  String get accountNotRegistered => 'Не зарегистрирован';
+
+  @override
+  String get accountRecoveryPhrase => 'Секретный ключ для входа';
+
+  @override
+  String get accountShow => 'Показать';
+
+  @override
+  String get accountHide => 'Скрыть';
+
+  @override
+  String get accountNoMnemonic => 'Мнемоника недоступна';
+
+  @override
+  String get accountTapToReveal =>
+      'С помощью этого ключа вы сможете войти в свой аккаунт на новом устройстве.\nХраните этот ключ в надёжном месте. Никому его не передавайте, даже сотрудникам техподдержки.\nЕсли вы потеряете ключ, и при этом у вас была активная платная подписка, вы уже не сможете зайти в свой аккаунт.';
+
+  @override
+  String get accountSaveMnemonicHint =>
+      'Если вы выйдете из вашей учётной записи и не будете заходить в неё дольше года (12 месяцев), то мы удалим аккаунт, чтобы освободить место для активных пользователей.';
+
+  @override
+  String get accountLiveStats => 'Статистика';
+
+  @override
+  String get accountDownloadSpeed => 'Скорость загрузки';
+
+  @override
+  String get accountUploadSpeed => 'Скорость отдачи';
+
+  @override
+  String get accountDuration => 'Длительность';
+
+  @override
+  String get accountStatus => 'Статус';
+
+  @override
+  String get accountCopied => 'Скопировано';
+
+  // ── Premium / тарифы / управление аккаунтом ───────────────────────
+  @override
+  String get accountPlanTitle => 'Текущий тариф';
+
+  @override
+  String get accountPlanFree => 'Бесплатный';
+
+  @override
+  String get accountPlanPremium => 'Премиум';
+
+  @override
+  String get accountPlanExpires => 'Действует до';
+
+  @override
+  String get accountPlanUnlimited => 'Без ограничений';
+
+  @override
+  String get accountBuyPremium => 'Купить премиум';
+
+  @override
+  String get accountActivateCode => 'Активировать код';
+
+  @override
+  String get accountActivateCodeHint => 'Введите премиум-код';
+
+  @override
+  String get accountActivateConfirm => 'Активировать';
+
+  @override
+  String get accountLogout => 'Выйти';
+
+  @override
+  String get accountLogoutConfirmTitle => 'Выйти из аккаунта?';
+
+  @override
+  String get accountLogoutConfirmBody =>
+      'Обязательно сохраните вашу секретную ключ фразу. Без неё вы навсегда потеряете доступ к своему аккаунту.';
+
+  @override
+  String get accountLogoutConfirmAction => 'Выйти';
+
+  @override
+  String get accountDeleteAccount => 'Удалить аккаунт';
+
+  @override
+  String get accountDeleteConfirmTitle =>
+      'Вы уверены, что хотите удалить аккаунт?';
+
+  @override
+  String get accountDeleteConfirmBody =>
+      'Вы навсегда потеряете данные, премиум-подписку и доступ к аккаунту. Это действие нельзя отменить.';
+
+  @override
+  String get accountDeleteConfirmAction => 'Удалить аккаунт';
+
+  @override
+  String get accountDeleteKeep => 'Оставить аккаунт';
+
+  @override
+  String get accountDeleteSuccess => 'Аккаунт удалён';
+
+  @override
+  String get accountDeleteError =>
+      'Не удалось удалить аккаунт. Проверьте подключение и попробуйте снова.';
+
+  @override
+  String get accountQrTitle => 'QR-код аккаунта';
+
+  @override
+  String get accountQrSubtitle =>
+      'Используется для идентификации аккаунта и решения технических проблем. При сбоях оплаты, доступа к аккаунту сделайте скриншот и отправьте в поддержку.';
+
+  @override
+  String get accountRevealMnemonic => 'Показать';
+
+  @override
+  String get accountMnemonicWarningTitle => 'Показать секретный ключ?';
+
+  @override
+  String get accountMnemonicWarningBody =>
+      'Любой, кто увидит эту фразу, сможет завладеть вашим аккаунтом. Убедитесь, что никто не смотрит на экран, и никогда никому её не передавайте.';
+
+  @override
+  String get accountMnemonicWarningContinue => 'Я понял, показать';
+
+  @override
+  String get welcomeSubtitle =>
+      'Приватно, быстро и только ваше.\nСоздайте новый аккаунт или войдите в существующий.';
+
+  @override
+  String get welcomeCreateNew => 'Я новый пользователь';
+
+  @override
+  String get welcomeRestoreMnemonic => 'Ввести ключ-фразу';
+
+  @override
+  String get welcomeFooter =>
+      'Ваш аккаунт живёт только в ключ-фразе.\nНи почты, ни пароля.';
+
+  @override
+  String get accountTariffsLoading => 'Загружаем тарифы…';
+
+  @override
+  String get accountTariffsEmpty => 'Сейчас нет доступных тарифов.';
+
+  @override
+  String get accountTariffsError =>
+      'Не удалось загрузить тарифы. Попробуйте позже.';
+
+  @override
+  String get premiumHeroTitle => 'Откройте возможности';
+
+  @override
+  String get premiumHeroAccent => 'Premium';
+
+  @override
+  String get premiumHeroSubtitle =>
+      'Неограниченная скорость, полная приватность и никакой рекламы — быстрый VPN всегда с вами. Оплата картой любого банка или через СБП — премиум активируется автоматически сразу после оплаты.';
+
+  @override
+  String get premiumPickPlan => 'Выберите тариф';
+
+  @override
+  String get premiumBuyForLabel => 'Оформить за';
+
+  @override
+  String get premiumPriceTbd => 'уточняется';
+
+  @override
+  String get premiumFeatureUnblock => 'Быстрая разблокировка любого контента';
+
+  @override
+  String get premiumFeatureSpeed => 'Без ограничений скорости';
+
+  @override
+  String get premiumFeatureAnonymous => 'Анонимный просмотр';
+
+  @override
+  String get premiumFeatureHd => 'HD-видео без зависаний';
+
+  @override
+  String get premiumFeatureNoLogs => 'Без логов и защита данных';
+
+  @override
+  String get premiumFeatureNoAds => 'Без рекламы';
+
+  @override
+  String get premiumBadgeBest => 'Выгодно';
+
+  @override
+  String get accountPaymentOpenError =>
+      'Не удалось открыть страницу оплаты. Попробуйте позже.';
+
+  @override
+  String get premiumPaymentTitle => 'Оплата';
+
+  @override
+  String get payLoadFailed => 'Не удалось загрузить страницу оплаты';
+
+  @override
+  String get premiumActivated => 'Подписка активирована!';
+
+  @override
+  String get accountActivateSuccess => 'Код активирован! Премиум подключён.';
+
+  @override
+  String get accountActivateInvalid => 'Неверный или неизвестный код.';
+
+  @override
+  String get accountActivateUsed => 'Этот код уже использовался.';
+
+  @override
+  String get accountActivateNetwork => 'Ошибка сети. Попробуйте позже.';
+
+  @override
+  String get accountCancel => 'Отмена';
+
+  @override
+  String get accountClose => 'Закрыть';
+
+  @override
+  String get accountChoosePlan => 'Выберите тариф';
+
+  // ── Misc ─────────────────────────────────────────────────────────────
+  @override
+  String get unknown => 'Неизвестно';
+
+  @override
+  String get comingSoon => 'Скоро будет';
+
+  @override
+  String get appearance => 'Внешний вид';
+
+  @override
+  String get advanced => 'Дополнительно';
+}
+
+const String _privacyPolicyRu = '''
+Политика конфиденциальности — Rabochiy VPN
+Дата вступления в силу: 1 мая 2026 г.
+
+О документе
+
+Этот документ объясняет, как приложение Rabochiy VPN относится к вашим данным. Мы постарались написать его понятно, чтобы вам было понятно. Rabochiy VPN — это инструмент для защиты вашего интернет-соединения; упоминаемые протоколы такие как (IKEv2, AmneziaWG и др.) являются лишь техническими стандартами и не связывают нас с какими-либо одноимёнными сервисами.
+
+Что мы не делаем
+
+Мы не записываем, что вы делаете в интернете. Конкретно, нас не интересуют и мы не храним ни список сайтов, которые вы посещаете, ни DNS-запросы, ни адреса серверов, к которым вы обращаетесь, ни ваш настоящий IP-адрес, ни время и продолжительность ваших сессий. Серверы, через которые проходит трафик, используются только для маршрутизации пакетов и не ведут пользовательских логов.
+
+Что хранится у вас на телефоне
+
+Приложение сохраняет на устройстве небольшой объём служебной информации: закэшированный список серверов (нужен для работы без сети), ваш аккаунт, последний выбранный сервер и статистику сессий, скорость и суммарное время подключения. Всё это остаётся только на вашем устройстве и никуда не передаётся. Удалить эти данные можно через настройки телефона или удалив приложение.
+
+Отчёты об ошибках
+
+Чтобы мы могли оперативно находить и исправлять баги, приложение использует Google Firebase Crashlytics. Если ваша система разрешает отправку отчётов о сбоях, при падении приложения автоматически формируется анонимный отчёт, содержащий модель устройства, версию Android, версию приложения и стек вызовов. Никаких сведений о вашей сетевой активности, IP-адресе, токене подписки или личности в этом отчёте нет. Дополнительно Firebase Analytics собирает анонимную статистику использования, например факт запуска приложения или успешного подключения. Данные агрегированы и не позволяют идентифицировать конкретного пользователя. Политика конфиденциальности Google применительно к этим сервисам доступна по адресу: https://policies.google.com/privacy
+
+Системные разрешения
+
+Для работы приложению необходимы следующие разрешения: создание VPN-туннеля, доступ к интернету и отслеживание состояния сети, работа в режиме foreground-службы (чтобы туннель не прерывался в фоне), отображение постоянного уведомления согласно требованиям Android. Дополнительно приложение запрашивает доступ к списку установленных приложений, исключительно для того, чтобы вы могли выбрать, какие приложения направляют трафик через VPN-туннель (Split Tunneling), а какие работают напрямую. Эти данные не покидают ваше устройство и не передаются нам или третьим лицам. Приложение не запрашивает и не использует доступ к контактам, медиатеке, камере, микрофону, геолокации, SMS или журналу звонков.
+
+Загрузка конфигурации серверов
+
+Список серверов и параметры подключения загружаются по зашифрованному HTTPS-соединению. Запрос отправляется с уникальным анонимным идентификатором учётной записи — тем самым случайным ID, который сервер назначает автоматически при первом подключении, — не связанным с вашей личностью. Сервер не получает данные устройства или содержимое трафика.
+
+Метаданные подключения
+
+Чтобы отображать загруженность серверов и обновлять статус в админ-панели, приложение отправляет на backend анонимные heartbeats (подключён / на сервере X / отключён) при каждом изменении состояния VPN. Эти данные не содержат посещаемых сайтов, DNS-запросов или IP-адресов назначения.
+
+Учётная запись
+
+При первом запуске приложение автоматически создаёт для вас анонимную учётную запись, без email, номера телефона или каких-либо личных данных. Вам присваивается рандомный уникальный идентификатор и секретный ключ. Секретный ключ отображается в приложении и позволяет восстановить доступ к той же учётной записи на другом устройстве. Мы не можем связать вашу учётную запись с вашей личностью и она существует лишь только как пара «идентификатор + ключ».
+
+Удаление данных и учётной записи
+
+Вы можете самостоятельно удалить свою учётную запись в любой момент через раздел настроек приложения. После удаления идентификатор и все связанные с ним данные подписки безвозвратно удаляются с наших серверов. Если после выхода из аккаунта, учётная запись не используется более 12 месяцев, она удаляется автоматически. Локальные данные на устройстве удаляются при удалении приложения или очистке его данных через настройки Android.
+
+Для кого предназначено приложение
+
+Rabochiy VPN не предназначен для детей младше 13 лет. Мы намеренно не собираем данные лиц младше 13 лет. Если вам стало известно, что ребёнок младше 13 лет использует приложение, пожалуйста, сообщите нам.
+
+Обновления политики
+
+Мы оставляем за собой право обновлять этот документ. Дата в заголовке всегда отражает актуальную версию. О значимых изменениях мы будем сообщать в нашем Telegram-чате.
+
+Связаться с нами можно через
+
+Telegram: https://t.me/rabochyvpn_chat
+Email: support@rabochiyvpn.me
+''';
