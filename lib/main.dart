@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +13,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import 'config/app_theme.dart';
 import 'firebase_options.dart';
+import 'services/remote_config_service.dart';
 import 'l10n/app_localizations.dart';
 import 'motion/device_tier.dart';
 import 'providers/app_provider.dart';
@@ -45,6 +48,11 @@ Future<void> main() async {
     debugPrint('Firebase is not configured yet: $e');
     debugPrint('$st');
   }
+
+  // Dynamic backend domain (Remote Config). Fired without awaiting so it
+  // never blocks the first frame: until it completes (or if Firebase is
+  // unreachable) the app runs on the default domain from ApiConfig.
+  unawaited(RemoteConfigService.instance.initialize());
 
   // Ограничиваем ориентацию экрана только портретным режимом
   // Крупные VPN-приложения обычно работают только вертикально, чтобы избежать поломок верстки

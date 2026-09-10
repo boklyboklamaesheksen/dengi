@@ -69,6 +69,7 @@ dependencies:
   # Lists installed apps on Android — feeds the split-tunnel picker.
   installed_apps: ^1.6.0
   responsive_framework: ^1.5.1
+  firebase_remote_config: ^6.6.0
 
 dev_dependencies:
   flutter_test:

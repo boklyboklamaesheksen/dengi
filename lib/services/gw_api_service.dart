@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api_service.dart';
+import '../config/api_config.dart';
 import 'gw_identity.dart';
 import '../models/server_config_model.dart';
 
@@ -50,7 +51,7 @@ class GwApiService {
 
       final response = await http
           .post(
-            Uri.parse('${ApiService.defaultBaseUrl}/vpn/api/v1/user/server_vlee'),
+            Uri.parse('${ApiConfig.baseUrl}/vpn/api/v1/user/server_vlee'),
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             body: body,
           )

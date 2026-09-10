@@ -48,12 +48,15 @@ class DefaultFirebaseOptions {
     measurementId: 'YOUR_WEB_MEASUREMENT_ID',
   );
 
+  // Values mirror android/app/google-services.json (project rabochiyvpn-app,
+  // package app.rabochiy.vpn) so Remote Config / Analytics / Crashlytics
+  // resolve the right Firebase project without re-running flutterfire CLI.
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_ANDROID_API_KEY',
-    appId: 'YOUR_ANDROID_APP_ID',
-    messagingSenderId: 'YOUR_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
+    apiKey: 'AIzaSyDLzpiRcWCdsq70ZxxxaUNwclcpi1bWerw',
+    appId: '1:1020087782119:android:805f3a2b80b55db333f042',
+    messagingSenderId: '1020087782119',
+    projectId: 'rabochiyvpn-app',
+    storageBucket: 'rabochiyvpn-app.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

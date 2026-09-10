@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../config/api_config.dart';
 import '../models/server_config_model.dart';
 
 /// Rabochiy VPN backend client.
@@ -24,13 +25,17 @@ import '../models/server_config_model.dart';
 /// fixed by the backend middleware — see [_signatureSecret] /
 /// [_signatureBundleId] for the exact values that the server checks.
 class ApiService {
-  /// Base URL of the production backend. Override at build time with
+  /// Default base URL of the production backend, kept for backward
+  /// compatibility. Override at build time with
   /// `flutter run --dart-define=RABOCHIY_API_BASE=http://10.0.2.2:3002`
   /// when pointing at a local FastAPI instance.
-  static const String defaultBaseUrl = String.fromEnvironment(
-    'RABOCHIY_API_BASE',
-    defaultValue: 'https://rabochiy.yarik.app',
-  );
+  ///
+  /// NOTE: this value is frozen at compile time. The live domain lives in
+  /// [ApiConfig.baseUrl] and is refreshed from Firebase Remote Config at
+  /// every startup — [baseUrl] (the per-instance field) already follows it.
+  static String get defaultBaseUrl =>
+      const String.fromEnvironment('RABOCHIY_API_BASE',
+          defaultValue: 'https://rabochiy.yarik.app');
 
   /// BundleId expected by the backend's request-signature middleware.
   /// The server-side whitelist is fixed, so we always send this exact
