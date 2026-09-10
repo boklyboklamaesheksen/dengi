@@ -675,17 +675,14 @@ class _MnemonicCard extends StatelessWidget {
               if (mnemonic != null)
                 PressScale(
                   onTap: onToggle,
-                  child: Container(
+                  child: LiquidTile(
+                    borderRadius: BorderRadius.circular(8),
+
+                    accent: AppColors.emerald,
+                    selected: true,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.emerald.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: AppColors.emerald.withValues(alpha: 0.30),
-                      ),
                     ),
                     child: Text(
                       showMnemonic
@@ -781,16 +778,11 @@ class _DeleteAccountButton extends StatelessWidget {
     return PressScale(
       onTap: onTap,
       pressedScale: 0.985,
-      child: Container(
-        width: double.infinity,
+      child: LiquidTile(
+        borderRadius: AppRadii.tile,
+
+        accent: AppColors.error,
         padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.error.withValues(alpha: 0.05),
-          borderRadius: AppRadii.tile,
-          border: Border.all(
-            color: AppColors.error.withValues(alpha: 0.20),
-          ),
-        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -1088,16 +1080,12 @@ class _LogoutButton extends StatelessWidget {
     return PressScale(
       onTap: onTap,
       pressedScale: 0.985,
-      child: Container(
-        width: double.infinity,
+      child: LiquidTile(
+        borderRadius: AppRadii.tile,
+
+        accent: AppColors.error,
+        selected: true,
         padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.error.withValues(alpha: 0.12),
-          borderRadius: AppRadii.tile,
-          border: Border.all(
-            color: AppColors.error.withValues(alpha: 0.32),
-          ),
-        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[

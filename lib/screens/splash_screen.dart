@@ -123,28 +123,30 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _proceedToApp() async {
     if (_enteringApp) return;
     _enteringApp = true;
+
+    // Enter the app immediately — the housekeeping (confirm flag, server
+    // catalogue) runs in the background so no extra loading window shows.
+    if (!mounted) return;
+    Navigator.of(context).pushReplacementNamed('/home');
+
     AppProvider? provider;
     try {
       provider = context.read<AppProvider>();
-      await provider.apiService.confirmMnemonicSaved();
-    } catch (_) {
-      ApiService? api;
-      try {
-        api = ApiService();
+    } catch (_) {}
+    try {
+      if (provider != null) {
+        await provider.apiService.confirmMnemonicSaved();
+      } else {
+        final api = ApiService();
         await api.confirmMnemonicSaved();
-      } catch (_) {
-        /* keep navigation resilient if prefs are temporarily unavailable */
-      } finally {
-        api?.close();
+        api.close();
       }
-    }
+    } catch (_) {/* prefs unavailable — non-blocking */}
     try {
       await provider?.loadServers();
     } catch (_) {
       /* the home screen will surface the provider error state */
     }
-    if (!mounted) return;
-    Navigator.of(context).pushReplacementNamed('/home');
   }
 
   void _copyMnemonic(AppLocalizations l10n) {
@@ -222,7 +224,7 @@ class _SplashScreenState extends State<SplashScreen>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        const _RMonogram(size: 118),
+        const _AppLogoBadge(size: 118),
         const SizedBox(height: 28),
         const Text(
           'RABOCHIY VPN',
@@ -263,7 +265,6 @@ class _MnemonicRevealScreen extends StatefulWidget {
 }
 
 class _MnemonicRevealScreenState extends State<_MnemonicRevealScreen> {
-  bool _confirmed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -392,57 +393,11 @@ class _MnemonicRevealScreenState extends State<_MnemonicRevealScreen> {
           ),
           const SizedBox(height: 20),
 
-          // ── Checkbox ──
-          PressScale(
-            onTap: () => setState(() => _confirmed = !_confirmed),
-            child: Transform.translate(
-              offset: const Offset(-8, 0),
-              child: Row(
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: _confirmed
-                            ? AppColors.emerald
-                            : AppColors.borderStrong,
-                        width: 2,
-                      ),
-                      color: _confirmed
-                          ? AppColors.emerald.withValues(alpha: 0.15)
-                          : Colors.transparent,
-                    ),
-                    child: _confirmed
-                        ? const Icon(
-                            Icons.check_rounded,
-                            color: AppColors.emerald,
-                            size: 18,
-                          )
-                        : null,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      l10n.splashSavedConfirm,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 14.3,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 28),
+
 
           // ── Continue CTA ──
           PressScale(
-            onTap: _confirmed ? widget.onProceed : null,
+            onTap: widget.onProceed,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 260),
               curve: RabochiyCurves.brisk,
@@ -454,12 +409,12 @@ class _MnemonicRevealScreenState extends State<_MnemonicRevealScreen> {
               child: LiquidTile(
                 borderRadius: AppRadii.tile,
                 accent: AppColors.emerald,
-                selected: _confirmed,
+                selected: true,
                 child: Center(
                   child: Text(
                     l10n.splashContinue,
-                    style: TextStyle(
-                      color: _confirmed ? Colors.white : AppColors.textMuted,
+                    style: const TextStyle(
+                      color: Colors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.8,
@@ -496,7 +451,7 @@ class _ErrorView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const _RMonogram(size: 80),
+          const _AppLogoBadge(size: 80),
           const SizedBox(height: 32),
           GlassCard(
             padding: const EdgeInsets.all(20),
@@ -562,10 +517,10 @@ class _ErrorView extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Y monogram — unchanged, brand asset
+//  App logo badge — gradient ring around the brand logo asset
 // ─────────────────────────────────────────────────────────────────────────────
-class _RMonogram extends StatelessWidget {
-  const _RMonogram({required this.size});
+class _AppLogoBadge extends StatelessWidget {
+  const _AppLogoBadge({required this.size});
 
   final double size;
 
@@ -597,19 +552,11 @@ class _RMonogram extends StatelessWidget {
           color: AppColors.base,
           border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         ),
-        child: Center(
-          child: ShaderMask(
-            shaderCallback: (Rect r) => AppColors.signal.createShader(r),
-            child: Text(
-              'R',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: size * 0.58,
-                fontWeight: FontWeight.w900,
-                height: 1.0,
-                letterSpacing: -3,
-              ),
-            ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(size * 0.21),
+          child: const Image(
+            image: AssetImage('assets/images/logo_rabochiy.png'),
+            fit: BoxFit.cover,
           ),
         ),
       ),

@@ -304,16 +304,9 @@ class AppProvider with ChangeNotifier {
 
     ServerConfig? best;
     try {
-      // Prefer the lowest-load non-premium server when the user is
-      // free-tier; premium users get the top-priority recommendation.
-      final candidates = _isPremium
-          ? _servers
-          : _servers.where(
-              (s) =>
-                  !s.premium || s.awgConfig.isNotEmpty || s.username.isNotEmpty,
-            );
-
-      final ranked = candidates.toList()
+      // Free-tier: prefer non-premium servers but keep premium ones as
+      // fallback candidates (tapping them opens the premium gate).
+      final ranked = _servers.toList()
         ..sort((a, b) {
           final loadA = _serverLoadByIp[a.address] ?? 50;
           final loadB = _serverLoadByIp[b.address] ?? 50;

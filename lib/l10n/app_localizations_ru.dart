@@ -366,11 +366,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   // ── Login / Restore screen ───────────────────────────────────────────
   @override
-  String get loginTitle => 'Восстановить аккаунт';
+  String get loginTitle => 'Войти в аккаунт';
 
   @override
   String get loginSubtitle =>
-      'Введите фразу восстановления (12 слов), чтобы вернуть свой аккаунт на этом устройстве.';
+      'Введите фразу восстановления (12 слов), чтобы вернуть свой аккаунт на этом устройстве';
 
   @override
   String get loginPlaceholder => 'слово1 слово2 слово3 … слово12';
@@ -379,7 +379,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get loginRestoreButton => 'Восстановить аккаунт';
 
   @override
-  String get loginCreateNew => 'Или создать новый аккаунт';
+  String get loginCreateNew => 'или создать новый аккаунт';
 
   @override
   String get loginErrorEmpty => 'Введите фразу восстановления';
@@ -533,18 +533,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get accountMnemonicWarningContinue => 'Я понял, показать';
 
   @override
-  String get welcomeSubtitle =>
-      'Приватно, быстро и только ваше.\nСоздайте новый аккаунт или войдите в существующий.';
+  String get welcomeSubtitle => 'Создайте новый аккаунт или войдите в существующий';
 
   @override
   String get welcomeCreateNew => 'Я новый пользователь';
 
   @override
-  String get welcomeRestoreMnemonic => 'Ввести ключ-фразу';
+  String get welcomeRestoreMnemonic => 'Восстановить аккаунт';
 
   @override
-  String get welcomeFooter =>
-      'Ваш аккаунт живёт только в ключ-фразе.\nНи почты, ни пароля.';
+  String get welcomeFooter => 'Введите секретную фразу для восстановления';
 
   @override
   String get accountTariffsLoading => 'Загружаем тарифы…';
@@ -560,11 +558,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get premiumHeroTitle => 'Откройте возможности';
 
   @override
-  String get premiumHeroAccent => 'Premium';
+  String get premiumHeroAccent => 'Pro';
 
   @override
   String get premiumHeroSubtitle =>
-      'Неограниченная скорость, полная приватность и никакой рекламы — быстрый VPN всегда с вами. Оплата картой любого банка или через СБП — премиум активируется автоматически сразу после оплаты.';
+      'Неограниченная скорость, полная приватность и никакой рекламы, рабочий VPN всегда с вами.';
 
   @override
   String get premiumPickPlan => 'Выберите тариф';
@@ -695,5 +693,5 @@ Rabochiy VPN не предназначен для детей младше 13 л�
 Связаться с нами можно через
 
 Telegram: https://t.me/rabochyvpn_chat
-Email: support@rabochiyvpn.me
+Email: support@vpnhub.ltd
 ''';

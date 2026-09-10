@@ -15,7 +15,7 @@ class SupportScreen extends StatelessWidget {
 
   static const String _telegramChatUrl = 'tg://resolve?domain=rabochyvpn_chat';
   static const String _telegramNewsUrl = 'tg://resolve?domain=rabochyvpn';
-  static const String _emailAddress = 'support@rabochiyvpn.me';
+  static const String _emailAddress = 'support@vpnhub.ltd';
   static const String _playStoreUrl =
       'https://play.google.com/store/apps/details?id=app.rabochiy.vpn';
 

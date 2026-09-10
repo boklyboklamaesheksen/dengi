@@ -579,7 +579,7 @@ class VleeVpnService : TProxyService() {
 
     private fun establishTun(excludedApps: List<String>, allowedApps: List<String>): ParcelFileDescriptor? {
         val builder = Builder()
-            .setSession("Vlee VPN")
+            .setSession("Rabochiy VPN")
             .setMtu(MTU)
             .addAddress(TUN_ADDRESS, 30)
             .addRoute("0.0.0.0", 0)

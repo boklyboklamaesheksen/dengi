@@ -181,7 +181,7 @@ class ServerConfig {
       flag: _flagFromCountryCode(countryCode),
       protocol: ServerProtocol.gw,
       state: (meta['state'] as String?) ?? '',
-      premium: meta['premium'] == true,
+      premium: meta['premium'] == true || config['locked'] == true,
       recommend: meta['recommend'] == true,
       priority: _parseInt(meta['priority']) ?? 0,
       // The whole plaintext envelope goes to the native engine as-is.

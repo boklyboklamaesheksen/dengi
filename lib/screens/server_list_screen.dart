@@ -48,14 +48,7 @@ class _ServerListScreenState extends State<ServerListScreen> {
               Container(
                 decoration: const BoxDecoration(
                   borderRadius: sheetRadius,
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: <Color>[
-                      GlassPalette.interiorTop,
-                      GlassPalette.interiorBottom,
-                    ],
-                  ),
+                  color: AppColors.base,
                 ),
                 child: Column(
                   children: <Widget>[
@@ -120,10 +113,17 @@ class _ServerListScreenState extends State<ServerListScreen> {
                           ),
                           const SizedBox(width: 8),
                           _FilterChip(
-                            label: 'AmneziaWG 2.0',
+                            label: 'AmneziaWG 3.1',
                             selected: _protocolFilter == ServerProtocol.awg,
                             onTap: () => setState(() => _protocolFilter = ServerProtocol.awg),
                             color: AppColors.emerald,
+                          ),
+                          const SizedBox(width: 8),
+                          _FilterChip(
+                            label: 'GW',
+                            selected: _protocolFilter == ServerProtocol.gw,
+                            onTap: () => setState(() => _protocolFilter = ServerProtocol.gw),
+                            color: AppColors.teal,
                           ),
                         ],
                       ),
@@ -244,12 +244,6 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = selected
-        ? (color ?? AppColors.emerald).withOpacity(0.25)
-        : Colors.white.withOpacity(0.08);
-    final borderColor = selected
-        ? (color ?? AppColors.emerald).withOpacity(0.5)
-        : Colors.white.withOpacity(0.1);
     final textColor = selected
         ? (color ?? AppColors.emerald)
         : Colors.white.withOpacity(0.6);
@@ -257,13 +251,11 @@ class _FilterChip extends StatelessWidget {
     return PressScale(
       onTap: onTap,
       pressedScale: 0.95,
-      child: Container(
+      child: FrostedSurface(
+        borderRadius: BorderRadius.circular(20),
+        sigma: 14,
+        compact: true,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: borderColor),
-        ),
         child: Text(
           label,
           style: TextStyle(
@@ -294,7 +286,7 @@ class _AutoTile extends StatelessWidget {
       child: GlassCard(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         tint: selected
-            ? AppColors.emerald.withValues(alpha: 0.22)
+            ? AppColors.emerald.withValues(alpha: 0.10)
             : null,
         child: Row(
           children: <Widget>[
@@ -306,9 +298,9 @@ class _AutoTile extends StatelessWidget {
                 gradient: AppColors.signal,
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: AppColors.emerald.withValues(alpha: 0.35),
-                    blurRadius: 14,
-                    spreadRadius: -2,
+                    color: AppColors.emerald.withValues(alpha: 0.15),
+                    blurRadius: 10,
+                    spreadRadius: -3,
                   ),
                 ],
               ),

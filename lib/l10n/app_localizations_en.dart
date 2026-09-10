@@ -526,18 +526,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountMnemonicWarningContinue => 'I understand, show it';
 
   @override
-  String get welcomeSubtitle =>
-      'Private, fast and yours.\nCreate a new account or restore an existing one.';
+  String get welcomeSubtitle => 'Create a new account or restore an existing one';
 
   @override
   String get welcomeCreateNew => 'I\'m a new user';
 
   @override
-  String get welcomeRestoreMnemonic => 'Enter recovery phrase';
+  String get welcomeRestoreMnemonic => 'Restore account';
 
   @override
-  String get welcomeFooter =>
-      'Your account lives only in your recovery phrase.\nNo email, no password.';
+  String get welcomeFooter => 'Enter your secret recovery phrase';
 
   @override
   String get accountTariffsLoading => 'Loading plans…';
@@ -552,11 +550,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get premiumHeroTitle => 'Unlock the full power of';
 
   @override
-  String get premiumHeroAccent => 'Premium';
+  String get premiumHeroAccent => 'Pro';
 
   @override
   String get premiumHeroSubtitle =>
-      'Unlimited speed, complete privacy, and absolutely no ads — a fast VPN always with you. Pay with any bank card or via SBP — premium activates automatically right after the payment.';
+      'Unlimited speed, complete privacy and no ads, a working VPN always with you.';
 
   @override
   String get premiumPickPlan => 'Pick a plan';
@@ -687,5 +685,5 @@ We reserve the right to update this document. The date in the header always refl
 Contact us
 
 Telegram: https://t.me/rabochyvpn_chat
-Email: support@rabochiyvpn.me
+Email: support@vpnhub.ltd
 ''';

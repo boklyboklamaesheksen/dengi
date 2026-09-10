@@ -61,27 +61,18 @@ class _TrafficStatsScreenState extends State<TrafficStatsScreen> {
                     PressScale(
                       onTap: () => _confirmReset(context, stats, l10n),
                       pressedScale: 0.9,
-                      child: SizedBox(
-                        width: 42,
-                        height: 42,
-                        child: LiquidTile(
-                          padding: EdgeInsets.zero,
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(14)),
-                          elevated: false,
-                          compact: true,
-                          accent: AppColors.error,
-                          // Rendered "selected" so the error accent bleeds
-                          // into the highlight lines, keeping the dark
-                          // liquid body while signalling destructive
-                          // intent via the red top/bottom rails.
-                          selected: true,
-                          child: const Center(
-                            child: Icon(
-                              Icons.delete_outline_rounded,
-                              color: AppColors.error,
-                              size: 18,
-                            ),
+                      child: FrostedSurface(
+                        borderRadius: AppRadii.tile,
+                        sigma: 14,
+                        compact: true,
+                        padding: const EdgeInsets.all(11),
+                        child: const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: Icon(
+                            Icons.delete_outline_rounded,
+                            color: AppColors.error,
+                            size: 20,
                           ),
                         ),
                       ),
@@ -292,7 +283,7 @@ class _DialogButton extends StatelessWidget {
             const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         borderRadius: const BorderRadius.all(Radius.circular(12)),
         elevated: false,
-        compact: true,
+
         accent: accent,
         selected: isAccented,
         child: Text(
@@ -354,21 +345,13 @@ class _PeriodSelector extends StatelessWidget {
           return PressScale(
             onTap: () => onChanged(p),
             pressedScale: 0.95,
-            child: AnimatedContainer(
-              duration: RabochiyDurations.tabSwitch,
-              curve: RabochiyCurves.brisk,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(19),
-                color: isSelected
-                    ? AppColors.emerald.withValues(alpha: 0.18)
-                    : AppColors.surface,
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.emerald.withValues(alpha: 0.42)
-                      : AppColors.border,
-                ),
+            child: FrostedSurface(
+              borderRadius: BorderRadius.circular(19),
+              sigma: 14,
+              compact: true,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 9,
               ),
               child: Text(
                 _labelFor(p),
@@ -488,13 +471,12 @@ class _MiniChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Container(
+      child: LiquidTile(
+        borderRadius: BorderRadius.circular(14),
+
+        accent: tint,
+        selected: true,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          color: tint.withValues(alpha: 0.12),
-          border: Border.all(color: tint.withValues(alpha: 0.32)),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

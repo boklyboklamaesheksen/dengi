@@ -101,26 +101,21 @@ class _BrandLogo extends StatelessWidget {
         width: 96,
         height: 96,
         decoration: BoxDecoration(
-          gradient: AppColors.signal,
           borderRadius: BorderRadius.circular(24),
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: AppColors.emerald.withValues(alpha: 0.35),
-              blurRadius: 40,
-              spreadRadius: -10,
+              color: Colors.black.withValues(alpha: 0.55),
+              blurRadius: 30,
+              spreadRadius: -8,
               offset: const Offset(0, 14),
             ),
           ],
         ),
-        child: const Center(
-          child: Text(
-            'R',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 56,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -2,
-            ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: const Image(
+            image: AssetImage('assets/images/logo_rabochiy.png'),
+            fit: BoxFit.cover,
           ),
         ),
       ),
@@ -171,21 +166,19 @@ class _SecondaryAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return PressScale(
       onTap: onTap,
-      child: Container(
+      child: SizedBox(
         height: 58,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceElevated.withValues(alpha: 0.45),
+        child: LiquidTile(
           borderRadius: AppRadii.tile,
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 14.5,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.4,
+          child: Center(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 14.5,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.4,
+              ),
             ),
           ),
         ),

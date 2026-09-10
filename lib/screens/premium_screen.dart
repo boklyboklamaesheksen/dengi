@@ -410,14 +410,26 @@ class _Hero extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        Text(
-          accent,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 34,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -1.0,
-            height: 1.05,
+        ShaderMask(
+          shaderCallback: (Rect bounds) => const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: <Color>[
+              Color(0xFFE0115C), // cherry
+              Color(0xFFFF4D2E), // vermilion
+              Color(0xFFFFA01E), // orange
+            ],
+          ).createShader(bounds),
+          blendMode: BlendMode.srcIn,
+          child: Text(
+            accent,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 34,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -1.0,
+              height: 1.05,
+            ),
           ),
         ),
         const SizedBox(height: 14),
@@ -577,23 +589,24 @@ class _TariffRadioCard extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: <Color>[
-                    Color(0x33FFFFFF),
-                    Color(0x145C626B),
+                    Color(0x22FFFFFF),
+                    Color(0x10FFFFFF),
+                    Color(0x06FFFFFF),
                   ],
                 )
               : null,
           color: selected ? null : AppColors.surface.withValues(alpha: 0.6),
           border: Border.all(
             color: selected
-                ? AppColors.emerald
+                ? Colors.white.withValues(alpha: 0.75)
                 : AppColors.borderStrong,
-            width: selected ? 1.6 : 1,
+            width: selected ? 1.4 : 1,
           ),
           boxShadow: selected
               ? const <BoxShadow>[
                   BoxShadow(
-                    color: Color(0x33FFFFFF),
-                    blurRadius: 24,
+                    color: Color(0x26FFFFFF),
+                    blurRadius: 18,
                     spreadRadius: -6,
                   ),
                 ]
@@ -612,18 +625,18 @@ class _TariffRadioCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: selected
-                      ? AppColors.emerald
+                      ? Colors.white
                       : AppColors.borderStrong,
                   width: 2,
                 ),
                 color: selected
-                    ? AppColors.emerald
+                    ? Colors.white
                     : Colors.transparent,
               ),
               child: selected
                   ? const Icon(
                       Icons.check_rounded,
-                      color: Colors.white,
+                      color: Color(0xFF07080A),
                       size: 14,
                     )
                   : null,
