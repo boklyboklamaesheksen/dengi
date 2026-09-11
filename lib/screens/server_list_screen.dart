@@ -31,6 +31,19 @@ class _ServerListScreenState extends State<ServerListScreen> {
   ServerProtocol? _protocolFilter;
 
   @override
+  void initState() {
+    super.initState();
+    // Re-fetch the catalogue every time the sheet opens: servers can be
+    // added/removed on the backend (bot/admin) while the app is running,
+    // and the provider only loads them on splash / login otherwise.
+    // Post-frame so Provider listeners aren't notified during build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<AppProvider>().loadServers();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context)!;
     return DraggableScrollableSheet(

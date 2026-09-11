@@ -108,7 +108,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyPolicyContent => _privacyPolicyEn;
 
   @override
-  String get privacyPolicyLastUpdated => 'Last updated April 20, 2026';
+  String get privacyPolicyLastUpdated => 'Last updated September 1, 2026';
 
   @override
   String get settingsAbout => 'About';
@@ -636,15 +636,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
 const String _privacyPolicyEn = '''
 Privacy Policy — Rabochiy VPN
-Effective date: 1 May 2026
+Last updated: 1 September 2026
 
 About this document
 
-This document explains how the Rabochiy VPN app handles your data. We have tried to write it in plain language so it is easy to understand. Rabochiy VPN is a tool to protect your internet connection; the protocols mentioned (IKEv2, AmneziaWG, etc.) are technical standards only and do not associate us with any services that share the same name.
+Welcome to Rabochiy VPN. We respect and protect your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile app and services. By using Rabochiy VPN, you agree to the terms of this Policy. If you do not agree with them, please stop using the app. Rabochiy VPN is an application built to provide secure and anonymous access to the Internet. We have built our service on the principles of minimal data collection. Unlike many other services, we do not log (record) your internet activity. Rabochiy VPN is a tool to protect your internet connection; the protocols mentioned (GW, AmneziaWG, etc.) are technical standards only and do not associate us with any services that share the same name.
 
 What we do not do
 
-We do not record what you do on the internet. Specifically, we are not interested in and we do not store: the list of websites you visit, DNS queries, the addresses of servers you connect to, your real IP address, or the timing and duration of your sessions. The servers your traffic passes through are used only for packet routing and do not keep user logs.
+We do not record what you do on the internet. Specifically, we are not interested in your GPS location, and we do not store: the list of websites you visit, DNS queries, the addresses of servers you connect to, your real IP address, or the timing and duration of your sessions. The servers your traffic passes through are used only for packet routing and do not keep user logs.
 
 What is stored on your phone
 
@@ -660,11 +660,11 @@ The app requires the following permissions to operate: creating a VPN tunnel, in
 
 Server configuration download
 
-The server list and connection parameters are downloaded over an encrypted HTTPS connection. The request is sent with a unique anonymous account identifier — the same random ID the server assigns automatically on first connection — that is not linked to your identity. The server does not receive device data or traffic content.
+The server list and connection parameters are downloaded over an encrypted HTTPS connection. The request is sent with a unique anonymous account identifier — a random ID the server assigns automatically on first connection — that is not linked to your identity. The server does not receive device data or traffic content.
 
 Connection metadata
 
-To display server load and update the admin panel status, the app sends anonymous heartbeats (connected / on server X / disconnected) to the backend whenever the VPN state changes. This data does not contain visited websites, DNS queries, or destination IP addresses.
+To display server load and update the admin panel status, the app sends anonymous packets (connected / on server X / disconnected) to the backend whenever the VPN state changes. This data does not contain visited websites or destination IP addresses.
 
 Account
 
@@ -673,6 +673,8 @@ On first launch the app automatically creates an anonymous account for you, with
 Data and account deletion
 
 You can delete your account yourself at any time through the app settings. After deletion, the identifier and all associated subscription data are permanently removed from our servers. If an account is not used for more than 12 months after logout, it is automatically deleted. Local data on the device is removed when you uninstall the app or clear its data through Android settings.
+
+In the current version of Rabochiy VPN, ad network code may be used to display ads, which allows us to maintain the free servers. Static code analysis may show tracker signatures classified as "advertising". This means that ad modules may collect anonymized data for targeted advertising, such as: Advertising ID (Ad ID); information about how you interact with ads (clicks, views). This data is collected by advertising partners (third parties) under their own privacy policies and is not linked to your activity inside the VPN tunnel. You can reset your advertising ID or opt out of ad personalization in your Android device settings.
 
 Who the app is for
 
