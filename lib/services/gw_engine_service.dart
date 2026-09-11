@@ -43,14 +43,23 @@ class GwEngineService {
   /// Starts the GW tunnel for the given decrypted server envelope
   /// (the k0..ka JSON as produced by [GwApiService]). The native side
   /// handles VpnService.prepare() itself when needed.
-  Future<bool> connect(ServerConfig config) async {
+  ///
+  /// [excludedApps] — packages that bypass the tunnel (exclude mode);
+  /// [allowedApps] — the only packages routed through the tunnel
+  /// (include mode). The native side always excludes the VPN app itself
+  /// in exclude mode, so the engine's own sockets stay outside.
+  Future<bool> connect(
+    ServerConfig config, {
+    List<String>? excludedApps,
+    List<String>? allowedApps,
+  }) async {
     try {
       return await _channel.invokeMethod<bool>(
             'connect',
             <String, dynamic>{
               'config': config.gwRawConfig,
-              'excludedApps': const <String>[],
-              'allowedApps': const <String>[],
+              'excludedApps': excludedApps ?? const <String>[],
+              'allowedApps': allowedApps ?? const <String>[],
             },
           ) ??
           false;

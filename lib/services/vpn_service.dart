@@ -130,6 +130,8 @@ class VpnService {
   Future<bool> connect(
     ServerConfig config, {
     List<String>? blockedApps,
+    List<String>? excludedApps,
+    List<String>? allowedApps,
   }) async {
     if (!_isPlatformSupported) {
       _errorMessage = 'platform_unsupported';
@@ -155,7 +157,11 @@ class VpnService {
         _gwEventsSub ??= GwEngineService.instance.statusStream.listen(
           (event) => _handleGwEvent(event, config),
         );
-        final ok = await GwEngineService.instance.connect(config);
+        final ok = await GwEngineService.instance.connect(
+          config,
+          excludedApps: excludedApps,
+          allowedApps: allowedApps,
+        );
         if (!ok) {
           _errorMessage = 'engine_not_ready';
           _updateStatus(VpnStatus.error);

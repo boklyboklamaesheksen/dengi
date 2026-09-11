@@ -428,13 +428,29 @@ class AppProvider with ChangeNotifier {
       return;
     }
 
+    // Per-app VPN mask. `blocked` drives the AWG path (injected as
+    // ExcludedApplications); the GW engine takes the mask as an
+    // excluded/allowed pair so the include mode maps to allowedApps
+    // instead of an inverted exclude list.
     List<String>? blocked;
+    List<String>? gwExcluded;
+    List<String>? gwAllowed;
     if (_splitTunnel.isActive) {
       final List<String> installed = await _listInstalledPackages();
       blocked = _splitTunnel.buildBlockedApps(installed);
+      if (_splitTunnel.config.mode == SplitTunnelMode.exclude) {
+        gwExcluded = List<String>.from(_splitTunnel.config.packages);
+      } else {
+        gwAllowed = List<String>.from(_splitTunnel.config.packages);
+      }
     }
 
-    final success = await _vpnService.connect(target, blockedApps: blocked);
+    final success = await _vpnService.connect(
+      target,
+      blockedApps: blocked,
+      excludedApps: gwExcluded,
+      allowedApps: gwAllowed,
+    );
     if (!success) {
       _errorMessage = _vpnService.errorMessage;
       notifyListeners();
