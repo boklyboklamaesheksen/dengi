@@ -265,6 +265,17 @@ class AppProvider with ChangeNotifier {
       _totalOnlineUsers = total;
 
       _servers = [...servers, ...gwServers];
+
+      // Keep the user's selection stable across reloads: re-point it at the
+      // fresh object with the same id, otherwise connects keep using the
+      // stale config blob captured before the refresh (personal AWG configs
+      // are re-issued by the backend).
+      final selected = _selectedServer;
+      if (selected != null) {
+        final match = _servers.where((s) => s.id == selected.id).toList();
+        if (match.isNotEmpty) _selectedServer = match.first;
+      }
+
       notifyListeners();
 
       if (_isAutoSelect || _selectedServer == null) {
