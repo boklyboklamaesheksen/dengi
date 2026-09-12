@@ -137,6 +137,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get homeGetProPrefix => 'Купить';
 
   @override
+  String get homeRenewProPrefix => 'Продлить';
+
+  @override
   String get homeGetProAccent => 'PRO';
 
   @override
@@ -455,7 +458,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get accountPlanFree => 'Бесплатный';
 
   @override
-  String get accountPlanPremium => 'Премиум';
+  String get accountPlanPremium => 'PRO';
 
   @override
   String get accountPlanExpires => 'Действует до';
@@ -464,7 +467,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get accountPlanUnlimited => 'Без ограничений';
 
   @override
-  String get accountBuyPremium => 'Купить премиум';
+  String get accountBuyPremium => 'Купить PRO';
 
   @override
   String get accountActivateCode => 'Активировать код';

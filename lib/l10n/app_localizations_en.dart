@@ -131,6 +131,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeGetProPrefix => 'Buy';
 
   @override
+  String get homeRenewProPrefix => 'Renew';
+
+  @override
   String get homeGetProAccent => 'PRO';
 
   @override
@@ -448,7 +451,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountPlanFree => 'Free';
 
   @override
-  String get accountPlanPremium => 'Premium';
+  String get accountPlanPremium => 'PRO';
 
   @override
   String get accountPlanExpires => 'Expires';
@@ -457,7 +460,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountPlanUnlimited => 'Unlimited';
 
   @override
-  String get accountBuyPremium => 'Buy Premium';
+  String get accountBuyPremium => 'Buy PRO';
 
   @override
   String get accountActivateCode => 'Activate code';

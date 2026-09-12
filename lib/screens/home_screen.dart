@@ -89,6 +89,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context)!;
+    // PRO badge doubles as a renewal entry point for existing subscribers.
+    final bool isPro =
+        context.select<AppProvider, bool>((AppProvider p) => p.isPremium);
 
     return ResponsiveScaledBox(
       width: 390,
@@ -134,7 +137,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
                                 Text(
-                                  l10n.homeGetProPrefix,
+                                  isPro
+                                      ? l10n.homeRenewProPrefix
+                                      : l10n.homeGetProPrefix,
                                   style: const TextStyle(
                                     color: AppColors.textPrimary,
                                     fontSize: 15,

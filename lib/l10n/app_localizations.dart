@@ -56,6 +56,7 @@ abstract class AppLocalizations {
   String get connectNow;
   String get disconnectUpper;
   String get homeGetProPrefix;
+  String get homeRenewProPrefix;
   String get homeGetProAccent;
   String get homeGetProSuffix;
 
