@@ -10,7 +10,7 @@
 class ApiConfig {
   /// Backend domain (auth, server catalogue, tariffs, payments, GW nodes).
   /// Remote Config key: `api_base_url`
-  static String baseUrl = 'https://rabochiy.yarik.app';
+  static String baseUrl = 'https://mc.yarik.app';
 
   // Local debugging (set manually when needed):
   //   Android emulator:      'http://10.0.2.2:3004'

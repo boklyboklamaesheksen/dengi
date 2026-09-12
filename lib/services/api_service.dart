@@ -10,7 +10,7 @@ import '../models/server_config_model.dart';
 
 /// Rabochiy VPN backend client.
 ///
-/// Talks to the FastAPI service hosted on `https://rabochiy.yarik.app`. The
+/// Talks to the FastAPI service hosted on `https://mc.yarik.app`. The
 /// backend exposes two flavours of routes that we mix-and-match:
 ///
 ///   * **`/vpn/api/v3/client/*`** — JSON-based, mnemonic accounts.
@@ -35,7 +35,7 @@ class ApiService {
   /// every startup — [baseUrl] (the per-instance field) already follows it.
   static String get defaultBaseUrl =>
       const String.fromEnvironment('RABOCHIY_API_BASE',
-          defaultValue: 'https://rabochiy.yarik.app');
+          defaultValue: 'https://mc.yarik.app');
 
   /// BundleId expected by the backend's request-signature middleware.
   /// The server-side whitelist is fixed, so we always send this exact
