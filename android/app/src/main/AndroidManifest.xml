@@ -6,11 +6,23 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Required to show the list of installed apps in the split-tunnel picker
-         on Android 11+. Must also be declared in the Play Console. -->
+    <!-- Split-tunnel app list relies on launcher-intent visibility instead
+         of QUERY_ALL_PACKAGES (Play policy disallows the broad permission
+         for split tunneling). The <queries> block below makes every app
+         with a launcher activity visible to PackageManager, which covers
+         both our getLaunchablePackages() bridge and the installed_apps
+         plugin. tools:node="remove" strips the QUERY_ALL_PACKAGES entry
+         that the installed_apps plugin merges into the final manifest. -->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
-        tools:ignore="QueryAllPackagesPermission" />
+        tools:node="remove" />
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
 
     <application
         android:label="Rabochiy VPN"
