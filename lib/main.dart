@@ -127,10 +127,15 @@ class RabochiyVpnApp extends StatelessWidget {
 
                 return MediaQuery(
                   data: mediaQuery.copyWith(textScaler: textScale),
-                  child: ResponsiveScaledBox(
-                    width: ResponsiveValue<double>(
-                      context,
-                      conditionalValues: [
+                    child: ResponsiveScaledBox(
+                      // defaultValue guards the ResponsiveValue cast: with
+                      // no matching condition the package would otherwise
+                      // cast null to double and crash on first frame
+                      // (seen in Crashlytics on real devices).
+                      width: ResponsiveValue<double>(
+                        context,
+                        defaultValue: 424,
+                        conditionalValues: [
                         Condition.equals(name: MOBILE, value: 424),
                         Condition.largerThan(name: MOBILE, value: 424),
                       ],
