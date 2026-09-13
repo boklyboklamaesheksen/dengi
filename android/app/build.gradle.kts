@@ -20,14 +20,13 @@ android {
     compileOptions {
         // Required by `coreLibraryDesugaring` for older Android API
         // levels using java.time / java.util.function APIs from the
-        // vendored StrongSwan + AmneziaWG sources.
+        // vendored AmneziaWG sources.
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {
-        // StrongSwan sources read app metadata via BuildConfig.
         buildConfig = true
     }
 
@@ -98,7 +97,7 @@ android {
 
     buildTypes {
         debug {
-            // Disable minification like GW VPN - strongSwan plugins break with ProGuard
+            // Minification stays off (native engines + reflection-sensitive code)
             isMinifyEnabled = false
             isShrinkResources = false
         }
@@ -162,18 +161,14 @@ dependencies {
     implementation(project(":amneziawg-tunnel"))
     implementation(project(":vlee_engine"))
     implementation(project(":hysteria2_engine"))
-    // StrongSwan IKEv2 sources live directly under
-    // `app/src/main/java/org/strongswan/android/**`; the matching
-    // .so files (libcharon.so, libstrongswan.so …) sit in
-    // `app/src/main/jniLibs/**` so no extra `implementation` is
-    // needed for IKEv2.
+    // IKEv2 / StrongSwan was removed from the product; only AWG + GW
+    // engines remain.
 
-    // Coroutines used by the Kotlin VPN managers (IkeV2Manager /
-    // AwgManager) glued to Flutter via MethodChannel.
+    // Coroutines used by the Kotlin VPN managers (AwgManager) glued
+    // to Flutter via MethodChannel.
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
-    // Java 8+ APIs used by StrongSwan / AmneziaWG sources on
-    // older devices (we keep minSdk via Flutter, so desugaring is
-    // mandatory).
+    // Java 8+ APIs used by the AmneziaWG sources on older devices
+    // (we keep minSdk via Flutter, so desugaring is mandatory).
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
 

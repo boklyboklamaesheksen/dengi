@@ -14,7 +14,7 @@ import '../models/server_config_model.dart';
 /// backend exposes two flavours of routes that we mix-and-match:
 ///
 ///   * **`/vpn/api/v3/client/*`** — JSON-based, mnemonic accounts.
-///     Used for: user create / login / get, IKEv2 server catalogue,
+///     Used for: user create / login / get, server catalogue,
 ///     tariff list, payment URL.
 ///   * **`/vpn/api/v1/user/*`**   — legacy form-encoded, signed POST.
 ///     Used for: AmneziaWG server catalogue, connection heartbeat,
@@ -77,7 +77,7 @@ class ApiService {
   //  Servers catalogue
   // ──────────────────────────────────────────────────────────────────
 
-  /// Loads the live server catalogue from both protocols (IKEv2 via v3
+  /// Loads the live server catalogue from both protocols (AWG via v3
   /// client API, AmneziaWG via v1 user API) and merges them into a
   /// single sorted list. On any network failure we transparently fall
   /// back to the cached snapshot so the UI is never empty on cold

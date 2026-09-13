@@ -19,14 +19,9 @@ enum ServerProtocol {
       case 'gw':
       case 'vlee':
         return ServerProtocol.gw;
-      case 'ikev2':
-      case 'ike':
-      case 'ipsec':
-      case 'awg':
-      case 'amneziawg':
-      case 'wireguard':
-      case 'wg':
       default:
+        // awg / amneziawg / wireguard / wg and any legacy value
+        // (ikev2 etc.) fall back to the primary AWG protocol.
         return ServerProtocol.awg;
     }
   }
@@ -68,12 +63,12 @@ class ServerConfig {
   final bool recommend;
   final int priority;
 
-  // ── IKEv2 (StrongSwan) credentials ────────────────────────────────
+  // ── Legacy credentials (IKEv2 removed; fields kept because the
+  // native method channel still receives them) ───────────────────────
   final String username;
   final String password;
 
-  /// Base64-encoded CA certificate (PEM). When empty StrongSwan falls
-  /// back to the device trust store.
+  /// Base64-encoded CA certificate (PEM). Unused since IKEv2 removal.
   final String caFile;
 
   // ── AmneziaWG configuration ───────────────────────────────────────
@@ -196,7 +191,7 @@ class ServerConfig {
   /// Builds a [ServerConfig] from a backend server document.
   ///
   /// Two sources feed into this:
-  ///   * **`/vpn/api/v3/client/servers/get`** for IKEv2 — the body is
+  ///   * **`/vpn/api/v3/client/servers/get`** for legacy records — the body is
   ///     `{country, ip_address, recommend, priority, user, password,
   ///     ca_file, created_at, premium, state, status}` (no
   ///     `country_code`, no `id`).
@@ -216,7 +211,7 @@ class ServerConfig {
       (json['country_code'] ?? json['countryCode'] ?? '').toString(),
     ).toUpperCase();
 
-    // IKEv2 records ship without a country_code — derive a best-effort
+    // Legacy records ship without a country_code — derive a best-effort
     // ISO-3166 code from the country / state name so the UI can still
     // render a real flag instead of the generic white one.
     if (countryCode.isEmpty) {

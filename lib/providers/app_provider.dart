@@ -13,7 +13,7 @@ import '../services/vpn_service.dart';
 /// Central state container for Rabochiy VPN.
 ///
 /// Drives every reactive widget in the app. The provider owns:
-///   * [VpnService] — bridge to the native IKEv2 / AmneziaWG engines.
+///   * [VpnService] — bridge to the native AmneziaWG / GW engines.
 ///   * [ApiService] — HTTPS client for the backend (server catalogue,
 ///     server load, connection heartbeats, payments, account state).
 ///   * [TrafficStatsService] — persistent hourly traffic buckets.

@@ -120,7 +120,7 @@ class MainActivity : FlutterActivity() {
                 }
             }
 
-        // VPN engine control channel (IKEv2 + AmneziaWG)
+        // VPN engine control channel (AmneziaWG + GW engines)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ENGINE_CHANNEL)
             .setMethodCallHandler { call, result ->
                 handleEngineCall(call, result)
