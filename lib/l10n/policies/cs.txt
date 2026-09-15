@@ -1,0 +1,33 @@
+Zásady ochrany soukromí — Rabochiy VPN
+Aktualizováno: 1. září 2026
+
+O dokumentu
+Tyto zásady popisují shromažďování, použití a ochranu informací při používání aplikace a služby. Používáním Rabochiy VPN s nimi souhlasíte; jinak aplikaci přestaňte používat. Shromažďujeme minimum údajů a nezaznamenáváme vaši internetovou aktivitu. GW a AmneziaWG jsou technické standardy; jejich uvedení neznamená vztah ke stejnojmenným službám.
+
+Co neukládáme
+Nesledujeme polohu GPS a neukládáme navštívené weby, dotazy DNS, adresy serverů, ke kterým přistupujete, skutečnou IP adresu ani časy a délku relací. Servery předávají pakety bez záznamů aktivity uživatelů.
+
+Údaje v telefonu
+Aplikace ukládá místně seznam serverů pro použití offline, účet, naposledy vybraný server a statistiky relací, například rychlost a dobu připojení. Tyto místní údaje nejsou odesílány. Můžete je smazat v nastavení Androidu nebo odinstalováním aplikace.
+
+Hlášení chyb
+Google Firebase Crashlytics pomáhá hledat chyby. Pokud systém povoluje hlášení, pád automaticky vytvoří anonymní zprávu s modelem zařízení, verzí Androidu a aplikace a zásobníkem chyby. Neobsahuje síťovou aktivitu, IP adresu, token předplatného ani totožnost. Firebase Analytics sbírá také anonymní statistiky použití, například spuštění aplikace nebo úspěšné připojení. Údaje jsou souhrnné a neidentifikují jednotlivé uživatele. Zásady Googlu: https://policies.google.com/privacy
+
+Systémová oprávnění
+Aplikace potřebuje vytvářet tunel VPN, přístup k internetu, kontrolovat stav sítě, běžet jako služba na popředí a zobrazovat trvalé oznámení vyžadované Androidem. Seznam nainstalovaných aplikací slouží výhradně k výběru aplikací pro dělené tunelování. Zůstává v zařízení a není předáván nám ani třetím stranám. Aplikace nepožaduje ani nepoužívá kontakty, média, fotoaparát, mikrofon, polohu, SMS nebo historii hovorů.
+
+Konfigurace a metadata připojení
+Seznam serverů a parametry se stahují přes šifrované HTTPS. Požadavek používá náhodný identifikátor účtu přidělený serverem, bez vazby na totožnost, a nepřenáší údaje zařízení ani obsah provozu. Pro zobrazení zatížení serverů a stavu v administraci aplikace posílá anonymní zprávy o připojení, použitém serveru a odpojení. Neobsahují navštívené weby ani cílové IP adresy.
+
+Účet a smazání
+Aplikace vytvoří anonymní účet bez e-mailu, telefonu nebo osobních údajů. Náhodný identifikátor a tajný klíč umožňují obnovu na jiném zařízení. Tuto dvojici nemůžeme spojit s vaší totožností. Účet můžete smazat v aplikaci: identifikátor a související údaje předplatného budou trvale odstraněny ze serverů. Účet nepoužívaný déle než 12 měsíců po odhlášení se maže automaticky. Místní údaje lze smazat v Androidu nebo odinstalováním.
+
+Reklama
+Kód reklamních sítí může být použit k financování bezplatných serverů. Statická analýza může odhalit reklamní signatury. Partneři mohou podle svých zásad shromažďovat anonymizované údaje, například reklamní ID, kliknutí a zobrazení. Tyto údaje se nespojují s vaší aktivitou v tunelu VPN. Reklamní ID můžete resetovat nebo vypnout personalizaci v Androidu.
+
+Komu je aplikace určena a změny
+Rabochiy VPN není určen dětem mladším 13 let a jejich údaje záměrně neshromažďujeme. Informujte nás, pokud aplikaci používá dítě mladší 13 let. Zásady můžeme aktualizovat; datum označuje aktuální verzi. Významné změny oznamujeme v našem chatu na Telegramu.
+
+Kontakt
+Telegram: https://t.me/rabochyvpn_chat
+E-mail: support@vpnhub.ltd

@@ -29,14 +29,21 @@ class GwEngineService {
   Stream<String> get statusStream => _statusController.stream;
 
   void bind() {
-    _rawSub ??= _events.listen(_statusController.add);
+    _rawSub ??= _events.listen(
+      _statusController.add,
+      onError: (Object error) => _statusController.add('STATE:ERROR'),
+    );
+  }
+
+  void unbind() {
+    _rawSub?.cancel();
+    _rawSub = null;
   }
 
   Stream<String> get _events {
     _rawStream ??= _statusChannel
         .receiveBroadcastStream()
-        .map((event) => event?.toString() ?? '')
-        .asBroadcastStream();
+        .map((event) => event?.toString() ?? '');
     return _rawStream!;
   }
 
@@ -101,6 +108,8 @@ class GwEngineService {
         return VpnStatus.disconnecting;
       case 'DISCONNECTED':
         return VpnStatus.disconnected;
+      case 'ERROR':
+        return VpnStatus.error;
       default:
         return null;
     }

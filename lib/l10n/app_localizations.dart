@@ -7,10 +7,9 @@ import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
 import 'app_localizations_ru.dart';
+import 'app_localizations_eu.dart';
 
-/// Hand-written localisation for Rabochiy VPN. The app intentionally does not
-/// use `flutter gen-l10n` so that all translation is contained in plain Dart
-/// and can be edited without running code generation.
+/// EN/RU are hand-written; EU catalogues are generated and bundled offline.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
       : localeName = intl.Intl.canonicalizedLocale(locale.toString());
@@ -35,6 +34,18 @@ abstract class AppLocalizations {
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('ru'),
+    Locale('fr'),
+    Locale('nl'),
+    Locale('de'),
+    Locale('es'),
+    Locale('it'),
+    Locale('pl'),
+    Locale('pt', 'PT'),
+    Locale('ro'),
+    Locale('sv'),
+    Locale('da'),
+    Locale('fi'),
+    Locale('cs'),
   ];
 
   // Branding
@@ -247,6 +258,11 @@ abstract class AppLocalizations {
   String get premiumPaymentTitle;
 
   String get payLoadFailed;
+  String get paymentBrowserNotice;
+  String get paymentOpenPage;
+  String get dayShort;
+  String get monthShort;
+  String get yearShort;
   String get premiumActivated;
   String get accountActivateSuccess;
   String get accountActivateInvalid;
@@ -285,13 +301,18 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'ru'].contains(locale.languageCode);
+      AppLocalizations.supportedLocales.any(
+        (supported) => supported.languageCode == locale.languageCode,
+      );
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+  if (AppLocalizationsEu.languageCodes.contains(locale.languageCode)) {
+    return AppLocalizationsEu(locale.languageCode);
+  }
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();

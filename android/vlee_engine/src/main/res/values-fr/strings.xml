@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vlee_notif_title">Rabochiy VPN</string>
+    <string name="vlee_notif_channel">Rabochiy VPN</string>
+    <string name="vlee_notif_connected">VPN CONNECTÉ</string>
+    <string name="vlee_notif_reconnecting">Reconnexion…</string>
+</resources>

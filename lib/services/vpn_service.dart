@@ -51,7 +51,7 @@ class EngineStatus {
   static int _toInt(dynamic v) {
     if (v == null) return 0;
     if (v is int) return v;
-    if (v is num) return v.toInt();
+    if (v is num) return v.isFinite ? v.toInt() : 0;
     if (v is String) return int.tryParse(v) ?? 0;
     return 0;
   }
@@ -77,6 +77,7 @@ class VpnService {
   String? _errorMessage;
   StreamSubscription<dynamic>? _eventsSub;
   StreamSubscription<String>? _gwEventsSub;
+  bool _disposed = false;
 
   // GW engine reports cumulative counters ~1 Hz; derive byte/s speeds
   // from the deltas (the AWG path gets them natively).
@@ -102,12 +103,14 @@ class VpnService {
   bool get _isPlatformSupported => Platform.isAndroid;
 
   Future<bool> initialize() async {
+    if (_disposed) return false;
     if (!_isPlatformSupported) {
       // Non-Android platforms: streams stay open but no engine is wired.
       return false;
     }
     try {
       await _control.invokeMethod<void>('initialize');
+      if (_disposed) return false;
       _bindEventStream();
       return true;
     } on MissingPluginException {
@@ -133,6 +136,7 @@ class VpnService {
     List<String>? excludedApps,
     List<String>? allowedApps,
   }) async {
+    if (_disposed) return false;
     if (!_isPlatformSupported) {
       _errorMessage = 'platform_unsupported';
       _updateStatus(VpnStatus.error);
@@ -142,6 +146,7 @@ class VpnService {
       if (_status == VpnStatus.connected || _status == VpnStatus.connecting) {
         await disconnect();
       }
+      if (_disposed) return false;
 
       _updateStatus(VpnStatus.connecting);
       _errorMessage = null;
@@ -162,6 +167,7 @@ class VpnService {
           excludedApps: excludedApps,
           allowedApps: allowedApps,
         );
+        if (_disposed || _currentConfig != config) return false;
         if (!ok) {
           _errorMessage = 'engine_not_ready';
           _updateStatus(VpnStatus.error);
@@ -170,13 +176,14 @@ class VpnService {
       }
 
       final granted = await _requestPermission();
+      if (_disposed || _currentConfig != config) return false;
       if (!granted) {
         _errorMessage = 'vpn_permission_denied';
         _updateStatus(VpnStatus.disconnected);
         return false;
       }
 
-      await _control.invokeMethod<void>('connect', <String, dynamic>{
+      final connected = await _control.invokeMethod<bool>('connect', <String, dynamic>{
         'protocol': config.protocol.apiName,
         'remark': config.cleanName,
         'address': config.address,
@@ -189,6 +196,12 @@ class VpnService {
         if (blockedApps != null && blockedApps.isNotEmpty)
           'blockedApps': blockedApps,
       });
+      if (connected != true) {
+        if (_disposed || _currentConfig != config) return false;
+        _errorMessage = 'engine_not_ready';
+        _updateStatus(VpnStatus.error);
+        return false;
+      }
       return true;
     } on MissingPluginException {
       _errorMessage = 'engine_not_ready';
@@ -288,7 +301,8 @@ class VpnService {
     _eventsSub?.cancel();
     _eventsSub = _events.receiveBroadcastStream().listen(
       (dynamic raw) {
-        if (raw is! Map) return;
+        if (_disposed || raw is! Map ||
+            _currentConfig?.protocol == ServerProtocol.gw) return;
         final status = EngineStatus.fromMap(raw);
         _engineStatusController.add(status);
 
@@ -321,6 +335,7 @@ class VpnService {
   /// GW engine events (STATE:/TRAFFIC:) are folded into the same
   /// status/engine pipelines the AWG path uses.
   void _handleGwEvent(String event, ServerConfig config) {
+    if (_disposed || _currentConfig?.protocol != ServerProtocol.gw) return;
     final status = GwEngineService.statusFromEvent(event);
     if (status != null) {
       _updateStatus(status);
@@ -371,6 +386,7 @@ class VpnService {
   }
 
   void _updateStatus(VpnStatus newStatus) {
+    if (_disposed) return;
     if (_status != newStatus) {
       _status = newStatus;
       _statusController.add(_status);
@@ -379,8 +395,10 @@ class VpnService {
   }
 
   void dispose() {
+    _disposed = true;
     _eventsSub?.cancel();
     _gwEventsSub?.cancel();
+    GwEngineService.instance.unbind();
     _statusController.close();
     _engineStatusController.close();
   }

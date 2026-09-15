@@ -1,0 +1,33 @@
+Politica de confidențialitate — Rabochiy VPN
+Actualizată: 1 septembrie 2026
+
+Despre document
+Această politică explică colectarea, utilizarea și protejarea informațiilor la folosirea aplicației și serviciului. Folosind Rabochiy VPN, accepți politica; în caz contrar, încetează utilizarea. Colectăm minimum de date și nu înregistrăm activitatea ta pe internet. GW și AmneziaWG sunt standarde tehnice; menționarea lor nu implică legături cu servicii cu aceleași nume.
+
+Ce nu păstrăm
+Nu urmărim locația GPS și nu păstrăm site-urile vizitate, cererile DNS, adresele serverelor accesate, IP-ul real sau orele și durata sesiunilor. Serverele direcționează pachetele fără jurnale de activitate ale utilizatorilor.
+
+Date pe telefon
+Aplicația salvează local o listă de servere pentru utilizare offline, contul, ultimul server ales și statistici de sesiune, precum viteza și timpul conectat. Aceste date locale nu sunt transmise. Le poți șterge din setările Android sau dezinstalând aplicația.
+
+Rapoarte de erori
+Google Firebase Crashlytics ajută la diagnosticarea erorilor. Dacă sistemul permite raportarea, o blocare generează automat un raport anonim cu modelul dispozitivului, versiunile Android și ale aplicației și stiva erorii. Nu conține activitatea de rețea, IP-ul, tokenul abonamentului sau identitatea. Firebase Analytics colectează și statistici anonime de utilizare, precum lansarea aplicației sau o conexiune reușită. Datele sunt agregate și nu identifică utilizatori individuali. Politica Google: https://policies.google.com/privacy
+
+Permisiuni de sistem
+Aplicația trebuie să creeze un tunel VPN, să acceseze internetul, să verifice starea rețelei, să ruleze ca serviciu în prim-plan și să afișeze notificarea permanentă cerută de Android. Lista aplicațiilor instalate este folosită doar pentru selectarea aplicațiilor în tunelarea divizată. Rămâne pe dispozitiv și nu este transmisă nouă sau terților. Nu solicităm și nu folosim accesul la contacte, fișiere media, cameră, microfon, locație, SMS-uri sau istoricul apelurilor.
+
+Configurare și metadate de conexiune
+Lista serverelor și parametrii sunt descărcați prin HTTPS criptat. Cererea folosește un identificator de cont aleatoriu atribuit de server, fără legătură cu identitatea. Nu transmite date ale dispozitivului sau conținutul traficului. Pentru afișarea încărcării serverelor și a stării în panoul de administrare, aplicația trimite mesaje anonime despre conectare, serverul folosit și deconectare. Acestea nu conțin site-uri vizitate sau IP-uri de destinație.
+
+Cont și ștergere
+Aplicația creează un cont anonim fără e-mail, telefon sau date personale. Un identificator aleatoriu și o cheie secretă permit restaurarea pe alt dispozitiv. Nu putem asocia această pereche cu identitatea ta. Poți șterge contul din aplicație: identificatorul și datele abonamentului asociate sunt eliminate definitiv de pe servere. Un cont nefolosit mai mult de 12 luni după deconectare este șters automat. Datele locale se șterg din Android sau prin dezinstalare.
+
+Publicitate
+Codul rețelelor publicitare poate fi folosit pentru finanțarea serverelor gratuite. Analiza statică poate detecta semnături publicitare. Partenerii pot colecta date anonimizate, precum identificatorul publicitar, clicuri și afișări, potrivit propriilor politici. Aceste date nu sunt asociate activității din tunelul VPN. Poți reseta identificatorul publicitar sau dezactiva personalizarea în Android.
+
+Public și actualizări
+Rabochiy VPN nu este destinat copiilor sub 13 ani și nu colectează intenționat datele lor. Anunță-ne dacă un copil sub 13 ani folosește aplicația. Putem actualiza această politică; data indică versiunea curentă. Schimbările importante sunt anunțate în chatul nostru Telegram.
+
+Contact
+Telegram: https://t.me/rabochyvpn_chat
+E-mail: support@vpnhub.ltd

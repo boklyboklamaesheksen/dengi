@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../config/app_theme.dart';
+import '../l10n/app_localizations.dart';
 import '../services/api_service.dart';
 
 /// Payment flow — the provider form opens in the SYSTEM BROWSER
@@ -98,10 +99,11 @@ class _PayWebScreenState extends State<PayWebScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.base,
       appBar: AppBar(
-        title: const Text('Оплата'),
+        title: Text(l10n.premiumPaymentTitle),
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           onPressed: () => _close(paid: false),
@@ -119,8 +121,7 @@ class _PayWebScreenState extends State<PayWebScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Страница оплаты открыта в браузере.'
-                ' Завершите платёж там — премиум активируется автоматически.',
+                l10n.paymentBrowserNotice,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: AppColors.textSecondary,
@@ -131,7 +132,7 @@ class _PayWebScreenState extends State<PayWebScreen> {
               const SizedBox(height: 24),
               OutlinedButton(
                 onPressed: () => openUrlExternal(widget.url),
-                child: const Text('Открыть страницу оплаты'),
+                child: Text(l10n.paymentOpenPage),
               ),
             ],
           ),

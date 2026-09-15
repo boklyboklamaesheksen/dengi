@@ -131,6 +131,7 @@ class TrafficStatsService extends ChangeNotifier {
   Timer? _flushTimer;
   bool _dirty = false;
   bool _loaded = false;
+  bool _disposed = false;
   int _lastSampleRx = 0;
   int _lastSampleTx = 0;
   int _lastTickMs = 0;
@@ -139,9 +140,10 @@ class TrafficStatsService extends ChangeNotifier {
 
   /// Loads persisted buckets from disk. Safe to call multiple times.
   Future<void> load() async {
-    if (_loaded) return;
+    if (_loaded || _disposed) return;
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+      if (_disposed) return;
       final String? raw = prefs.getString(_prefsKey);
       if (raw != null && raw.isNotEmpty) {
         final List<dynamic> decoded = jsonDecode(raw) as List<dynamic>;
@@ -164,6 +166,7 @@ class TrafficStatsService extends ChangeNotifier {
   /// Records a connection *session start* — called once per successful
   /// connect so the stats screen can report "sessions" count.
   void recordSessionStart() {
+    if (_disposed) return;
     _lastSampleRx = 0;
     _lastSampleTx = 0;
     _lastTickMs = DateTime.now().millisecondsSinceEpoch;
@@ -182,7 +185,7 @@ class TrafficStatsService extends ChangeNotifier {
     required int totalRxBytes,
     required int totalTxBytes,
   }) {
-    if (!_loaded) return;
+    if (!_loaded || _disposed) return;
 
     // Engine counters reset to 0 whenever the tunnel restarts. If we see a
     // smaller value than before, assume a fresh session and reset the
@@ -264,16 +267,18 @@ class TrafficStatsService extends ChangeNotifier {
 
   /// Wipes every persisted bucket.
   Future<void> reset() async {
+    if (_disposed) return;
     _buckets.clear();
     _dirty = true;
     await _flushNow();
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 
   @override
   void dispose() {
+    _disposed = true;
     _flushTimer?.cancel();
-    // Best-effort synchronous flush on dispose.
+    // Best-effort asynchronous flush on dispose.
     if (_dirty) {
       unawaited(_flushNow());
     }
@@ -316,7 +321,7 @@ class TrafficStatsService extends ChangeNotifier {
   }
 
   void _scheduleFlush() {
-    _flushTimer?.cancel();
+    if (_flushTimer?.isActive ?? false) return;
     _flushTimer = Timer(_flushThrottle, _flushNow);
   }
 
@@ -329,9 +334,11 @@ class TrafficStatsService extends ChangeNotifier {
       final List<Map<String, Object>> serialised = _buckets.values
           .map((TrafficBucket b) => b.toJson())
           .toList(growable: false);
-      await prefs.setString(_prefsKey, jsonEncode(serialised));
+      if (!await prefs.setString(_prefsKey, jsonEncode(serialised))) {
+        _dirty = true;
+      }
     } catch (_) {
-      // Ignore — we'll try again on the next bump.
+      _dirty = true;
     }
   }
 

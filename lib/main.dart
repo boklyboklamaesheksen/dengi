@@ -9,9 +9,9 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 import 'config/app_theme.dart';
+import 'widgets/app_viewport.dart';
 import 'firebase_options.dart';
 import 'services/remote_config_service.dart';
 import 'l10n/app_localizations.dart';
@@ -108,51 +108,8 @@ class RabochiyVpnApp extends StatelessWidget {
     return MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => AppProvider())],
       child: MaterialApp(
-        title: 'Rabochiy VPN',
-        builder: (context, child) {
-          // Инициализируем ResponsiveFramework для пропорционального масштабирования на всех экранах.
-          // Устанавливаем базовую ширину 390 (стандартный размер дизайна, например iPhone 12/13/14).
-          // Все элементы (отступы, шрифты, высоты) будут пропорционально сжиматься/растягиваться
-          // в зависимости от реальной ширины телефона пользователя.
-          return ResponsiveBreakpoints.builder(
-            child: Builder(
-              builder: (context) {
-                // Ограничиваем масштабирование текста системой (как делали ранее),
-                // и применяем пропорциональное масштабирование всего UI:
-                final mediaQuery = MediaQuery.of(context);
-                final textScale = mediaQuery.textScaler.clamp(
-                  minScaleFactor: 0.9,
-                  maxScaleFactor: 1.15,
-                );
-
-                return MediaQuery(
-                  data: mediaQuery.copyWith(textScaler: textScale),
-                    child: ResponsiveScaledBox(
-                      // defaultValue guards the ResponsiveValue cast: with
-                      // no matching condition the package would otherwise
-                      // cast null to double and crash on first frame
-                      // (seen in Crashlytics on real devices).
-                      width: ResponsiveValue<double>(
-                        context,
-                        defaultValue: 424,
-                        conditionalValues: [
-                        Condition.equals(name: MOBILE, value: 424),
-                        Condition.largerThan(name: MOBILE, value: 424),
-                      ],
-                    ).value,
-                    child: child!,
-                  ),
-                );
-              },
-            ),
-            breakpoints: [
-              const Breakpoint(start: 0, end: 450, name: MOBILE),
-              const Breakpoint(start: 451, end: 800, name: TABLET),
-              const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-              const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
-            ],
-          );
-        },
+        onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
+        builder: (context, child) => AppViewport(child: child),
         navigatorObservers: [?analyticsObserver],
         localizationsDelegates: const [
           AppLocalizations.delegate,
@@ -160,7 +117,7 @@ class RabochiyVpnApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: const [Locale('en'), Locale('ru')],
+        supportedLocales: AppLocalizations.supportedLocales,
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
         themeMode: ThemeMode.dark,

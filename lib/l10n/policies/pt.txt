@@ -1,0 +1,33 @@
+Política de privacidade — Rabochiy VPN
+Atualizada: 1 de setembro de 2026
+
+Sobre este documento
+Esta política explica a recolha, utilização e proteção de informações durante o uso da aplicação e do serviço. Ao usar Rabochiy VPN, aceita esta política; caso contrário, deixe de usar a aplicação. Recolhemos o mínimo de dados e não registamos a sua atividade na Internet. GW e AmneziaWG são normas técnicas; a sua menção não implica ligação a serviços com esses nomes.
+
+O que não guardamos
+Não seguimos a localização GPS nem guardamos os sites visitados, pedidos DNS, endereços dos servidores a que acede, o seu IP real ou os horários e a duração das sessões. Os servidores encaminham pacotes sem registos de atividade dos utilizadores.
+
+Dados no telemóvel
+A aplicação guarda localmente uma lista de servidores para uso offline, a conta, o último servidor escolhido e estatísticas de sessão, como velocidade e tempo de ligação. Estes dados locais não são transmitidos. Pode apagá-los nas definições Android ou desinstalando a aplicação.
+
+Relatórios de erros
+O Google Firebase Crashlytics ajuda a diagnosticar falhas. Se o sistema permitir relatórios, uma falha gera automaticamente um relatório anónimo com o modelo do dispositivo, versões do Android e da aplicação e a pilha do erro. Não contém atividade de rede, IP, token de subscrição ou identidade. O Firebase Analytics também recolhe estatísticas anónimas de utilização, como o arranque da aplicação ou uma ligação bem-sucedida. São dados agregados que não identificam utilizadores individuais. Política da Google: https://policies.google.com/privacy
+
+Permissões do sistema
+A aplicação precisa de criar um túnel VPN, aceder à Internet, verificar o estado da rede, funcionar como serviço em primeiro plano e mostrar a notificação permanente exigida pelo Android. A lista de aplicações instaladas serve apenas para escolher as aplicações do túnel dividido. Fica no dispositivo e não é partilhada connosco nem com terceiros. Não pedimos nem usamos acesso a contactos, multimédia, câmara, microfone, localização, SMS ou histórico de chamadas.
+
+Configuração e metadados de ligação
+A lista de servidores e os parâmetros são obtidos por HTTPS cifrado. O pedido usa um identificador de conta aleatório atribuído pelo servidor, sem ligação à identidade, e não transmite dados do dispositivo ou conteúdo do tráfego. Para mostrar a carga dos servidores e o estado no painel de administração, a aplicação envia mensagens anónimas de ligação, servidor utilizado e desligação. Não contêm sites visitados ou endereços IP de destino.
+
+Conta e eliminação
+A aplicação cria uma conta anónima sem email, telefone ou dados pessoais. Um identificador aleatório e uma chave secreta permitem restaurar a conta noutro dispositivo. Não podemos associar este par à sua identidade. Pode eliminar a conta na aplicação: o identificador e os dados de subscrição associados são removidos definitivamente dos servidores. Uma conta sem utilização durante mais de 12 meses após terminar sessão é eliminada automaticamente. Os dados locais são apagados nas definições Android ou ao desinstalar a aplicação.
+
+Publicidade
+Pode ser utilizado código de redes publicitárias para financiar os servidores gratuitos. A análise estática pode identificar assinaturas publicitárias. Os parceiros podem recolher dados anonimizados, como o identificador publicitário, cliques e visualizações, segundo as suas próprias políticas. Estes dados não estão ligados à atividade no túnel VPN. Pode repor o identificador publicitário ou desativar a personalização no Android.
+
+Destinatários e alterações
+Rabochiy VPN não se destina a menores de 13 anos e não recolhe deliberadamente os seus dados. Avise-nos se souber que um menor de 13 usa a aplicação. Podemos atualizar esta política; a data identifica a versão atual. As alterações importantes são anunciadas na nossa conversa Telegram.
+
+Contacto
+Telegram: https://t.me/rabochyvpn_chat
+Email: support@vpnhub.ltd

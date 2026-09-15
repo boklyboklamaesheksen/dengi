@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.amnezia.awg.backend.Backend
 import org.amnezia.awg.backend.BackendException
 import org.amnezia.awg.backend.GoBackend
@@ -16,14 +18,8 @@ import java.io.ByteArrayInputStream
  * Kotlin manager that wraps the vendored [GoBackend] (AmneziaWG) and exposes
  * suspend-friendly methods for the Flutter [VpnService] bridge.
  *
- * The [GoBackend] constructor loads `libwg-go.so` (the Go runtime). On some
- * devices (notably Honor / Huawei EMUI 9-10 on Kirin SoCs) loading the Go
- * runtime from the main thread at app startup triggers a non-catchable
- * native crash. To stay safe we:
- *   * defer backend creation to the first connect call (`ensureBackend`),
- *   * run that creation on the IO dispatcher,
- *   * surface a regular [Result.failure] when the load fails so the
- *     Flutter side can show a user-friendly error instead of crashing.
+ * Loads the Go runtime lazily on an IO worker. Java loading exceptions can
+ * be reported to Flutter; a native SIGSEGV cannot be caught here.
  */
 class AwgManager(
     private val context: Context,
@@ -47,7 +43,8 @@ class AwgManager(
 
     @Volatile
     private var backend: Backend? = null
-    private var currentTunnel: Tunnel? = null
+    @Volatile private var currentTunnel: Tunnel? = null
+    private val operationMutex = Mutex()
 
     /**
      * Bumped by [disconnect] so an in-flight [connect] knows it was
@@ -56,7 +53,7 @@ class AwgManager(
      * tunnel behind a "cancelled" UI state.
      */
     private val cancelGeneration = java.util.concurrent.atomic.AtomicInteger(0)
-    private var currentConfig: Config? = null
+    @Volatile private var currentConfig: Config? = null
 
     /**
      * Lazily creates the [GoBackend] on first use. Subsequent calls reuse
@@ -111,99 +108,103 @@ class AwgManager(
         remark: String,
         awgConfigBase64: String,
         blockedApps: List<String>? = null
-    ): Result<Tunnel> = withContext(Dispatchers.IO) {
+    ): Result<Tunnel> {
         val gen = cancelGeneration.get()
-        try {
-            currentState = State.CONNECTING
-            onStateChange(State.CONNECTING, null)
-
-            val b = ensureBackend() ?: run {
-                onStateChange(State.ERROR, null)
-                return@withContext Result.failure<Tunnel>(
-                    IllegalStateException("AmneziaWG backend unavailable on this device")
-                )
-            }
-
-            val configBytes = android.util.Base64.decode(
-                awgConfigBase64,
-                android.util.Base64.DEFAULT
-            )
-            // Split tunneling is injected as an ExcludedApplications line of
-            // the [Interface] section — the static GoBackend.excludedPackages
-            // hook no longer exists in the AmneziaWG 3.1 module.
-            val configText = if (blockedApps.isNullOrEmpty()) {
-                String(configBytes, Charsets.UTF_8)
-            } else {
-                Log.d(TAG, "Excluded packages: $blockedApps")
-                injectExcludedApplications(String(configBytes, Charsets.UTF_8), blockedApps)
-            }
-            val config = Config.parse(ByteArrayInputStream(configText.toByteArray(Charsets.UTF_8)))
-            currentConfig = config
-
-            // Sanitize tunnel name to max 15 chars (Tunnel.NAME_MAX_LENGTH).
-            val sanitizedName = remark.take(Tunnel.NAME_MAX_LENGTH).ifEmpty { "rabochiy_awg" }
-            val tunnel = createTunnel(sanitizedName)
-            currentTunnel = tunnel
-
-            b.setState(tunnel, Tunnel.State.UP, config)
-
-            // The user cancelled while the handshake was in flight —
-            // tear the just-raised tunnel straight back down.
-            if (cancelGeneration.get() != gen) {
-                Log.i(TAG, "Connect was cancelled mid-handshake — rolling back")
-                try {
-                    b.setState(tunnel, Tunnel.State.DOWN, null)
-                } catch (e: Exception) {
-                    Log.w(TAG, "Rollback after cancel failed", e)
+        return withContext(Dispatchers.IO) {
+            operationMutex.withLock {
+                if (cancelGeneration.get() != gen) {
+                    return@withLock Result.failure<Tunnel>(InterruptedException("cancelled"))
                 }
-                currentTunnel = null
-                currentConfig = null
-                currentState = State.DISCONNECTED
-                onStateChange(State.DISCONNECTED, null)
-                return@withContext Result.failure<Tunnel>(
-                    InterruptedException("cancelled")
-                )
-            }
+                try {
+                    currentState = State.CONNECTING
+                    onStateChange(State.CONNECTING, null)
 
-            currentState = State.CONNECTED
-            onStateChange(State.CONNECTED, b.getStatistics(tunnel))
-            Result.success(tunnel)
-        } catch (e: BackendException) {
-            Log.e(TAG, "AWG backend error", e)
-            currentState = State.ERROR
-            onStateChange(State.ERROR, null)
-            Result.failure(e)
-        } catch (e: Exception) {
-            Log.e(TAG, "Unexpected AWG error", e)
-            currentState = State.ERROR
-            onStateChange(State.ERROR, null)
-            Result.failure(e)
+                    val b = ensureBackend() ?: run {
+                        currentState = State.ERROR
+                        onStateChange(State.ERROR, null)
+                        return@withLock Result.failure<Tunnel>(
+                            IllegalStateException("AmneziaWG backend unavailable on this device")
+                        )
+                    }
+
+                    val configBytes = android.util.Base64.decode(
+                        awgConfigBase64,
+                        android.util.Base64.DEFAULT
+                    )
+                    // The 3.1 config parser owns per-app exclusions.
+                    val configText = if (blockedApps.isNullOrEmpty()) {
+                        String(configBytes, Charsets.UTF_8)
+                    } else {
+                        injectExcludedApplications(String(configBytes, Charsets.UTF_8), blockedApps)
+                    }
+                    val config = Config.parse(ByteArrayInputStream(configText.toByteArray(Charsets.UTF_8)))
+
+                    val sanitizedName = remark.take(Tunnel.NAME_MAX_LENGTH).ifEmpty { "rabochiy_awg" }
+                    val tunnel = createTunnel(sanitizedName)
+
+                    b.setState(tunnel, Tunnel.State.UP, config)
+                    currentTunnel = tunnel
+                    currentConfig = config
+
+                    // Undo a tunnel raised after the user cancelled.
+                    if (cancelGeneration.get() != gen) {
+                        Log.i(TAG, "Connect was cancelled mid-handshake — rolling back")
+                        b.setState(tunnel, Tunnel.State.DOWN, null)
+                        currentTunnel = null
+                        currentConfig = null
+                        currentState = State.DISCONNECTED
+                        onStateChange(State.DISCONNECTED, null)
+                        return@withLock Result.failure<Tunnel>(InterruptedException("cancelled"))
+                    }
+
+                    currentState = State.CONNECTED
+                    onStateChange(State.CONNECTED, b.getStatistics(tunnel))
+                    Result.success(tunnel)
+                } catch (e: BackendException) {
+                    Log.e(TAG, "AWG backend error", e)
+                    currentState = State.ERROR
+                    onStateChange(State.ERROR, null)
+                    Result.failure(e)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Unexpected AWG error", e)
+                    currentState = State.ERROR
+                    onStateChange(State.ERROR, null)
+                    Result.failure(e)
+                }
+            }
         }
     }
 
     /**
      * Tears down the active tunnel.
      */
-    suspend fun disconnect(): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            cancelGeneration.incrementAndGet()
-            onStateChange(State.DISCONNECTING, null)
-            val b = backend ?: run {
-                // Nothing was ever started — treat as a clean state.
-                onStateChange(State.DISCONNECTED, null)
-                return@withContext Result.success(Unit)
+    suspend fun disconnect(): Result<Unit> {
+        cancelGeneration.incrementAndGet()
+        return withContext(Dispatchers.IO) {
+            operationMutex.withLock {
+                try {
+                    currentState = State.DISCONNECTING
+                    onStateChange(State.DISCONNECTING, null)
+                    val b = backend ?: run {
+                        currentState = State.DISCONNECTED
+                        onStateChange(State.DISCONNECTED, null)
+                        return@withLock Result.success(Unit)
+                    }
+                    val t = currentTunnel ?: createTunnel()
+                    b.setState(t, Tunnel.State.DOWN, null)
+                    currentTunnel = null
+                    currentConfig = null
+                    excludedPackages = null
+                    currentState = State.DISCONNECTED
+                    onStateChange(State.DISCONNECTED, null)
+                    Result.success(Unit)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Disconnect error", e)
+                    currentState = State.ERROR
+                    onStateChange(State.ERROR, null)
+                    Result.failure(e)
+                }
             }
-            val t = currentTunnel ?: createTunnel()
-            b.setState(t, Tunnel.State.DOWN, null)
-            currentTunnel = null
-            currentConfig = null
-            excludedPackages = null
-            onStateChange(State.DISCONNECTED, null)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Log.e(TAG, "Disconnect error", e)
-            onStateChange(State.ERROR, null)
-            Result.failure(e)
         }
     }
 

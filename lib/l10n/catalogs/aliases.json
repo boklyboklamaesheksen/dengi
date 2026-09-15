@@ -1,0 +1,10 @@
+{
+  "tabSettings": "settings",
+  "supportTitle": "tabSupport",
+  "loginRestoreButton": "loginTitle",
+  "accountTitle": "tabAccount",
+  "accountLogoutConfirmAction": "accountLogout",
+  "accountDeleteConfirmAction": "accountDeleteAccount",
+  "accountRevealMnemonic": "accountShow",
+  "accountCancel": "statsCancel"
+}

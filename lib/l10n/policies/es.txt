@@ -1,0 +1,33 @@
+Política de privacidad — Rabochiy VPN
+Actualizada: 1 de septiembre de 2026
+
+Sobre este documento
+Esta política explica la recogida, el uso y la protección de la información al usar la aplicación y el servicio. Al usar Rabochiy VPN aceptas esta política; si no estás de acuerdo, deja de usar la aplicación. Recogemos el mínimo de datos y no registramos tu actividad en Internet. GW y AmneziaWG son estándares técnicos; su mención no implica relación con servicios del mismo nombre.
+
+Lo que no guardamos
+No seguimos tu ubicación GPS ni guardamos las webs visitadas, las consultas DNS, las direcciones de los servidores a los que accedes, tu IP real ni los horarios o la duración de tus sesiones. Los servidores encaminan paquetes sin registros de actividad de los usuarios.
+
+Datos en tu teléfono
+La aplicación guarda localmente una lista de servidores para su uso sin conexión, tu cuenta, el último servidor elegido y estadísticas de sesión como velocidad y tiempo conectado. Estos datos locales no se transmiten. Puedes borrarlos en Android o desinstalando la aplicación.
+
+Informes de errores
+Usamos Google Firebase Crashlytics para detectar fallos. Cuando el sistema permite los informes, un cierre inesperado genera automáticamente un informe anónimo con el modelo del dispositivo, las versiones de Android y de la aplicación y la traza del error. No incluye actividad de red, dirección IP, token de suscripción ni identidad. Firebase Analytics también recoge estadísticas anónimas de uso, como el inicio de la aplicación o una conexión correcta. Son datos agregados que no identifican a usuarios concretos. Política de Google: https://policies.google.com/privacy
+
+Permisos del sistema
+La aplicación necesita crear un túnel VPN, acceder a Internet, comprobar el estado de la red, funcionar como servicio en primer plano y mostrar la notificación permanente que exige Android. La lista de aplicaciones instaladas solo se usa para seleccionar las que pasan por el túnel dividido. Permanece en el dispositivo y no se comparte con nosotros ni con terceros. No se solicita ni utiliza acceso a contactos, archivos multimedia, cámara, micrófono, ubicación, SMS o registro de llamadas.
+
+Configuración y metadatos de conexión
+La lista de servidores y los parámetros se descargan mediante HTTPS cifrado. La petición usa un identificador de cuenta aleatorio asignado por el servidor, sin vínculo con tu identidad. No transmite datos del dispositivo ni contenido del tráfico. Para mostrar la carga de los servidores y el estado en el panel de administración, la aplicación envía mensajes anónimos sobre conexión, servidor utilizado y desconexión. No contienen webs visitadas ni direcciones IP de destino.
+
+Cuenta y eliminación
+La aplicación crea una cuenta anónima sin correo, teléfono ni datos personales. Un identificador aleatorio y una clave secreta permiten recuperar la cuenta en otro dispositivo. No podemos vincular esa pareja con tu identidad. Puedes eliminar la cuenta desde la aplicación: el identificador y los datos de suscripción asociados se borran de nuestros servidores de forma permanente. Una cuenta sin uso durante más de 12 meses tras cerrar sesión se elimina automáticamente. Los datos locales se borran desde Android o al desinstalar la aplicación.
+
+Publicidad
+Puede utilizarse código de redes publicitarias para financiar los servidores gratuitos. Un análisis estático puede detectar firmas publicitarias. Los socios pueden recoger datos anonimizados, como el identificador publicitario y clics o visualizaciones de anuncios, según sus propias políticas. Estos datos no se vinculan a tu actividad dentro del túnel VPN. Puedes restablecer el identificador publicitario o desactivar la personalización en Android.
+
+Destinatarios y cambios
+Rabochiy VPN no está dirigido a menores de 13 años y no recoge sus datos deliberadamente. Avísanos si sabes que un menor de 13 usa la aplicación. Podemos actualizar esta política; la fecha indica la versión vigente. Los cambios importantes se anuncian en nuestro chat de Telegram.
+
+Contacto
+Telegram: https://t.me/rabochyvpn_chat
+Correo: support@vpnhub.ltd

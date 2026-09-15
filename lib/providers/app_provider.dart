@@ -24,6 +24,9 @@ class AppProvider with ChangeNotifier {
   final GwApiService _gwApiService = GwApiService();
   final TrafficStatsService _trafficStats = TrafficStatsService();
   final SplitTunnelService _splitTunnel = SplitTunnelService();
+  StreamSubscription<EngineStatus>? _engineSubscription;
+  StreamSubscription<VpnStatus>? _statusSubscription;
+  bool _disposed = false;
 
   VpnStatus _vpnStatus = VpnStatus.disconnected;
   List<ServerConfig> _servers = [];
@@ -113,31 +116,36 @@ class AppProvider with ChangeNotifier {
   Future<void> _initialize() async {
     _isLoading = true;
     notifyListeners();
+    _bindVpnStreams();
+    try {
+      await Future.wait<void>(<Future<void>>[
+        _vpnService.initialize(),
+        _trafficStats.load(),
+        _splitTunnel.load(),
+        _apiService.getIsPremium().then((value) {
+          _isPremium = value;
+        }),
+      ]);
+      if (_disposed) return;
+      _splitTunnel.addListener(_onSplitTunnelChanged);
+      await loadServers();
+      if (_disposed) return;
+      await _refreshUserState();
+    } catch (_) {
+      _errorMessage = 'load_servers_failed';
+    } finally {
+      _isLoading = false;
+      if (!_disposed) notifyListeners();
+    }
+  }
 
-    await Future.wait<void>(<Future<void>>[
-      _vpnService.initialize(),
-      _trafficStats.load(),
-      _splitTunnel.load(),
-      _apiService.getIsPremium().then((value) {
-        _isPremium = value;
-      }),
-    ]);
-
-    // Subscribe to split-tunnel changes so (a) any widget that watches
-    // AppProvider rebuilds when tunnel state changes and (b) we can
-    // transparently reapply the new mask while the VPN is already live.
-    _splitTunnel.addListener(_onSplitTunnelChanged);
-
-    await loadServers();
-
-    // Fire-and-forget user-state refresh so the premium badge reflects
-    // any backend-side changes (code activation, plan extension) that
-    // happened while the app was closed.
-    unawaited(_refreshUserState());
-
-    _vpnService.engineStatusStream.listen((status) {
+  void _bindVpnStreams() {
+    _engineSubscription = _vpnService.engineStatusStream.listen((status) {
+      if (_disposed) return;
       _downloadSpeedBytes = status.downloadSpeed;
       _uploadSpeedBytes = status.uploadSpeed;
+      if (status.state.toUpperCase() != 'CONNECTED' ||
+          _vpnStatus != VpnStatus.connected) return;
 
       // status.download / status.upload are cumulative byte counters for
       // the live session. Use them to feed the hourly traffic buckets.
@@ -162,10 +170,15 @@ class AppProvider with ChangeNotifier {
       notifyListeners();
     });
 
-    _vpnService.statusStream.listen((status) {
+    _statusSubscription = _vpnService.statusStream.listen((status) {
+      if (_disposed) return;
       _vpnStatus = status;
 
       if (status == VpnStatus.connected) {
+        _cumulativeRxBytes = 0;
+        _cumulativeTxBytes = 0;
+        _lastEngineRx = 0;
+        _lastEngineTx = 0;
         _startTimer();
         _trafficStats.recordSessionStart();
         _startHeartbeat();
@@ -180,14 +193,13 @@ class AppProvider with ChangeNotifier {
         _stopHeartbeat(reportDisconnect: true);
       } else if (status == VpnStatus.error) {
         _errorMessage = _vpnService.errorMessage;
+        _stopTimer();
         _stopHeartbeat(reportDisconnect: true);
       }
 
       notifyListeners();
     });
 
-    _isLoading = false;
-    notifyListeners();
   }
 
   /// Caches the package names of every installed Android app. Rebuilt on
@@ -237,6 +249,7 @@ class AppProvider with ChangeNotifier {
   }
 
   Future<void> loadServers() async {
+    if (_disposed) return;
     try {
       _isLoading = true;
       notifyListeners();
@@ -245,6 +258,7 @@ class AppProvider with ChangeNotifier {
         _apiService.fetchServerConfigs(),
         _apiService.fetchServerLoads(),
       ]);
+      if (_disposed) return;
 
       final servers = futures[0] as List<ServerConfig>;
       final loadByIp = futures[1] as Map<String, int>;
@@ -252,6 +266,7 @@ class AppProvider with ChangeNotifier {
       // GW (SSH-tunnel) servers join the same catalogue; failures to load
       // them (no fleet yet, no user) degrade silently to an empty list.
       final gwServers = await _gwApiService.fetchServers();
+      if (_disposed) return;
 
       _serverLoadByIp
         ..clear()
@@ -286,13 +301,14 @@ class AppProvider with ChangeNotifier {
       _errorMessage = 'load_servers_failed';
     } finally {
       _isLoading = false;
-      notifyListeners();
+      if (!_disposed) notifyListeners();
     }
   }
 
   Future<void> _refreshUserState() async {
+    if (_disposed) return;
     final state = await _apiService.refreshUserState();
-    if (state == null) return;
+    if (_disposed || state == null) return;
     final premiumChanged = _isPremium != state.isPremium;
     _isPremium = state.isPremium;
     if (premiumChanged) {
@@ -311,7 +327,7 @@ class AppProvider with ChangeNotifier {
   Future<void> refreshUserState() => _refreshUserState();
 
   Future<void> _autoSelectBestServer() async {
-    if (_servers.isEmpty) return;
+    if (_disposed || _servers.isEmpty) return;
 
     ServerConfig? best;
     try {
@@ -374,11 +390,13 @@ class AppProvider with ChangeNotifier {
   Future<void> _reconnect() async {
     await _vpnService.disconnect();
     await Future.delayed(const Duration(milliseconds: 500));
+    if (_disposed) return;
     await connectVpn();
   }
 
   Future<void> _disconnectForPremiumGate() async {
     await _vpnService.disconnect();
+    if (_disposed) return;
     _errorMessage = 'premium_required';
     notifyListeners();
   }
@@ -407,8 +425,10 @@ class AppProvider with ChangeNotifier {
   }
 
   Future<void> connectVpn() async {
+    if (_disposed) return;
     if (_servers.isEmpty) {
       await loadServers();
+      if (_disposed) return;
       if (_servers.isEmpty) {
         _errorMessage = 'no_servers_available';
         notifyListeners();
@@ -419,6 +439,7 @@ class AppProvider with ChangeNotifier {
     ServerConfig? target = _selectedServer;
     if (_isAutoSelect) {
       if (target == null) await _autoSelectBestServer();
+      if (_disposed) return;
       target = _selectedServer;
     }
 
@@ -448,6 +469,7 @@ class AppProvider with ChangeNotifier {
     List<String>? gwAllowed;
     if (_splitTunnel.isActive) {
       final List<String> installed = await _listInstalledPackages();
+      if (_disposed) return;
       blocked = _splitTunnel.buildBlockedApps(installed);
       if (_splitTunnel.config.mode == SplitTunnelMode.exclude) {
         gwExcluded = List<String>.from(_splitTunnel.config.packages);
@@ -462,6 +484,7 @@ class AppProvider with ChangeNotifier {
       excludedApps: gwExcluded,
       allowedApps: gwAllowed,
     );
+    if (_disposed) return;
     if (!success) {
       _errorMessage = _vpnService.errorMessage;
       notifyListeners();
@@ -503,6 +526,7 @@ class AppProvider with ChangeNotifier {
     } catch (_) {
       /* tunnel was already down or platform threw — ignore */
     }
+    if (_disposed) return;
 
     _vpnStatus = VpnStatus.disconnected;
     _isPremium = false;
@@ -572,18 +596,23 @@ class AppProvider with ChangeNotifier {
   }
 
   Future<void> _sendHeartbeat(String action) async {
+    final serverIp = _activeServerIp;
+    final protocol = _activeProtocol ?? 'awg';
     final userId = await _apiService.getUserId();
-    if (userId == null || userId.isEmpty || userId == 'pending') return;
+    if (_disposed || userId == null || userId.isEmpty || userId == 'pending') return;
     await _apiService.reportConnection(
       userId: userId,
-      serverIp: _activeServerIp,
+      serverIp: serverIp,
       action: action,
-      protocol: _activeProtocol ?? 'awg',
+      protocol: protocol,
     );
   }
 
   @override
   void dispose() {
+    _disposed = true;
+    _engineSubscription?.cancel();
+    _statusSubscription?.cancel();
     _splitTunnelApplyTimer?.cancel();
     _splitTunnel.removeListener(_onSplitTunnelChanged);
     _vpnService.dispose();

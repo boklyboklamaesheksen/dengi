@@ -1,0 +1,33 @@
+Informativa sulla privacy — Rabochiy VPN
+Aggiornata: 1° settembre 2026
+
+Informazioni sul documento
+Questa informativa spiega la raccolta, l’uso e la protezione delle informazioni quando usi l’app e il servizio. Usando Rabochiy VPN accetti l’informativa; in caso contrario, interrompi l’uso. Raccogliamo il minimo indispensabile e non registriamo la tua attività Internet. GW e AmneziaWG sono standard tecnici: citarli non implica legami con servizi omonimi.
+
+Cosa non conserviamo
+Non seguiamo la tua posizione GPS e non conserviamo siti visitati, richieste DNS, indirizzi dei server a cui accedi, il tuo vero indirizzo IP o orari e durata delle sessioni. I server instradano i pacchetti senza registrare le attività degli utenti.
+
+Dati sul telefono
+L’app conserva localmente una lista di server per l’uso offline, i dati dell’account, l’ultimo server scelto e statistiche come velocità e tempo di connessione. Questi dati locali non vengono trasmessi. Puoi eliminarli dalle impostazioni Android o disinstallando l’app.
+
+Segnalazioni di errore
+Google Firebase Crashlytics aiuta a individuare i problemi. Se il sistema consente le segnalazioni, un arresto genera automaticamente un rapporto anonimo con modello del dispositivo, versioni di Android e dell’app e traccia dell’errore. Non contiene attività di rete, indirizzo IP, token di abbonamento o identità. Firebase Analytics raccoglie anche statistiche anonime, ad esempio l’avvio dell’app o una connessione riuscita. I dati sono aggregati e non identificano singoli utenti. Informativa di Google: https://policies.google.com/privacy
+
+Autorizzazioni di sistema
+L’app richiede la creazione di un tunnel VPN, accesso a Internet, controllo dello stato della rete, funzionamento come servizio in primo piano e la notifica permanente richiesta da Android. L’elenco delle app installate serve solo a scegliere quelle che usano lo split tunneling. Resta sul dispositivo e non viene condiviso con noi o con terzi. Non sono richiesti o usati contatti, contenuti multimediali, fotocamera, microfono, posizione, SMS o registro chiamate.
+
+Configurazione e metadati di connessione
+Lista dei server e parametri vengono scaricati tramite HTTPS cifrato. La richiesta usa un ID account casuale assegnato dal server, non collegato alla tua identità, e non trasmette dati del dispositivo o contenuti del traffico. Per mostrare il carico dei server e lo stato nel pannello di amministrazione, l’app invia messaggi anonimi di connessione, server usato e disconnessione. Non contengono siti visitati o indirizzi IP di destinazione.
+
+Account ed eliminazione
+L’app crea un account anonimo senza email, telefono o dati personali. Un identificatore casuale e una chiave segreta permettono il ripristino su un altro dispositivo. Non possiamo collegare questa coppia alla tua identità. Puoi eliminare l’account dall’app: identificatore e dati dell’abbonamento associati vengono rimossi definitivamente dai server. Un account inutilizzato per oltre 12 mesi dopo l’uscita viene eliminato automaticamente. I dati locali si eliminano da Android o disinstallando l’app.
+
+Pubblicità
+Il codice di reti pubblicitarie può essere usato per finanziare i server gratuiti. Un’analisi statica può rilevare firme pubblicitarie. I partner possono raccogliere dati anonimizzati, come ID pubblicitario, clic e visualizzazioni, secondo le proprie informative. Questi dati non sono collegati alla tua attività nel tunnel VPN. Puoi reimpostare l’ID pubblicitario o disattivare la personalizzazione in Android.
+
+Destinatari e aggiornamenti
+Rabochiy VPN non è destinato ai minori di 13 anni e non raccoglie deliberatamente i loro dati. Segnalaci l’eventuale uso da parte di un minore di 13 anni. Possiamo aggiornare questa informativa; la data indica la versione attuale. I cambiamenti importanti sono annunciati nella nostra chat Telegram.
+
+Contatti
+Telegram: https://t.me/rabochyvpn_chat
+Email: support@vpnhub.ltd

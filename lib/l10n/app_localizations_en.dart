@@ -600,6 +600,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payLoadFailed => 'Failed to load the payment page';
 
   @override
+  String get paymentBrowserNotice => 'The payment page is open in your browser. Complete the payment there; your subscription will activate automatically.';
+  @override
+  String get paymentOpenPage => 'Open payment page';
+  @override
+  String get dayShort => 'd';
+  @override
+  String get monthShort => 'mo';
+  @override
+  String get yearShort => 'yr';
+
+  @override
   String get premiumActivated => 'Subscription activated!';
 
   @override

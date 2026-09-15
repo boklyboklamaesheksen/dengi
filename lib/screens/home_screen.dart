@@ -113,9 +113,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.only(top: 8, bottom: 4),
                     child: Row(
                       children: <Widget>[
-                        const Text(
-                          'Rabochiy VPN',
-                          style: TextStyle(
+                        Text(
+                          l10n.appTitle,
+                          style: const TextStyle(
                             fontSize: 22,
                             color: Colors.white,
                             fontWeight: FontWeight.w700,

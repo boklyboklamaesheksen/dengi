@@ -1,0 +1,33 @@
+Integritetspolicy — Rabochiy VPN
+Uppdaterad: 1 september 2026
+
+Om dokumentet
+Policyn beskriver hur information samlas in, används och skyddas när du använder appen och tjänsten. Genom att använda Rabochiy VPN godkänner du policyn; sluta använda appen om du inte godkänner den. Vi samlar in så lite data som möjligt och loggar inte din internetaktivitet. GW och AmneziaWG är tekniska standarder; namnen innebär ingen koppling till tjänster med samma namn.
+
+Vad vi inte sparar
+Vi följer inte din GPS-position och sparar inte besökta webbplatser, DNS-frågor, adresser till servrar du besöker, din riktiga IP-adress eller sessionernas tidpunkter och längd. Servrarna vidarebefordrar paket utan loggar över användaraktivitet.
+
+Data på telefonen
+Appen sparar lokalt en serverlista för användning offline, ditt konto, den senast valda servern och sessionsstatistik som hastighet och anslutningstid. Dessa lokala data överförs inte. Du kan radera dem i Android-inställningarna eller genom att avinstallera appen.
+
+Felrapporter
+Google Firebase Crashlytics hjälper oss att hitta fel. Om systemet tillåter kraschrapporter skapas automatiskt en anonym rapport vid en krasch, med enhetsmodell, Android- och appversion samt felstack. Rapporten innehåller inte nätverksaktivitet, IP-adress, prenumerationstoken eller identitet. Firebase Analytics samlar också in anonym användningsstatistik, till exempel appstarter och lyckade anslutningar. Uppgifterna sammanställs och identifierar inte enskilda användare. Googles policy: https://policies.google.com/privacy
+
+Systembehörigheter
+Appen behöver skapa en VPN-tunnel, använda internet, kontrollera nätverksstatus, köras som förgrundstjänst och visa den bestående avisering som Android kräver. Listan över installerade appar används enbart för att välja appar för delad tunnling. Den stannar på enheten och delas inte med oss eller tredje part. Appen begär eller använder inte kontakter, medier, kamera, mikrofon, position, sms eller samtalslistor.
+
+Konfiguration och anslutningsmetadata
+Serverlistan och anslutningsparametrarna hämtas via krypterad HTTPS. Begäran använder ett slumpmässigt konto-ID som servern tilldelar utan koppling till din identitet. Den överför inga enhetsdata eller trafikinnehåll. För att visa serverbelastning och status i administrationspanelen skickar appen anonyma meddelanden om anslutning, använd server och frånkoppling. De innehåller inga besökta webbplatser eller mål-IP-adresser.
+
+Konto och radering
+Appen skapar ett anonymt konto utan e-post, telefonnummer eller personuppgifter. Ett slumpmässigt ID och en hemlig nyckel låter dig återställa kontot på en annan enhet. Vi kan inte koppla detta par till din identitet. Du kan radera kontot i appen: ID och tillhörande prenumerationsuppgifter tas då bort permanent från servrarna. Ett konto som inte används på mer än 12 månader efter utloggning raderas automatiskt. Lokala data raderas via Android eller vid avinstallation.
+
+Annonser
+Kod från annonsnätverk kan användas för att finansiera gratisservrar. Statisk analys kan visa annonssignaturer. Partner kan enligt sina egna policyer samla in anonymiserade uppgifter, som annons-ID, klick och visningar. Dessa uppgifter kopplas inte till din aktivitet i VPN-tunneln. Du kan återställa annons-ID eller stänga av personanpassning i Android.
+
+Målgrupp och ändringar
+Rabochiy VPN är inte avsett för barn under 13 år och samlar inte medvetet in deras data. Kontakta oss om ett barn under 13 använder appen. Vi kan uppdatera policyn; datumet visar aktuell version. Viktiga ändringar meddelas i vår Telegram-chatt.
+
+Kontakt
+Telegram: https://t.me/rabochyvpn_chat
+E-post: support@vpnhub.ltd

@@ -38,10 +38,10 @@ android {
         applicationId = "app.rabochiy.vpn"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion // Lowered for better compatibility
+        minSdk = 24
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.0"
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
 
         // Явно указываем архитектуры для native библиотек V2Ray
         ndk {
@@ -143,12 +143,6 @@ android {
 }
 
 dependencies {
-    // Заменяем устаревший Play Core на новые разделенные библиотеки
-    implementation("com.google.android.play:feature-delivery:2.1.0")
-    implementation("com.google.android.play:asset-delivery:2.2.2")
-    implementation("com.google.android.play:app-update:2.1.0")
-    implementation("com.google.android.play:review:2.0.1")
-
     // Firebase BoM — управляет совместимыми версиями Firebase SDK
     implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
     implementation("com.google.firebase:firebase-analytics")

@@ -85,6 +85,7 @@ class SplitTunnelService extends ChangeNotifier {
 
   SplitTunnelConfig _config = SplitTunnelConfig.defaults;
   bool _loaded = false;
+  bool _disposed = false;
 
   SplitTunnelConfig get config => _config;
   bool get isLoaded => _loaded;
@@ -92,9 +93,10 @@ class SplitTunnelService extends ChangeNotifier {
 
   /// Loads persisted state. Safe to call multiple times.
   Future<void> load() async {
-    if (_loaded) return;
+    if (_loaded || _disposed) return;
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+      if (_disposed) return;
       final String? raw = prefs.getString(_prefsKey);
       if (raw != null && raw.isNotEmpty) {
         final Map<String, dynamic> decoded =
@@ -106,7 +108,7 @@ class SplitTunnelService extends ChangeNotifier {
       _config = SplitTunnelConfig.defaults;
     }
     _loaded = true;
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 
   Future<void> setEnabled(bool value) async {
@@ -183,5 +185,11 @@ class SplitTunnelService extends ChangeNotifier {
     } catch (_) {
       // Non-critical — will retry on next change.
     }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 }

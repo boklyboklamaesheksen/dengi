@@ -1,0 +1,33 @@
+Privacybeleid — Rabochiy VPN
+Bijgewerkt: 1 september 2026
+
+Over dit document
+Dit beleid beschrijft hoe informatie wordt verzameld, gebruikt en beschermd bij het gebruik van de app en de dienst. Door Rabochiy VPN te gebruiken ga je hiermee akkoord; stop met het gebruik als je niet akkoord gaat. We verzamelen zo weinig mogelijk gegevens en leggen je internetactiviteiten niet vast. GW en AmneziaWG zijn technische standaarden; vermelding betekent geen band met gelijknamige diensten.
+
+Wat we niet bewaren
+We volgen je GPS-locatie niet en bewaren geen bezochte websites, DNS-verzoeken, adressen van bezochte servers, je echte IP-adres of de tijdstippen en duur van je sessies. De servers sturen pakketten door zonder gebruikersactiviteiten te loggen.
+
+Gegevens op je telefoon
+De app bewaart lokaal een serverlijst voor offline gebruik, je account, de laatst gekozen server en sessiestatistieken zoals snelheid en verbindingstijd. Deze lokale gegevens worden niet verzonden. Je kunt ze wissen via Android of door de app te verwijderen.
+
+Foutmeldingen
+Google Firebase Crashlytics helpt ons fouten op te sporen. Als het systeem crashrapportage toestaat, wordt bij een crash automatisch een anoniem rapport gemaakt met het apparaatmodel, de Android- en appversie en de foutstack. Dit bevat geen netwerkactiviteiten, IP-adres, abonnementstoken of identiteit. Firebase Analytics verzamelt ook anonieme gebruiksstatistieken, zoals het starten van de app of een geslaagde verbinding. Deze worden samengevoegd en identificeren geen individuele gebruiker. Het privacybeleid van Google: https://policies.google.com/privacy
+
+Systeemrechten
+De app moet een VPN-tunnel kunnen maken, internet gebruiken, de netwerkstatus controleren, als voorgrondservice werken en de blijvende melding tonen die Android vereist. De lijst met geïnstalleerde apps is uitsluitend nodig om apps voor split tunneling te kiezen. De lijst blijft op je apparaat en wordt niet met ons of derden gedeeld. De app vraagt of gebruikt geen toegang tot contacten, media, camera, microfoon, locatie, sms of oproeplogboeken.
+
+Configuratie en verbindingsgegevens
+De serverlijst en verbindingsinstellingen worden via versleutelde HTTPS opgehaald. Daarbij wordt een willekeurige account-ID gebruikt die de server toewijst en die niet aan je identiteit is gekoppeld. Dit verzoek bevat geen apparaatgegevens of verkeersinhoud. Om serverbelasting en de beheerstatus te tonen, stuurt de app anonieme berichten over verbinden, de gebruikte server en verbreken. Deze bevatten geen bezochte websites of IP-adressen van bestemmingen.
+
+Account en verwijderen
+De app maakt een anoniem account zonder e-mailadres, telefoonnummer of persoonlijke gegevens. Een willekeurige ID en geheime sleutel maken herstel op een ander apparaat mogelijk. We kunnen dit paar niet aan je identiteit koppelen. Je kunt het account in de app verwijderen: de ID en bijbehorende abonnementsgegevens worden dan voorgoed van onze servers gewist. Een account dat na uitloggen meer dan 12 maanden niet wordt gebruikt, wordt automatisch verwijderd. Lokale gegevens wis je via Android of door de app te verwijderen.
+
+Advertenties
+Code van advertentienetwerken kan worden gebruikt om gratis servers te bekostigen. Statische analyse kan advertentiesignaturen herkennen. Partners kunnen volgens hun eigen privacybeleid geanonimiseerde gegevens verzamelen, zoals advertentie-ID, klikken en weergaven. Die gegevens worden niet gekoppeld aan je activiteiten in de VPN-tunnel. Je kunt de advertentie-ID opnieuw instellen of gepersonaliseerde advertenties uitschakelen in Android.
+
+Doelgroep en wijzigingen
+Rabochiy VPN is niet bedoeld voor kinderen onder 13 jaar. We verzamelen hun gegevens niet bewust. Laat het ons weten als een kind onder 13 de app gebruikt. We kunnen dit beleid aanpassen; de datum geeft de actuele versie aan. Belangrijke wijzigingen melden we in onze Telegram-chat.
+
+Contact
+Telegram: https://t.me/rabochyvpn_chat
+E-mail: support@vpnhub.ltd

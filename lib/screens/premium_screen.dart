@@ -550,17 +550,17 @@ class _TariffRadioCard extends StatelessWidget {
   final String priceTbdLabel;
   final VoidCallback onTap;
 
-  String _formatDuration() {
+  String _formatDuration(AppLocalizations l10n) {
     if (tariff.durationMs <= 0) return '';
     const day = 24 * 60 * 60 * 1000;
     final days = (tariff.durationMs / day).round();
-    if (days < 28) return '$days д';
+    if (days < 28) return '$days ${l10n.dayShort}';
     if (days < 360) {
       final months = (days / 30).round();
-      return '$months мес';
+      return '$months ${l10n.monthShort}';
     }
     final years = (days / 365).round();
-    return '$years г';
+    return '$years ${l10n.yearShort}';
   }
 
   String _formatPrice() {
@@ -573,7 +573,7 @@ class _TariffRadioCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dur = _formatDuration();
+    final dur = _formatDuration(AppLocalizations.of(context)!);
     final price = _formatPrice();
 
     return PressScale(

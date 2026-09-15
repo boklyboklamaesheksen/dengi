@@ -43,10 +43,7 @@ class ApiService {
   /// value regardless of the actual Android `applicationId`.
   static const String _signatureBundleId = 'app.rabochiy.vpn';
 
-  /// Shared secret baked into the backend signature middleware.
-  /// Required for the SHA-256 hash. Compromise of this string only
-  /// allows forging request timestamps; it does not unlock any user
-  /// data on its own.
+  /// Build-time value matching the legacy backend signature middleware.
   static String get _signatureSecret => BackendSigning.secret;
 
   static const userIdPrefsKey = 'rabochiy_user_id';

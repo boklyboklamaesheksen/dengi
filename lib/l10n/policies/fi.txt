@@ -1,0 +1,33 @@
+Tietosuojakäytäntö — Rabochiy VPN
+Päivitetty: 1. syyskuuta 2026
+
+Tietoa asiakirjasta
+Tässä käytännössä kuvataan tietojen kerääminen, käyttö ja suojaaminen sovellusta ja palvelua käytettäessä. Käyttämällä Rabochiy VPN:ää hyväksyt käytännön; jos et hyväksy sitä, lopeta käyttö. Keräämme mahdollisimman vähän tietoja emmekä kirjaa internettoimintaasi. GW ja AmneziaWG ovat teknisiä standardeja; nimet eivät tarkoita yhteyttä samannimisiin palveluihin.
+
+Mitä emme tallenna
+Emme seuraa GPS-sijaintia emmekä tallenna vierailtuja sivustoja, DNS-kyselyjä, käytettyjen kohdepalvelinten osoitteita, oikeaa IP-osoitettasi tai istuntojen ajankohtia ja kestoja. Palvelimet reitittävät paketteja ilman käyttäjien toimintalokeja.
+
+Puhelimeen tallennettavat tiedot
+Sovellus tallentaa paikallisesti palvelinluettelon offlinekäyttöön, tilin, viimeksi valitun palvelimen ja istuntotilastoja, kuten nopeuden ja yhteysajan. Näitä paikallisia tietoja ei lähetetä. Voit poistaa ne Android-asetuksista tai poistamalla sovelluksen.
+
+Virheraportit
+Google Firebase Crashlytics auttaa löytämään virheitä. Jos järjestelmä sallii kaatumisraportit, kaatuminen luo automaattisesti anonyymin raportin, jossa on laitteen malli, Android- ja sovellusversio sekä virheen pinojälki. Raportti ei sisällä verkkotoimintaa, IP-osoitetta, tilaustunnistetta tai henkilöllisyyttä. Firebase Analytics kerää myös anonyymejä käyttötilastoja, kuten sovelluksen käynnistyksiä ja onnistuneita yhteyksiä. Tiedot yhdistetään, eikä niistä voi tunnistaa yksittäistä käyttäjää. Googlen käytäntö: https://policies.google.com/privacy
+
+Järjestelmän käyttöoikeudet
+Sovellus tarvitsee VPN-tunnelin luomisen, internetyhteyden, verkon tilan tarkistamisen, toiminnan etualapalveluna ja Androidin vaatiman pysyvän ilmoituksen. Asennettujen sovellusten luetteloa käytetään vain jaetun tunneloinnin sovellusvalintaan. Luettelo pysyy laitteella, eikä sitä jaeta meille tai kolmansille osapuolille. Sovellus ei pyydä tai käytä yhteystietoja, mediaa, kameraa, mikrofonia, sijaintia, tekstiviestejä tai puhelulokeja.
+
+Määritykset ja yhteyden metatiedot
+Palvelinluettelo ja yhteysasetukset ladataan salatun HTTPS-yhteyden kautta. Pyyntö käyttää palvelimen antamaa satunnaista tilitunnistetta, jota ei yhdistetä henkilöllisyyteesi. Pyyntö ei lähetä laitteen tietoja tai liikenteen sisältöä. Palvelinkuorman ja hallintapaneelin tilan näyttämiseksi sovellus lähettää anonyymejä viestejä yhdistämisestä, käytetystä palvelimesta ja katkaisusta. Ne eivät sisällä vierailtuja sivustoja tai kohteiden IP-osoitteita.
+
+Tili ja poistaminen
+Sovellus luo anonyymin tilin ilman sähköpostia, puhelinnumeroa tai henkilötietoja. Satunnainen tunniste ja salainen avain mahdollistavat palauttamisen toiselle laitteelle. Emme voi yhdistää tätä paria henkilöllisyyteesi. Voit poistaa tilin sovelluksesta: tunniste ja siihen liittyvät tilaustiedot poistetaan pysyvästi palvelimilta. Tili, jota ei käytetä yli 12 kuukauteen uloskirjautumisen jälkeen, poistetaan automaattisesti. Paikalliset tiedot poistetaan Androidista tai sovelluksen poistamisen yhteydessä.
+
+Mainokset
+Mainosverkkojen koodia voidaan käyttää ilmaisten palvelinten rahoittamiseen. Staattinen analyysi voi tunnistaa mainoskoodin. Kumppanit voivat omien käytäntöjensä mukaan kerätä anonymisoituja tietoja, kuten mainostunnisteen, klikkauksia ja näyttökertoja. Tietoja ei yhdistetä toimintaasi VPN-tunnelissa. Voit nollata mainostunnisteen tai poistaa personoinnin käytöstä Androidissa.
+
+Kohderyhmä ja muutokset
+Rabochiy VPN ei ole tarkoitettu alle 13-vuotiaille, emmekä kerää heidän tietojaan tietoisesti. Ilmoita meille, jos alle 13-vuotias käyttää sovellusta. Voimme päivittää käytäntöä; päivämäärä kertoo nykyisen version. Merkittävistä muutoksista ilmoitetaan Telegram-keskustelussamme.
+
+Yhteystiedot
+Telegram: https://t.me/rabochyvpn_chat
+Sähköposti: support@vpnhub.ltd

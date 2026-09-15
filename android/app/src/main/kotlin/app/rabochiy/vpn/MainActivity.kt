@@ -4,13 +4,12 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
-import android.net.TrafficStats
 import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.Process
+import android.os.SystemClock
 import android.util.Log
 import android.view.WindowInsetsController
 import androidx.core.view.WindowCompat
@@ -24,7 +23,12 @@ import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : FlutterActivity() {
     companion object {
@@ -39,8 +43,7 @@ class MainActivity : FlutterActivity() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val mainHandler = Handler(Looper.getMainLooper())
-    private val statsHandler = Handler(Looper.getMainLooper())
-    private var statsRunnable: Runnable? = null
+    private var statsJob: Job? = null
     private var lastRxBytes: Long = 0
     private var lastTxBytes: Long = 0
     private var lastStatsTime: Long = 0
@@ -81,7 +84,7 @@ class MainActivity : FlutterActivity() {
     override fun onResume() {
         super.onResume()
         isAppInForeground = true
-        if (isVpnConnected && statsRunnable == null) {
+        if (isVpnConnected && statsJob == null) {
             startTrafficPolling()
         }
     }
@@ -89,10 +92,24 @@ class MainActivity : FlutterActivity() {
     override fun onPause() {
         super.onPause()
         isAppInForeground = false
-        statsRunnable?.let {
-            statsHandler.removeCallbacks(it)
-            statsRunnable = null
+        stopTrafficPolling()
+    }
+
+    override fun onDestroy() {
+        stopTrafficPolling()
+        vleeListener?.let { VleeManager.unregisterListener(it) }
+        vleeListener = null
+        eventSink = null
+        vleeStatusSink = null
+        try {
+            pendingPermissionResult?.success(false)
+        } catch (e: Exception) {
+            Log.w("MainActivity", "Permission channel already closed", e)
         }
+        pendingPermissionResult = null
+        mainHandler.removeCallbacksAndMessages(null)
+        scope.cancel()
+        super.onDestroy()
     }
 
     /**
@@ -205,7 +222,9 @@ class MainActivity : FlutterActivity() {
     private fun handleEngineCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "initialize" -> {
-                awgManager = AwgManager(this) { state, stats -> emitStatus(state.name, stats) }
+                if (awgManager == null) {
+                    awgManager = AwgManager(applicationContext) { state, stats -> emitStatus(state.name, stats) }
+                }
                 result.success(true)
             }
             "requestPermission" -> {
@@ -255,9 +274,7 @@ class MainActivity : FlutterActivity() {
             "disconnect" -> {
                 scope.launch {
                     val awg = awgManager
-                    val awgResult = if (awg != null &&
-                        (awg.isActive || awg.currentState != AwgManager.State.DISCONNECTED)
-                    ) {
+                    val awgResult = if (awg != null) {
                         awg.disconnect()
                     } else {
                         Result.success(Unit)
@@ -296,48 +313,38 @@ class MainActivity : FlutterActivity() {
     private fun startTrafficPolling() {
         stopTrafficPolling()
         if (!isAppInForeground) return
-        val runnable = object : Runnable {
-            override fun run() {
+        statsJob = scope.launch {
+            while (isActive && isAppInForeground && isVpnConnected) {
+                delay(1000)
                 emitTrafficStats()
-                statsHandler.postDelayed(this, 1000)
             }
         }
-        statsRunnable = runnable
-        statsHandler.postDelayed(runnable, 1000)
     }
 
     private fun stopTrafficPolling() {
-        statsRunnable?.let { statsHandler.removeCallbacks(it) }
-        statsRunnable = null
+        statsJob?.cancel()
+        statsJob = null
         lastRxBytes = 0
         lastTxBytes = 0
         lastStatsTime = 0
     }
 
-    private fun emitTrafficStats() {
-        val now = System.currentTimeMillis()
+    private suspend fun emitTrafficStats() {
+        val awgStats = withContext(Dispatchers.IO) { awgManager?.statistics() } ?: return
+        if (!isVpnConnected || !isAppInForeground) return
+        val now = SystemClock.elapsedRealtime()
 
-        val rxTotal: Long
-        val txTotal: Long
+        val rxTotal = awgStats.totalRx()
+        val txTotal = awgStats.totalTx()
 
-        val awgStats = awgManager?.statistics()
-        if (awgStats != null) {
-            rxTotal = awgStats.totalRx()
-            txTotal = awgStats.totalTx()
-        } else {
-            val uid = Process.myUid()
-            rxTotal = TrafficStats.getUidRxBytes(uid)
-            txTotal = TrafficStats.getUidTxBytes(uid)
-        }
-
-        val downloadSpeed: Int
-        val uploadSpeed: Int
+        val downloadSpeed: Long
+        val uploadSpeed: Long
 
         if (lastStatsTime > 0 && rxTotal >= lastRxBytes && txTotal >= lastTxBytes) {
             val dt = (now - lastStatsTime) / 1000.0
             if (dt > 0) {
-                downloadSpeed = ((rxTotal - lastRxBytes) / dt).toInt()
-                uploadSpeed = ((txTotal - lastTxBytes) / dt).toInt()
+                downloadSpeed = ((rxTotal - lastRxBytes) / dt).toLong()
+                uploadSpeed = ((txTotal - lastTxBytes) / dt).toLong()
             } else {
                 downloadSpeed = 0
                 uploadSpeed = 0
@@ -354,8 +361,8 @@ class MainActivity : FlutterActivity() {
         val data = HashMap<String, Any>()
         data["state"] = "CONNECTED"
         data["duration"] = 0
-        data["download"] = if (rxTotal > 0) rxTotal.toInt() else 0
-        data["upload"] = if (txTotal > 0) txTotal.toInt() else 0
+        data["download"] = rxTotal.coerceAtLeast(0L)
+        data["upload"] = txTotal.coerceAtLeast(0L)
         data["downloadSpeed"] = downloadSpeed
         data["uploadSpeed"] = uploadSpeed
 
@@ -374,6 +381,11 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun emitStatus(state: String, stats: Any?) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mainHandler.post { emitStatus(state, stats) }
+            return
+        }
+        if (isDestroyed) return
         when (state.uppercase()) {
             "CONNECTED" -> {
                 isVpnConnected = true
@@ -384,9 +396,8 @@ class MainActivity : FlutterActivity() {
                 if (stats is org.amnezia.awg.backend.Statistics) {
                     lastRxBytes = stats.totalRx()
                     lastTxBytes = stats.totalTx()
-                    lastStatsTime = System.currentTimeMillis()
+                    lastStatsTime = SystemClock.elapsedRealtime()
                 }
-                return
             }
             "DISCONNECTED", "ERROR" -> {
                 isVpnConnected = false

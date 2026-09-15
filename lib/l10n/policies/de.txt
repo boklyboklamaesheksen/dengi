@@ -1,0 +1,33 @@
+Datenschutzerklärung — Rabochiy VPN
+Stand: 1. September 2026
+
+Über dieses Dokument
+Diese Erklärung beschreibt die Erhebung, Verwendung und den Schutz von Informationen bei der Nutzung der App und des Dienstes. Mit der Nutzung stimmen Sie ihr zu; andernfalls stellen Sie die Nutzung bitte ein. Rabochiy VPN beruht auf minimaler Datenerhebung und protokolliert keine Internetaktivitäten. GW und AmneziaWG bezeichnen technische Standards und stellen keine Verbindung zu gleichnamigen Diensten her.
+
+Was wir nicht speichern
+Wir erfassen keine GPS-Position und speichern weder besuchte Websites, DNS-Anfragen, Adressen der aufgerufenen Server, Ihre echte IP-Adresse noch Zeitpunkt und Dauer Ihrer Sitzungen. Die Server leiten Pakete weiter, ohne Nutzeraktivitäten zu protokollieren.
+
+Daten auf Ihrem Gerät
+Die App speichert lokal eine Serverliste für die Offline-Nutzung, Kontodaten, den zuletzt gewählten Server und Sitzungsstatistiken wie Geschwindigkeit und Verbindungsdauer. Diese lokalen Daten werden nicht übertragen. Sie können sie über die Android-Einstellungen oder durch Deinstallation löschen.
+
+Fehlerberichte
+Google Firebase Crashlytics hilft bei der Fehlerdiagnose. Wenn das System Fehlerberichte erlaubt, entsteht bei einem Absturz automatisch ein anonymer Bericht mit Gerätemodell, Android- und App-Version sowie Fehlerstapel. Er enthält weder Netzwerkaktivitäten, IP-Adresse, Abonnement-Token noch Ihre Identität. Firebase Analytics erfasst außerdem anonyme Nutzungsstatistiken, etwa App-Starts und erfolgreiche Verbindungen. Die zusammengefassten Daten identifizieren keine einzelnen Nutzer. Googles Datenschutzerklärung: https://policies.google.com/privacy
+
+Systemberechtigungen
+Die App benötigt das Erstellen eines VPN-Tunnels, Internetzugriff, das Prüfen des Netzwerkstatus, einen Vordergrunddienst und die von Android vorgeschriebene dauerhafte Benachrichtigung. Die Liste installierter Apps dient ausschließlich der Auswahl für Split-Tunneling. Sie bleibt auf dem Gerät und wird weder an uns noch an Dritte übertragen. Kontakte, Medien, Kamera, Mikrofon, Standort, SMS und Anruflisten werden nicht angefordert oder genutzt.
+
+Konfiguration und Verbindungsmetadaten
+Serverliste und Verbindungsparameter werden über verschlüsseltes HTTPS geladen. Die Anfrage enthält eine zufällige, vom Server zugewiesene Konto-ID ohne Bezug zu Ihrer Identität; dabei werden weder Gerätedaten noch Verkehrsinhalte übertragen. Zur Anzeige von Serverlast und Status in der Verwaltung sendet die App anonyme Meldungen über Verbindung, gewählten Server und Trennung. Diese enthalten keine besuchten Websites oder Ziel-IP-Adressen.
+
+Konto und Löschung
+Die App erstellt ein anonymes Konto ohne E-Mail-Adresse, Telefonnummer oder persönliche Daten. Eine zufällige Kennung und ein geheimer Schlüssel ermöglichen die Wiederherstellung auf einem anderen Gerät. Wir können dieses Paar nicht mit Ihrer Identität verknüpfen. Sie können das Konto in der App löschen: Kennung und zugehörige Abonnementdaten werden dauerhaft von unseren Servern entfernt. Wird ein Konto nach der Abmeldung länger als 12 Monate nicht genutzt, wird es automatisch gelöscht. Lokale Daten lassen sich über Android oder durch Deinstallation entfernen.
+
+Werbung
+Werbenetzwerk-Code kann zur Finanzierung kostenloser Server eingesetzt werden. Statische Analysen können Werbe-Tracker-Signaturen erkennen. Partner können nach ihren eigenen Datenschutzregeln anonymisierte Daten wie Werbe-ID, Anzeigenklicks und -aufrufe erheben. Diese Daten werden nicht mit Ihrer Aktivität im VPN-Tunnel verknüpft. In Android können Sie die Werbe-ID zurücksetzen oder personalisierte Werbung deaktivieren.
+
+Zielgruppe und Änderungen
+Rabochiy VPN richtet sich nicht an Kinder unter 13 Jahren und erhebt deren Daten nicht absichtlich. Informieren Sie uns, wenn ein Kind unter 13 die App nutzt. Wir können diese Erklärung aktualisieren; das Datum kennzeichnet den aktuellen Stand. Wesentliche Änderungen kündigen wir im Telegram-Chat an.
+
+Kontakt
+Telegram: https://t.me/rabochyvpn_chat
+E-Mail: support@vpnhub.ltd
