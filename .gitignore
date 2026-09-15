@@ -1,0 +1,41 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+pubspec.lock
+
+# Android
+android/.gradle/
+android/local.properties
+android/app/build/
+android/key.properties
+android/key.keystore
+android/app/upload-keystore.jks
+*.jks
+*.keystore
+
+# iOS/macOS
+ios/
+macos/
+web/
+windows/
+linux/
+
+# IDE / misc
+.idea/
+.vscode/
+*.iml
+google-services.json.yarik.bak
+
+# Workspace attachments, generated Android output and machine-local settings
+.hoplite/
+android/.kotlin/
+android/app/release/
+android/app/local.properties
+android/build_log*.txt
+android/gradle_build.txt
+config/build-secrets.json

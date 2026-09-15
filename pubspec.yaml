@@ -1,0 +1,143 @@
+name: rabochiy_vpn
+description: "Rabochiy VPN — premium privacy tunnel with a stark monochrome xAI-style UI."
+# Private application, not published to pub.dev
+publish_to: 'none'
+
+# Version follows semantic versioning: MAJOR.MINOR.PATCH+BUILD
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.8
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  
+  # VPN functionality
+
+  # HTTP client for API calls
+  http: ^1.6.0
+
+  # SHA-256 used by the legacy v1 request-signing middleware on the
+  # backend (`hash`, `time`, `bundleId` triplet sent on every signed
+  # POST). Already present transitively, listed here explicitly so we
+  # can bump the version without surprising breakage.
+  crypto: ^3.0.3
+  # GW protocol: secp256k1 ECDH + AES-256-GCM envelope decryption
+  pointycastle: ^3.9.1
+
+  # Local storage for user data and settings
+  shared_preferences: ^2.2.2
+  
+  # State management
+  provider: ^6.1.1
+  
+  # JSON serialization
+  json_annotation: ^4.8.1
+  
+  # Connectivity check
+  # connectivity_plus: ^5.0.2
+  
+  # Permission handling
+  # permission_handler: ^11.2.0
+  # VLESS engine archived to /_archived_vless. Replaced by native
+  # IKEv2 (StrongSwan) + AmneziaWG modules under android/.
+  # flutter_v2ray_plus: ^1.1.3
+  dart_ping: ^9.0.1
+  uuid: ^4.5.3
+  # QR display for the new account/mnemonic screen.
+  qr_flutter: ^4.1.0
+  firebase_core: ^4.4.0
+  firebase_crashlytics: ^5.0.7
+  firebase_analytics: ^12.1.2
+  intl: ^0.20.2
+  package_info_plus: ^9.0.0
+  url_launcher: ^6.3.2
+  webview_flutter: ^4.10.0
+  # Lists installed apps on Android — feeds the split-tunnel picker.
+  installed_apps: ^1.6.0
+  responsive_framework: ^1.5.1
+  firebase_remote_config: ^6.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^6.0.0
+  
+  # Code generation
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1
+  flutter_launcher_icons: ^0.13.1
+  # rename_app: ^1.6.1 # Consider adding this if you need to rename bundle ID or package name systematically
+
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: false
+  # Full-bleed square art — iOS rounds the corners itself; pre-adaptive
+  # Android launchers use this as-is and their own launcher theme supplies
+  # a masked shape on top.
+  image_path: "assets/images/logo_rabochiy.png"
+  remove_alpha_ios: false
+  min_sdk_android: 21
+  # Solid background layer behind the cat foreground on adaptive icons.
+  # Must match the flat fill baked into both logo_rabochiy.png and the
+  # surrounding transparent areas of logo_rabochiy_foreground.png so every
+  # mask shape (circle, squircle, rounded square, teardrop) shows an
+  # unbroken dark canvas.
+  adaptive_icon_background: "#1F2228"
+  adaptive_icon_foreground: "assets/images/logo_rabochiy_foreground.png"
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/images/
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package
