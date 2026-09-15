@@ -7,7 +7,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appTitle => 'Рабочий VPN';
 
   @override
-  String get paymentBrowserNotice => 'Страница оплаты открыта в браузере. Завершите платёж там — подписка активируется автоматически.';
+  String get paymentBrowserNotice =>
+      'Страница оплаты открыта в браузере. Завершите платёж там — подписка активируется автоматически.';
   @override
   String get paymentOpenPage => 'Открыть страницу оплаты';
   @override
@@ -37,6 +38,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get connectingUpper => 'ПОДКЛЮЧЕНИЕ…';
+  @override
   String get cancelConnecting => 'Нажмите, чтобы отменить';
 
   @override
@@ -95,6 +97,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get failedToLoadServers => 'Не удалось загрузить список серверов';
+
+  @override
+  String get apiConfigurationError =>
+      'В этой сборке отсутствует настройка API. Установите настроенную версию или обратитесь в поддержку.';
 
   @override
   String serversCount(num count) {
@@ -547,7 +553,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get accountMnemonicWarningContinue => 'Я понял, показать';
 
   @override
-  String get welcomeSubtitle => 'Создайте новый аккаунт или войдите в существующий';
+  String get welcomeSubtitle =>
+      'Создайте новый аккаунт или войдите в существующий';
 
   @override
   String get welcomeCreateNew => 'Я новый пользователь';

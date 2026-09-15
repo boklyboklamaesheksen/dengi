@@ -75,6 +75,8 @@ class AppLocalizationsEu extends AppLocalizations {
   @override
   String get failedToLoadServers => _messages['failedToLoadServers']!;
   @override
+  String get apiConfigurationError => _messages['apiConfigurationError']!;
+  @override
   String get settings => _messages['settings']!;
   @override
   String get supportTelegram => _messages['supportTelegram']!;
@@ -478,6 +480,7 @@ const _catalogues = <String, Map<String, String>>{
     "accountUploadSpeed": "Débit montant",
     "accountUserId": "Identifiant utilisateur",
     "advanced": "Avancé",
+    "apiConfigurationError": "La configuration de l’API manque dans cette version. Installez une version configurée ou contactez l’assistance.",
     "appTitle": "Rabochiy VPN",
     "appearance": "Apparence",
     "autoSelect": "Sélection automatique",
@@ -683,6 +686,7 @@ const _catalogues = <String, Map<String, String>>{
     "accountUploadSpeed": "Uploadsnelheid",
     "accountUserId": "Gebruikers-ID",
     "advanced": "Geavanceerd",
+    "apiConfigurationError": "De API-configuratie ontbreekt in deze versie. Installeer een geconfigureerde versie of neem contact op met support.",
     "appTitle": "Rabochiy VPN",
     "appearance": "Weergave",
     "autoSelect": "Automatisch kiezen",
@@ -888,6 +892,7 @@ const _catalogues = <String, Map<String, String>>{
     "accountUploadSpeed": "Uploadgeschwindigkeit",
     "accountUserId": "Nutzer-ID",
     "advanced": "Erweitert",
+    "apiConfigurationError": "In dieser Version fehlt die API-Konfiguration. Installiere eine konfigurierte Ausgabe oder kontaktiere den Support.",
     "appTitle": "Rabochiy VPN",
     "appearance": "Darstellung",
     "autoSelect": "Automatische Auswahl",
@@ -1093,6 +1098,7 @@ const _catalogues = <String, Map<String, String>>{
     "accountUploadSpeed": "Velocidad de subida",
     "accountUserId": "ID de usuario",
     "advanced": "Avanzado",
+    "apiConfigurationError": "A esta versión le falta la configuración de la API. Instala una versión configurada o contacta con soporte.",
     "appTitle": "Rabochiy VPN",
     "appearance": "Apariencia",
     "autoSelect": "Selección automática",
@@ -1298,6 +1304,7 @@ const _catalogues = <String, Map<String, String>>{
     "accountUploadSpeed": "Velocità di upload",
     "accountUserId": "ID utente",
     "advanced": "Avanzate",
+    "apiConfigurationError": "In questa versione manca la configurazione API. Installa una versione configurata o contatta l’assistenza.",
     "appTitle": "Rabochiy VPN",
     "appearance": "Aspetto",
     "autoSelect": "Scelta automatica",
@@ -1503,6 +1510,7 @@ const _catalogues = <String, Map<String, String>>{
     "accountUploadSpeed": "Szybkość wysyłania",
     "accountUserId": "Identyfikator użytkownika",
     "advanced": "Zaawansowane",
+    "apiConfigurationError": "W tej wersji brakuje konfiguracji API. Zainstaluj skonfigurowaną wersję lub skontaktuj się z pomocą techniczną.",
     "appTitle": "Rabochiy VPN",
     "appearance": "Wygląd",
     "autoSelect": "Wybór automatyczny",
@@ -1710,6 +1718,7 @@ const _catalogues = <String, Map<String, String>>{
     "accountUploadSpeed": "Velocidade de envio",
     "accountUserId": "ID de utilizador",
     "advanced": "Avançadas",
+    "apiConfigurationError": "Falta a configuração da API nesta versão. Instale uma versão configurada ou contacte o apoio.",
     "appTitle": "Rabochiy VPN",
     "appearance": "Aspeto",
     "autoSelect": "Seleção automática",
@@ -1915,6 +1924,7 @@ const _catalogues = <String, Map<String, String>>{
     "accountUploadSpeed": "Viteză de încărcare",
     "accountUserId": "ID utilizator",
     "advanced": "Avansate",
+    "apiConfigurationError": "Din această versiune lipsește configurarea API. Instalează o versiune configurată sau contactează asistența.",
     "appTitle": "Rabochiy VPN",
     "appearance": "Aspect",
     "autoSelect": "Selecție automată",
@@ -2121,6 +2131,7 @@ const _catalogues = <String, Map<String, String>>{
     "accountUploadSpeed": "Uppladdningshastighet",
     "accountUserId": "Användar-ID",
     "advanced": "Avancerat",
+    "apiConfigurationError": "Den här versionen saknar API-konfiguration. Installera en konfigurerad version eller kontakta supporten.",
     "appTitle": "Rabochiy VPN",
     "appearance": "Utseende",
     "autoSelect": "Automatiskt val",
@@ -2326,6 +2337,7 @@ const _catalogues = <String, Map<String, String>>{
     "accountUploadSpeed": "Uploadhastighed",
     "accountUserId": "Bruger-ID",
     "advanced": "Avanceret",
+    "apiConfigurationError": "Denne version mangler API-konfiguration. Installér en konfigureret udgave, eller kontakt support.",
     "appTitle": "Rabochiy VPN",
     "appearance": "Udseende",
     "autoSelect": "Automatisk valg",
@@ -2531,6 +2543,7 @@ const _catalogues = <String, Map<String, String>>{
     "accountUploadSpeed": "Lähetysnopeus",
     "accountUserId": "Käyttäjätunniste",
     "advanced": "Lisäasetukset",
+    "apiConfigurationError": "Tästä versiosta puuttuvat API-asetukset. Asenna määritetty versio tai ota yhteyttä tukeen.",
     "appTitle": "Rabochiy VPN",
     "appearance": "Ulkoasu",
     "autoSelect": "Automaattinen valinta",
@@ -2736,6 +2749,7 @@ const _catalogues = <String, Map<String, String>>{
     "accountUploadSpeed": "Rychlost odesílání",
     "accountUserId": "ID uživatele",
     "advanced": "Pokročilé",
+    "apiConfigurationError": "V tomto sestavení chybí konfigurace API. Nainstalujte nakonfigurovanou verzi nebo kontaktujte podporu.",
     "appTitle": "Rabochiy VPN",
     "appearance": "Vzhled",
     "autoSelect": "Automatický výběr",

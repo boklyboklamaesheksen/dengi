@@ -1,4 +1,5 @@
 {
+  "apiConfigurationError": "Tästä versiosta puuttuvat API-asetukset. Asenna määritetty versio tai ota yhteyttä tukeen.",
   "connect": "Yhdistä",
   "disconnect": "Katkaise",
   "connected": "Yhdistetty",

@@ -27,15 +27,15 @@ enum ServerProtocol {
   }
 
   String get apiName => switch (this) {
-        ServerProtocol.awg => 'awg',
-        ServerProtocol.gw => 'gw',
-      };
+    ServerProtocol.awg => 'awg',
+    ServerProtocol.gw => 'gw',
+  };
 
   /// Human-readable label for the UI badge.
   String get displayName => switch (this) {
-        ServerProtocol.awg => 'AmneziaWG 3.1',
-        ServerProtocol.gw => 'GW',
-      };
+    ServerProtocol.awg => 'AmneziaWG 3.1',
+    ServerProtocol.gw => 'GW',
+  };
 }
 
 /// Server configuration as returned by the Rabochiy VPN backend.
@@ -121,9 +121,9 @@ class ServerConfig {
   /// Default port when the backend doesn't supply one. Reflects the
   /// canonical port for each transport.
   static int defaultPortFor(ServerProtocol p) => switch (p) {
-        ServerProtocol.awg => 51820,
-        ServerProtocol.gw => 22,
-      };
+    ServerProtocol.awg => 51820,
+    ServerProtocol.gw => 22,
+  };
 
   /// Builds a [ServerConfig] from a decrypted GW server envelope.
   ///
@@ -136,11 +136,13 @@ class ServerConfig {
   }) {
     String pick(String compact, String legacy, [String fallback = '']) =>
         config.containsKey(compact)
-            ? config[compact]?.toString() ?? fallback
-            : (config[legacy]?.toString() ?? fallback);
+        ? config[compact]?.toString() ?? fallback
+        : (config[legacy]?.toString() ?? fallback);
 
     int pickInt(String compact, String legacy, int fallback) {
-      final raw = config.containsKey(compact) ? config[compact] : config[legacy];
+      final raw = config.containsKey(compact)
+          ? config[compact]
+          : config[legacy];
       return (raw is num) ? raw.toInt() : int.tryParse('$raw') ?? fallback;
     }
 
@@ -204,7 +206,9 @@ class ServerConfig {
   /// normalised to the empty string so the UI doesn't surface them.
   factory ServerConfig.fromJson(Map<String, dynamic> json) {
     final protocol = ServerProtocol.fromString(json['protocol'] as String?);
-    final ip = _stripSentinel((json['ip_address'] ?? json['address'] ?? '').toString());
+    final ip = _stripSentinel(
+      (json['ip_address'] ?? json['address'] ?? '').toString(),
+    );
     final country = _stripSentinel((json['country'] ?? '').toString());
     final state = _stripSentinel((json['state'] ?? '').toString());
     var countryCode = _stripSentinel(
@@ -218,9 +222,7 @@ class ServerConfig {
       countryCode = _inferCountryCode(country, state);
     }
 
-    final rawId = _stripSentinel(
-      (json['id'] ?? json['_id'] ?? '').toString(),
-    );
+    final rawId = _stripSentinel((json['id'] ?? json['_id'] ?? '').toString());
     final id = rawId.isNotEmpty ? rawId : '${protocol.apiName}_$ip';
 
     final port = _parsePort(json['port']) ?? defaultPortFor(protocol);
@@ -245,32 +247,38 @@ class ServerConfig {
       premium: json['premium'] == true,
       recommend: json['recommend'] == true,
       priority: _parseInt(json['priority']) ?? 0,
-      username: _stripSentinel((json['user'] ?? json['username'] ?? '').toString()),
+      username: _stripSentinel(
+        (json['user'] ?? json['username'] ?? '').toString(),
+      ),
       password: _stripSentinel((json['password'] ?? '').toString()),
-      caFile: _stripSentinel((json['ca_file'] ?? json['caFile'] ?? '').toString()),
-      awgConfig: _stripSentinel((json['config'] ?? json['awgConfig'] ?? '').toString()),
+      caFile: _stripSentinel(
+        (json['ca_file'] ?? json['caFile'] ?? '').toString(),
+      ),
+      awgConfig: _stripSentinel(
+        (json['config'] ?? json['awgConfig'] ?? '').toString(),
+      ),
     );
   }
 
   /// Reverse of [fromJson] — useful for caching the latest catalogue
   /// to disk so the UI is never empty on cold start.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': serverName,
-        'ip_address': address,
-        'port': port,
-        'country': country,
-        'country_code': countryCode,
-        'state': state,
-        'protocol': protocol.apiName,
-        'premium': premium,
-        'recommend': recommend,
-        'priority': priority,
-        'user': username,
-        'password': password,
-        'ca_file': caFile,
-        'config': awgConfig,
-      };
+    'id': id,
+    'name': serverName,
+    'ip_address': address,
+    'port': port,
+    'country': country,
+    'country_code': countryCode,
+    'state': state,
+    'protocol': protocol.apiName,
+    'premium': premium,
+    'recommend': recommend,
+    'priority': priority,
+    'user': username,
+    'password': password,
+    'ca_file': caFile,
+    'config': awgConfig,
+  };
 
   ServerConfig copyWith({
     String? id,
@@ -292,6 +300,7 @@ class ServerConfig {
     String? password,
     String? caFile,
     String? awgConfig,
+    String? gwRawConfig,
   }) {
     return ServerConfig(
       id: id ?? this.id,
@@ -313,6 +322,7 @@ class ServerConfig {
       password: password ?? this.password,
       caFile: caFile ?? this.caFile,
       awgConfig: awgConfig ?? this.awgConfig,
+      gwRawConfig: gwRawConfig ?? this.gwRawConfig,
     );
   }
 
@@ -428,11 +438,7 @@ class ServerConfig {
     return null;
   }
 
-  static String _composeDisplayName(
-    String country,
-    String state,
-    String code,
-  ) {
+  static String _composeDisplayName(String country, String state, String code) {
     final parts = <String>[];
     if (country.isNotEmpty) parts.add(country);
     if (state.isNotEmpty && state != country) parts.add(state);
@@ -454,6 +460,9 @@ class ServerConfig {
       return '🏳️';
     }
     final base = 0x1F1E6;
-    return String.fromCharCodes([base + (first - aChar), base + (second - aChar)]);
+    return String.fromCharCodes([
+      base + (first - aChar),
+      base + (second - aChar),
+    ]);
   }
 }

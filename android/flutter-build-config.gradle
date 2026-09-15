@@ -1,0 +1,59 @@
+import groovy.json.JsonSlurper
+import java.nio.charset.StandardCharsets
+
+// Read pubspec on every sync; local.properties can contain a stale build number.
+def appRoot = rootProject.projectDir.parentFile
+def versionMatch = (new File(appRoot, 'pubspec.yaml').getText('UTF-8') =~ /(?m)^version:\s*(\d+\.\d+\.\d+)\+(\d+)\s*$/)
+if (!versionMatch.find()) {
+    throw new GradleException('pubspec.yaml must contain version: MAJOR.MINOR.PATCH+BUILD')
+}
+project.ext.rabochiyVersionName = versionMatch.group(1)
+project.ext.rabochiyVersionCode = Integer.parseInt(versionMatch.group(2))
+
+def defines = [:]
+def secretsFile = new File(appRoot, 'config/build-secrets.json')
+if (secretsFile.exists()) {
+    try {
+        def values = new JsonSlurper().parse(secretsFile, 'UTF-8')
+        if (!(values instanceof Map) || values.any { key, value -> !(value instanceof String) }) {
+            throw new IllegalArgumentException()
+        }
+        defines.putAll(values)
+    } catch (Exception ignored) {
+        throw new GradleException('config/build-secrets.json must be a JSON object with string values.')
+    }
+}
+def environmentSecret = providers.environmentVariable('RABOCHIY_SIGNING_SECRET').orNull
+if (environmentSecret != null) defines.RABOCHIY_SIGNING_SECRET = environmentSecret
+
+// Explicit Flutter --dart-define / --dart-define-from-file takes precedence.
+def incoming = project.findProperty('dart-defines')?.toString()
+if (incoming) {
+    incoming.split(',').each { encoded ->
+        try {
+            def value = new String(Base64.decoder.decode(encoded), StandardCharsets.UTF_8)
+            def separator = value.indexOf('=')
+            if (separator < 1) throw new IllegalArgumentException()
+            defines[value.substring(0, separator)] = value.substring(separator + 1)
+        } catch (Exception ignored) {
+            throw new GradleException('Invalid dart-defines encoding.')
+        }
+    }
+}
+project.ext.set('dart-defines', defines.collect { key, value ->
+    Base64.encoder.encodeToString("${key}=${value}".getBytes(StandardCharsets.UTF_8))
+}.join(','))
+
+def configured = defines.RABOCHIY_SIGNING_SECRET?.trim()
+def verifyConfiguration = tasks.register('verifyFlutterBuildConfiguration') {
+    group = 'verification'
+    description = 'Reject an app build that cannot access the signed VPN catalogue.'
+    doLast {
+        if (!configured) {
+            throw new GradleException('Missing RABOCHIY_SIGNING_SECRET. Fill config/build-secrets.json (see its example), set the environment variable, or pass --dart-define-from-file. Never commit the real value.')
+        }
+    }
+}
+tasks.configureEach {
+    if (name.startsWith('compileFlutterBuild')) dependsOn(verifyConfiguration)
+}

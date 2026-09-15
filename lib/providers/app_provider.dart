@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:installed_apps/installed_apps.dart';
 
+import '../config/backend_signing.dart';
 import '../models/server_config_model.dart';
 import '../services/api_service.dart';
 import '../services/gw_api_service.dart';
@@ -19,14 +20,17 @@ import '../services/vpn_service.dart';
 ///   * [TrafficStatsService] — persistent hourly traffic buckets.
 ///   * [SplitTunnelService] — per-app include / exclude masks.
 class AppProvider with ChangeNotifier {
-  final VpnService _vpnService = VpnService();
-  final ApiService _apiService = ApiService();
-  final GwApiService _gwApiService = GwApiService();
+  final VpnService _vpnService;
+  final ApiService _apiService;
+  final GwApiService _gwApiService;
   final TrafficStatsService _trafficStats = TrafficStatsService();
   final SplitTunnelService _splitTunnel = SplitTunnelService();
   StreamSubscription<EngineStatus>? _engineSubscription;
   StreamSubscription<VpnStatus>? _statusSubscription;
   bool _disposed = false;
+  Future<void>? _serverLoad;
+  int _accountGeneration = 0;
+  String? _catalogError;
 
   VpnStatus _vpnStatus = VpnStatus.disconnected;
   List<ServerConfig> _servers = [];
@@ -74,6 +78,7 @@ class AppProvider with ChangeNotifier {
   bool get isAutoSelect => _isAutoSelect;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
+  String? get catalogError => _catalogError;
   bool get isPremium => _isPremium;
   bool get selectedServerRequiresPremium =>
       !_isPremium && _selectedServer?.premium == true;
@@ -109,8 +114,15 @@ class AppProvider with ChangeNotifier {
     return liveLoad.toDouble().clamp(0.0, 100.0);
   }
 
-  AppProvider() {
-    _initialize();
+  AppProvider({
+    ApiService? apiService,
+    GwApiService? gwApiService,
+    VpnService? vpnService,
+    bool autoInitialize = true,
+  }) : _apiService = apiService ?? ApiService(),
+       _gwApiService = gwApiService ?? GwApiService(),
+       _vpnService = vpnService ?? VpnService() {
+    if (autoInitialize) _initialize();
   }
 
   Future<void> _initialize() async {
@@ -145,7 +157,9 @@ class AppProvider with ChangeNotifier {
       _downloadSpeedBytes = status.downloadSpeed;
       _uploadSpeedBytes = status.uploadSpeed;
       if (status.state.toUpperCase() != 'CONNECTED' ||
-          _vpnStatus != VpnStatus.connected) return;
+          _vpnStatus != VpnStatus.connected) {
+        return;
+      }
 
       // status.download / status.upload are cumulative byte counters for
       // the live session. Use them to feed the hourly traffic buckets.
@@ -199,7 +213,6 @@ class AppProvider with ChangeNotifier {
 
       notifyListeners();
     });
-
   }
 
   /// Caches the package names of every installed Android app. Rebuilt on
@@ -248,25 +261,55 @@ class AppProvider with ChangeNotifier {
     }
   }
 
-  Future<void> loadServers() async {
-    if (_disposed) return;
+  Future<void> loadServers() {
+    if (_disposed) return Future.value();
+    if (_serverLoad != null) return _serverLoad!;
+    late final Future<void> operation;
+    operation = _loadServers().whenComplete(() {
+      if (identical(_serverLoad, operation)) _serverLoad = null;
+    });
+    _serverLoad = operation;
+    return operation;
+  }
+
+  Future<void> _loadServers() async {
+    final generation = _accountGeneration;
     try {
       _isLoading = true;
+      _catalogError = null;
       notifyListeners();
 
+      Object? awgError;
+      Object? gwError;
       final futures = await Future.wait<Object>(<Future<Object>>[
-        _apiService.fetchServerConfigs(),
-        _apiService.fetchServerLoads(),
+        _withFallback(
+          _apiService.fetchServerConfigs,
+          const <ServerConfig>[],
+          (error) => awgError = error,
+        ),
+        _withFallback(
+          _gwApiService.fetchServers,
+          const <ServerConfig>[],
+          (error) => gwError = error,
+        ),
+        _withFallback(
+          _apiService.fetchServerLoads,
+          const <String, int>{},
+          (_) {},
+        ),
       ]);
-      if (_disposed) return;
+      if (_disposed || generation != _accountGeneration) return;
 
       final servers = futures[0] as List<ServerConfig>;
-      final loadByIp = futures[1] as Map<String, int>;
-
-      // GW (SSH-tunnel) servers join the same catalogue; failures to load
-      // them (no fleet yet, no user) degrade silently to an empty list.
-      final gwServers = await _gwApiService.fetchServers();
-      if (_disposed) return;
+      final gwServers = futures[1] as List<ServerConfig>;
+      final loadByIp = futures[2] as Map<String, int>;
+      _catalogError =
+          awgError is BackendConfigurationException ||
+              gwError is BackendConfigurationException
+          ? 'api_not_configured'
+          : awgError != null || gwError != null
+          ? 'load_servers_failed'
+          : null;
 
       _serverLoadByIp
         ..clear()
@@ -279,7 +322,16 @@ class AppProvider with ChangeNotifier {
       });
       _totalOnlineUsers = total;
 
-      _servers = [...servers, ...gwServers];
+      _servers = [
+        if (awgError == null)
+          ...servers
+        else
+          ..._servers.where((s) => s.protocol == ServerProtocol.awg),
+        if (gwError == null)
+          ...gwServers
+        else
+          ..._servers.where((s) => s.protocol == ServerProtocol.gw),
+      ];
 
       // Keep the user's selection stable across reloads: re-point it at the
       // fresh object with the same id, otherwise connects keep using the
@@ -288,7 +340,7 @@ class AppProvider with ChangeNotifier {
       final selected = _selectedServer;
       if (selected != null) {
         final match = _servers.where((s) => s.id == selected.id).toList();
-        if (match.isNotEmpty) _selectedServer = match.first;
+        _selectedServer = match.firstOrNull;
       }
 
       notifyListeners();
@@ -297,11 +349,27 @@ class AppProvider with ChangeNotifier {
         await _autoSelectBestServer();
       }
     } catch (e) {
-      // Stable code consumed by the localised banner in the UI.
-      _errorMessage = 'load_servers_failed';
+      if (!_disposed && generation == _accountGeneration) {
+        _catalogError = 'load_servers_failed';
+      }
     } finally {
-      _isLoading = false;
-      if (!_disposed) notifyListeners();
+      if (!_disposed && generation == _accountGeneration) {
+        _isLoading = false;
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<T> _withFallback<T>(
+    Future<T> Function() load,
+    T fallback,
+    void Function(Object) onError,
+  ) async {
+    try {
+      return await load();
+    } catch (error) {
+      onError(error);
+      return fallback;
     }
   }
 
@@ -335,6 +403,7 @@ class AppProvider with ChangeNotifier {
       // fallback candidates (tapping them opens the premium gate).
       final ranked = _servers.toList()
         ..sort((a, b) {
+          if (!_isPremium && a.premium != b.premium) return a.premium ? 1 : -1;
           final loadA = _serverLoadByIp[a.address] ?? 50;
           final loadB = _serverLoadByIp[b.address] ?? 50;
           if (a.recommend != b.recommend) return a.recommend ? -1 : 1;
@@ -513,6 +582,9 @@ class AppProvider with ChangeNotifier {
   /// even if the native disconnect throws or the activity is
   /// killed mid-flow the next launch still lands on /welcome.
   Future<void> resetSession() async {
+    _accountGeneration++;
+    _serverLoad = null;
+    _catalogError = null;
     _stopHeartbeat();
     _stopTimer();
     _splitTunnelApplyTimer?.cancel();
@@ -599,7 +671,9 @@ class AppProvider with ChangeNotifier {
     final serverIp = _activeServerIp;
     final protocol = _activeProtocol ?? 'awg';
     final userId = await _apiService.getUserId();
-    if (_disposed || userId == null || userId.isEmpty || userId == 'pending') return;
+    if (_disposed || userId == null || userId.isEmpty || userId == 'pending') {
+      return;
+    }
     await _apiService.reportConnection(
       userId: userId,
       serverIp: serverIp,
@@ -621,6 +695,7 @@ class AppProvider with ChangeNotifier {
     _stopTimer();
     _stopHeartbeat();
     _apiService.close();
+    _gwApiService.close();
     super.dispose();
   }
 }

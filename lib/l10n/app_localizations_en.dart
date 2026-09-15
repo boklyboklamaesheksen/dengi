@@ -26,6 +26,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connectingUpper => 'CONNECTING…';
+  @override
   String get cancelConnecting => 'Tap to cancel';
 
   @override
@@ -84,6 +85,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToLoadServers => 'Failed to load servers';
+
+  @override
+  String get apiConfigurationError =>
+      'This build is missing its API configuration. Install a configured release or contact support.';
 
   @override
   String serversCount(num count) {
@@ -529,7 +534,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountMnemonicWarningContinue => 'I understand, show it';
 
   @override
-  String get welcomeSubtitle => 'Create a new account or restore an existing one';
+  String get welcomeSubtitle =>
+      'Create a new account or restore an existing one';
 
   @override
   String get welcomeCreateNew => 'I\'m a new user';
@@ -600,7 +606,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payLoadFailed => 'Failed to load the payment page';
 
   @override
-  String get paymentBrowserNotice => 'The payment page is open in your browser. Complete the payment there; your subscription will activate automatically.';
+  String get paymentBrowserNotice =>
+      'The payment page is open in your browser. Complete the payment there; your subscription will activate automatically.';
   @override
   String get paymentOpenPage => 'Open payment page';
   @override

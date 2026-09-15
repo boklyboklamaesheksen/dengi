@@ -1,4 +1,5 @@
 {
+  "apiConfigurationError": "Din această versiune lipsește configurarea API. Instalează o versiune configurată sau contactează asistența.",
   "connect": "Conectare",
   "disconnect": "Deconectare",
   "connected": "Conectat",

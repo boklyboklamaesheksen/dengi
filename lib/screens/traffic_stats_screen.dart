@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import '../config/app_theme.dart';
 import '../l10n/app_localizations.dart';
 import '../motion/glass.dart';
-import '../motion/motion_curves.dart';
 import '../motion/press_feedback.dart';
 import '../providers/app_provider.dart';
 import '../services/traffic_stats_service.dart';

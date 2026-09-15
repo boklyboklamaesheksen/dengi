@@ -12,6 +12,13 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+apply(from = rootProject.file("flutter-build-config.gradle"))
+
+flutter {
+    flutterVersionName = extra["rabochiyVersionName"] as String
+    flutterVersionCode = extra["rabochiyVersionCode"].toString()
+}
+
 android {
     namespace = "app.rabochiy.vpn"
     compileSdk = 36
@@ -43,7 +50,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Явно указываем архитектуры для native библиотек V2Ray
+        // Only ship ABIs supported by both VPN engines.
         ndk {
             abiFilters.clear()
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64")
@@ -110,7 +117,7 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
-            // Minification with ProGuard rules required for V2Ray native classes
+            // JNI and reflective crypto keep rules are supplied by the modules.
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

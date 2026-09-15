@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,8 +22,7 @@ import '../models/server_config_model.dart';
 ///
 /// Every `/vpn/api/v1/user/*` POST is signed with `hash`, `time`,
 /// `bundleId` form fields. The shared secret and bundle whitelist are
-/// fixed by the backend middleware — see [_signatureSecret] /
-/// [_signatureBundleId] for the exact values that the server checks.
+/// fixed by the backend middleware; [BackendSigning] owns this contract.
 class ApiService {
   /// Default base URL of the production backend, kept for backward
   /// compatibility. Override at build time with
@@ -34,17 +32,10 @@ class ApiService {
   /// NOTE: this value is frozen at compile time. The live domain lives in
   /// [ApiConfig.baseUrl] and is refreshed from Firebase Remote Config at
   /// every startup — [baseUrl] (the per-instance field) already follows it.
-  static String get defaultBaseUrl =>
-      const String.fromEnvironment('RABOCHIY_API_BASE',
-          defaultValue: 'https://mc.yarik.app');
-
-  /// BundleId expected by the backend's request-signature middleware.
-  /// The server-side whitelist is fixed, so we always send this exact
-  /// value regardless of the actual Android `applicationId`.
-  static const String _signatureBundleId = 'app.rabochiy.vpn';
-
-  /// Build-time value matching the legacy backend signature middleware.
-  static String get _signatureSecret => BackendSigning.secret;
+  static String get defaultBaseUrl => const String.fromEnvironment(
+    'RABOCHIY_API_BASE',
+    defaultValue: 'https://mc.yarik.app',
+  );
 
   static const userIdPrefsKey = 'rabochiy_user_id';
   static const mnemonicPrefsKey = 'rabochiy_mnemonic';
@@ -62,56 +53,47 @@ class ApiService {
   static const loginNetworkError = 'network_error';
   static const loginServerError = 'server_error';
 
-  final String baseUrl;
+  final String? _baseUrlOverride;
+  String get baseUrl =>
+      (_baseUrlOverride ?? ApiConfig.baseUrl).replaceAll(RegExp(r'/+$'), '');
   final http.Client _client;
   final Duration _timeout;
+  final BackendSigning _signing;
 
-  ApiService({String? baseUrl, http.Client? client, Duration? timeout})
-    : baseUrl = (baseUrl ?? defaultBaseUrl).replaceAll(RegExp(r'/+$'), ''),
-      _client = client ?? http.Client(),
-      _timeout = timeout ?? const Duration(seconds: 15);
+  ApiService({
+    String? baseUrl,
+    http.Client? client,
+    Duration? timeout,
+    this._signing = const BackendSigning(),
+  }) : _baseUrlOverride = baseUrl,
+       _client = client ?? http.Client(),
+       _timeout = timeout ?? const Duration(seconds: 15);
 
   // ──────────────────────────────────────────────────────────────────
   //  Servers catalogue
   // ──────────────────────────────────────────────────────────────────
 
-  /// Loads the live server catalogue from both protocols (AWG via v3
-  /// client API, AmneziaWG via v1 user API) and merges them into a
-  /// single sorted list. On any network failure we transparently fall
-  /// back to the cached snapshot so the UI is never empty on cold
-  /// start.
+  /// Loads AWG servers, falling back only to this account/backend's cache.
   Future<List<ServerConfig>> fetchServerConfigs() async {
-    final userId = await _ensureUserId();
-    if (userId == 'pending') {
-      // Backend not reachable on first launch. Show whatever we cached
-      // last time, if anything.
-      final cached = await _readMergedCache();
-      return cached;
-    }
-
-    Object? lastError;
-
-    final awg = await _fetchAwgServers(userId).catchError((Object e) {
-      lastError = e;
-      return <ServerConfig>[];
-    });
-
-    if (awg.isEmpty) {
-      // The endpoint failed — surface cached snapshot if present.
-      final cached = await _readMergedCache();
-      if (cached.isNotEmpty) return cached;
-      if (lastError != null) {
-        throw lastError!;
-      }
+    final userId = await getUserId();
+    if (userId == null || userId.isEmpty || userId == 'pending') {
       return const [];
     }
-
-    final merged = <ServerConfig>[...awg];
-    merged.sort((a, b) => b.priority.compareTo(a.priority));
-    return merged;
+    try {
+      final servers = await _fetchAwgServers(userId);
+      servers.sort((a, b) => b.priority.compareTo(a.priority));
+      return servers;
+    } on BackendConfigurationException {
+      rethrow;
+    } catch (_) {
+      final cached = await _readMergedCache(userId);
+      if (cached.isNotEmpty) return cached;
+      rethrow;
+    }
   }
 
   Future<List<ServerConfig>> _fetchAwgServers(String userId) async {
+    final requestBase = baseUrl;
     final res = await _signedPost(
       '/vpn/api/v1/user/server_awg',
       <String, String>{'userId': userId},
@@ -121,41 +103,25 @@ class ApiService {
     }
     final body = jsonDecode(res.body) as Map<String, dynamic>;
     final raw = body['data'];
-    if (raw is! List) {
-      await _writeCache(_kAwgCacheKey, res.body);
-      return const [];
+    if ((body['success'] != 1 && body['success'] != true) || raw is! List) {
+      throw const FormatException('Invalid AWG catalogue response');
     }
-    await _writeCache(_kAwgCacheKey, res.body);
-    return _parseList(raw, defaultProtocol: 'awg');
+    final servers = _parseList(raw, defaultProtocol: 'awg');
+    if (raw.isNotEmpty && servers.isEmpty) {
+      throw const FormatException('Invalid AWG server records');
+    }
+    if (await getUserId() == userId) {
+      await _writeCache(
+        _kAwgCacheKey,
+        jsonEncode({'userId': userId, 'baseUrl': requestBase, 'data': raw}),
+      );
+    }
+    return servers;
   }
 
   // ──────────────────────────────────────────────────────────────────
   //  User session
   // ──────────────────────────────────────────────────────────────────
-
-  /// Returns the cached `user_id`. When missing, registers a new user
-  /// against the backend and persists `user_id` + `mnemonic` locally
-  /// in `SharedPreferences`.
-  Future<String> _ensureUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    final cached = prefs.getString(_kUserIdKey);
-    if (cached != null && cached.isNotEmpty && cached != 'pending') {
-      return cached;
-    }
-
-    final created = await _createUser();
-    if (created != null &&
-        created.userId.isNotEmpty &&
-        created.userId != 'pending') {
-      await _persistSession(created, mnemonicConfirmed: false);
-      return created.userId;
-    }
-
-    // Backend unavailable on first launch. Cache 'pending' so we don't
-    // hammer the API with registration attempts on every request.
-    await prefs.setString(_kUserIdKey, 'pending');
-    return 'pending';
-  }
 
   Future<UserSession?> _createUser() async {
     try {
@@ -330,7 +296,7 @@ class ApiService {
         }
         // Force a fresh server-list fetch on next start so the new
         // account sees its own catalogue (premium gate, regional pool).
-            await prefs.remove(_kAwgCacheKey);
+        await prefs.remove(_kAwgCacheKey);
 
         return LoginResult.success(
           userId: userId,
@@ -490,15 +456,15 @@ class ApiService {
     final userId = prefs.getString(_kUserIdKey);
     if (userId == null || userId.isEmpty || userId == 'pending') return null;
     try {
-      final uri = _buildUri(
-        '/vpn/api/v3/client/payments/initiate',
-        const {},
-      );
+      final uri = _buildUri('/vpn/api/v3/client/payments/initiate', const {});
       final res = await _client
           .post(
             uri,
             headers: const {'Content-Type': 'application/json'},
-            body: jsonEncode({'user_id': userId, 'tariff_id': tariffTechnicalName}),
+            body: jsonEncode({
+              'user_id': userId,
+              'tariff_id': tariffTechnicalName,
+            }),
           )
           .timeout(_timeout);
       if (res.statusCode != 200) return null;
@@ -619,9 +585,8 @@ class ApiService {
 
   Uri _buildUri(String path, Map<String, String> qs) {
     final cleanPath = path.startsWith('/') ? path : '/$path';
-    return Uri.parse(
-      '$baseUrl$cleanPath',
-    ).replace(queryParameters: qs.isEmpty ? null : qs);
+    return Uri.parse('$baseUrl$cleanPath')
+        .replace(queryParameters: qs.isEmpty ? null : qs);
   }
 
   /// Performs a signed `application/x-www-form-urlencoded` POST against
@@ -632,17 +597,7 @@ class ApiService {
     String path,
     Map<String, String> fields,
   ) async {
-    final unixSeconds = (DateTime.now().millisecondsSinceEpoch ~/ 1000)
-        .toString();
-    final raw = '$unixSeconds|$_signatureSecret';
-    final hashHex = sha256.convert(utf8.encode(raw)).toString();
-
-    final body = <String, String>{
-      ...fields,
-      'hash': hashHex,
-      'time': unixSeconds,
-      'bundleId': _signatureBundleId,
-    };
+    final body = _signing.sign(fields);
 
     final uri = _buildUri(path, const {});
     return _client
@@ -689,10 +644,10 @@ class ApiService {
     }
   }
 
-  Future<List<ServerConfig>> _readMergedCache() async {
+  Future<List<ServerConfig>> _readMergedCache(String userId) async {
     final prefs = await SharedPreferences.getInstance();
     final out = <ServerConfig>[];
-    out.addAll(await _readCache(prefs, _kAwgCacheKey, 'awg'));
+    out.addAll(await _readCache(prefs, _kAwgCacheKey, 'awg', userId));
     out.sort((a, b) => b.priority.compareTo(a.priority));
     return out;
   }
@@ -701,11 +656,15 @@ class ApiService {
     SharedPreferences prefs,
     String key,
     String defaultProtocol,
+    String userId,
   ) async {
     try {
       final raw = prefs.getString(key);
       if (raw == null || raw.isEmpty) return const [];
       final body = jsonDecode(raw) as Map<String, dynamic>;
+      if (body['userId'] != userId || body['baseUrl'] != baseUrl) {
+        return const [];
+      }
       final list = body['data'];
       if (list is List) {
         return _parseList(list, defaultProtocol: defaultProtocol);

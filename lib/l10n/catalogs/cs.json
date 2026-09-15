@@ -1,4 +1,5 @@
 {
+  "apiConfigurationError": "V tomto sestavení chybí konfigurace API. Nainstalujte nakonfigurovanou verzi nebo kontaktujte podporu.",
   "connect": "Připojit",
   "disconnect": "Odpojit",
   "connected": "Připojeno",

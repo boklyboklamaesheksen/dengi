@@ -44,6 +44,7 @@ class _SplitTunnelScreenState extends State<SplitTunnelScreen> {
 
   Future<void> _showDisclosureIfNeeded() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     final shown = prefs.getBool('split_tunnel_disclosure_shown') ?? false;
     if (shown) {
       if (mounted) setState(() => _appsFuture = _loadApps(_lastShowSystemFlag));

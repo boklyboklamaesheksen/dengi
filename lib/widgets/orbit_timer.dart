@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../config/app_theme.dart';
 
 /// Large monospaced hh:mm:ss readout for the home screen.
 ///

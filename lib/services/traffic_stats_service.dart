@@ -32,30 +32,29 @@ class TrafficBucket {
     int tx = 0,
     int sessions = 0,
     int onlineSeconds = 0,
-  }) =>
-      TrafficBucket(
-        startMs: startMs,
-        rxBytes: rxBytes + rx,
-        txBytes: txBytes + tx,
-        sessions: this.sessions + sessions,
-        onlineSeconds: this.onlineSeconds + onlineSeconds,
-      );
+  }) => TrafficBucket(
+    startMs: startMs,
+    rxBytes: rxBytes + rx,
+    txBytes: txBytes + tx,
+    sessions: this.sessions + sessions,
+    onlineSeconds: this.onlineSeconds + onlineSeconds,
+  );
 
   Map<String, Object> toJson() => <String, Object>{
-        't': startMs,
-        'r': rxBytes,
-        'u': txBytes,
-        's': sessions,
-        'o': onlineSeconds,
-      };
+    't': startMs,
+    'r': rxBytes,
+    'u': txBytes,
+    's': sessions,
+    'o': onlineSeconds,
+  };
 
   static TrafficBucket fromJson(Map<String, dynamic> json) => TrafficBucket(
-        startMs: (json['t'] as num).toInt(),
-        rxBytes: (json['r'] as num?)?.toInt() ?? 0,
-        txBytes: (json['u'] as num?)?.toInt() ?? 0,
-        sessions: (json['s'] as num?)?.toInt() ?? 0,
-        onlineSeconds: (json['o'] as num?)?.toInt() ?? 0,
-      );
+    startMs: (json['t'] as num).toInt(),
+    rxBytes: (json['r'] as num?)?.toInt() ?? 0,
+    txBytes: (json['u'] as num?)?.toInt() ?? 0,
+    sessions: (json['s'] as num?)?.toInt() ?? 0,
+    onlineSeconds: (json['o'] as num?)?.toInt() ?? 0,
+  );
 }
 
 /// Aggregated totals for a user-selected period.
@@ -120,7 +119,9 @@ extension TrafficPeriodExtension on TrafficPeriod {
 /// * The service is a [ChangeNotifier] so the stats screen can rebuild
 ///   automatically as new samples land.
 class TrafficStatsService extends ChangeNotifier {
-  TrafficStatsService();
+  TrafficStatsService({DateTime Function()? now}) : _now = now ?? DateTime.now;
+
+  final DateTime Function() _now;
 
   static const String _prefsKey = 'rabochiy_traffic_buckets_v1';
   static const Duration _retainFor = Duration(days: 366);
@@ -149,8 +150,9 @@ class TrafficStatsService extends ChangeNotifier {
         final List<dynamic> decoded = jsonDecode(raw) as List<dynamic>;
         for (final dynamic item in decoded) {
           if (item is Map) {
-            final TrafficBucket b =
-                TrafficBucket.fromJson(Map<String, dynamic>.from(item));
+            final TrafficBucket b = TrafficBucket.fromJson(
+              Map<String, dynamic>.from(item),
+            );
             _buckets[b.startMs] = b;
           }
         }
@@ -169,22 +171,14 @@ class TrafficStatsService extends ChangeNotifier {
     if (_disposed) return;
     _lastSampleRx = 0;
     _lastSampleTx = 0;
-    _lastTickMs = DateTime.now().millisecondsSinceEpoch;
-    _bump(
-      rx: 0,
-      tx: 0,
-      sessionsDelta: 1,
-      onlineDelta: 0,
-    );
+    _lastTickMs = _now().millisecondsSinceEpoch;
+    _bump(rx: 0, tx: 0, sessionsDelta: 1, onlineDelta: 0);
   }
 
   /// Called roughly once a second while connected with the cumulative
   /// RX / TX counters from the VPN engine. The service derives a delta and
   /// attributes it to the current wall-clock hour bucket.
-  void recordSample({
-    required int totalRxBytes,
-    required int totalTxBytes,
-  }) {
+  void recordSample({required int totalRxBytes, required int totalTxBytes}) {
     if (!_loaded || _disposed) return;
 
     // Engine counters reset to 0 whenever the tunnel restarts. If we see a
@@ -192,14 +186,12 @@ class TrafficStatsService extends ChangeNotifier {
     // delta baseline so we don't subtract anything from the history.
     int rxDelta = totalRxBytes - _lastSampleRx;
     int txDelta = totalTxBytes - _lastSampleTx;
-    if (rxDelta < 0 || txDelta < 0) {
-      rxDelta = math.max(totalRxBytes, 0);
-      txDelta = math.max(totalTxBytes, 0);
-    }
+    if (rxDelta < 0) rxDelta = math.max(totalRxBytes, 0);
+    if (txDelta < 0) txDelta = math.max(totalTxBytes, 0);
     _lastSampleRx = totalRxBytes;
     _lastSampleTx = totalTxBytes;
 
-    final int nowMs = DateTime.now().millisecondsSinceEpoch;
+    final int nowMs = _now().millisecondsSinceEpoch;
     final int onlineDelta = _lastTickMs > 0
         ? ((nowMs - _lastTickMs) ~/ 1000).clamp(0, 3600)
         : 0;
@@ -207,12 +199,7 @@ class TrafficStatsService extends ChangeNotifier {
 
     if (rxDelta <= 0 && txDelta <= 0 && onlineDelta <= 0) return;
 
-    _bump(
-      rx: rxDelta,
-      tx: txDelta,
-      sessionsDelta: 0,
-      onlineDelta: onlineDelta,
-    );
+    _bump(rx: rxDelta, tx: txDelta, sessionsDelta: 0, onlineDelta: onlineDelta);
   }
 
   /// Forgets the "last seen" counters so the next sample won't contribute
@@ -235,7 +222,7 @@ class TrafficStatsService extends ChangeNotifier {
       );
     }
 
-    final int nowMs = DateTime.now().millisecondsSinceEpoch;
+    final int nowMs = _now().millisecondsSinceEpoch;
     final Duration? lookback = period.lookback;
     final int fromMs = lookback == null ? 0 : nowMs - lookback.inMilliseconds;
 
@@ -244,10 +231,17 @@ class TrafficStatsService extends ChangeNotifier {
     int sessions = 0;
     int online = 0;
 
-    final List<TrafficBucket> sorted = _buckets.values
-        .where((TrafficBucket b) => b.startMs >= fromMs)
-        .toList(growable: false)
-      ..sort((TrafficBucket a, TrafficBucket b) => a.startMs.compareTo(b.startMs));
+    final List<TrafficBucket> sorted =
+        _buckets.values
+            .where(
+              (TrafficBucket b) =>
+                  b.startMs + const Duration(hours: 1).inMilliseconds > fromMs,
+            )
+            .toList(growable: false)
+          ..sort(
+            (TrafficBucket a, TrafficBucket b) =>
+                a.startMs.compareTo(b.startMs),
+          );
 
     for (final TrafficBucket b in sorted) {
       rx += b.rxBytes;
@@ -294,7 +288,8 @@ class TrafficStatsService extends ChangeNotifier {
     required int onlineDelta,
   }) {
     final int hourStartMs = _currentHourStartMs();
-    final TrafficBucket existing = _buckets[hourStartMs] ??
+    final TrafficBucket existing =
+        _buckets[hourStartMs] ??
         TrafficBucket(
           startMs: hourStartMs,
           rxBytes: 0,
@@ -314,10 +309,9 @@ class TrafficStatsService extends ChangeNotifier {
   }
 
   int _currentHourStartMs() {
-    final DateTime now = DateTime.now();
-    final DateTime hourStart =
-        DateTime(now.year, now.month, now.day, now.hour);
-    return hourStart.millisecondsSinceEpoch;
+    const hourMs = Duration(hours: 1);
+    return (_now().millisecondsSinceEpoch ~/ hourMs.inMilliseconds) *
+        hourMs.inMilliseconds;
   }
 
   void _scheduleFlush() {
@@ -343,10 +337,7 @@ class TrafficStatsService extends ChangeNotifier {
   }
 
   void _pruneOld() {
-    final int threshold = DateTime.now()
-        .subtract(_retainFor)
-        .millisecondsSinceEpoch;
+    final int threshold = _now().subtract(_retainFor).millisecondsSinceEpoch;
     _buckets.removeWhere((int start, _) => start < threshold);
   }
 }
-

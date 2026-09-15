@@ -52,8 +52,9 @@ class _ServerListScreenState extends State<ServerListScreen> {
       maxChildSize: 0.95,
       expand: false,
       builder: (context, scrollController) {
-        const BorderRadius sheetRadius =
-            BorderRadius.vertical(top: Radius.circular(28));
+        const BorderRadius sheetRadius = BorderRadius.vertical(
+          top: Radius.circular(28),
+        );
         return ClipRRect(
           borderRadius: sheetRadius,
           child: Stack(
@@ -79,25 +80,38 @@ class _ServerListScreenState extends State<ServerListScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
                         children: <Widget>[
-                          Text(
-                            l10n.selectServer,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
+                          Expanded(
+                            child: Text(
+                              l10n.selectServer,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                          const Spacer(),
+                          Consumer<AppProvider>(
+                            builder: (context, provider, _) => IconButton(
+                              tooltip: l10n.refresh,
+                              onPressed: provider.isLoading
+                                  ? null
+                                  : provider.loadServers,
+                              icon: const Icon(Icons.refresh_rounded),
+                            ),
+                          ),
                           PressScale(
                             onTap: () => Navigator.pop(context),
                             pressedScale: 0.9,
                             child: const SizedBox(
-                              width: 36,
-                              height: 36,
+                              width: 48,
+                              height: 48,
                               child: LiquidTile(
                                 padding: EdgeInsets.zero,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(12)),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(12),
+                                ),
                                 elevated: false,
                                 compact: true,
                                 child: Center(
@@ -117,25 +131,29 @@ class _ServerListScreenState extends State<ServerListScreen> {
                     // Protocol filter chips
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
                         children: [
                           _FilterChip(
                             label: l10n.filterAll,
                             selected: _protocolFilter == null,
                             onTap: () => setState(() => _protocolFilter = null),
                           ),
-                          const SizedBox(width: 8),
                           _FilterChip(
                             label: 'AmneziaWG 3.1',
                             selected: _protocolFilter == ServerProtocol.awg,
-                            onTap: () => setState(() => _protocolFilter = ServerProtocol.awg),
+                            onTap: () => setState(
+                              () => _protocolFilter = ServerProtocol.awg,
+                            ),
                             color: AppColors.emerald,
                           ),
-                          const SizedBox(width: 8),
                           _FilterChip(
                             label: 'GW',
                             selected: _protocolFilter == ServerProtocol.gw,
-                            onTap: () => setState(() => _protocolFilter = ServerProtocol.gw),
+                            onTap: () => setState(
+                              () => _protocolFilter = ServerProtocol.gw,
+                            ),
                             color: AppColors.teal,
                           ),
                         ],
@@ -145,14 +163,36 @@ class _ServerListScreenState extends State<ServerListScreen> {
                     Expanded(
                       child: Consumer<AppProvider>(
                         builder: (context, provider, _) {
-                          final List<ServerConfig> allServers = provider.servers.toList()
-                            ..sort((a, b) {
-                              if (a.protocol == b.protocol) return 0;
-                              return a.protocol == ServerProtocol.awg ? -1 : 1;
-                            });
-                          final List<ServerConfig> servers = _protocolFilter == null
+                          final List<ServerConfig> allServers =
+                              provider.servers.toList()..sort((a, b) {
+                                if (a.protocol == b.protocol) return 0;
+                                return a.protocol == ServerProtocol.awg
+                                    ? -1
+                                    : 1;
+                              });
+                          final List<ServerConfig> servers =
+                              _protocolFilter == null
                               ? allServers
-                              : allServers.where((s) => s.protocol == _protocolFilter).toList();
+                              : allServers
+                                    .where((s) => s.protocol == _protocolFilter)
+                                    .toList();
+                          final errorBanner = provider.catalogError == null
+                              ? null
+                              : Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  child: Text(
+                                    provider.catalogError ==
+                                            'api_not_configured'
+                                        ? l10n.apiConfigurationError
+                                        : l10n.failedToLoadServers,
+                                    key: const ValueKey('catalog-error'),
+                                    style: const TextStyle(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                );
 
                           if (provider.isLoading && allServers.isEmpty) {
                             return const Center(
@@ -164,37 +204,45 @@ class _ServerListScreenState extends State<ServerListScreen> {
                           }
 
                           if (servers.isEmpty && !provider.isLoading) {
-                            return Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.dns_outlined,
-                                    color: Colors.white.withOpacity(0.3),
-                                    size: 48,
-                                  ),
-                                  const SizedBox(height: 12),
+                            return ListView(
+                              controller: scrollController,
+                              padding: const EdgeInsets.all(16),
+                              children: [
+                                Icon(
+                                  Icons.dns_outlined,
+                                  color: Colors.white.withValues(alpha: 0.3),
+                                  size: 48,
+                                ),
+                                const SizedBox(height: 12),
+                                if (errorBanner != null)
+                                  errorBanner
+                                else
                                   Text(
                                     l10n.serversNotFound,
+                                    textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.5),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.5,
+                                      ),
                                       fontSize: 15,
                                     ),
                                   ),
-                                ],
-                              ),
+                              ],
                             );
                           }
 
+                          final headerCount = errorBanner == null ? 1 : 2;
                           return ListView.separated(
                             controller: scrollController,
-                            padding: const EdgeInsets.fromLTRB(
-                                16, 0, 16, 24),
-                            itemCount: servers.length + 1,
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                            itemCount: servers.length + headerCount,
                             separatorBuilder: (_, _) =>
                                 const SizedBox(height: 8),
                             itemBuilder: (context, index) {
-                              if (index == 0) {
+                              if (errorBanner != null && index == 0) {
+                                return errorBanner;
+                              }
+                              if (index == headerCount - 1) {
                                 return _AutoTile(
                                   selected: provider.isAutoSelect,
                                   onTap: () {
@@ -204,11 +252,10 @@ class _ServerListScreenState extends State<ServerListScreen> {
                                 );
                               }
                               final ServerConfig server =
-                                  servers[index - 1];
+                                  servers[index - headerCount];
                               final bool selected =
                                   !provider.isAutoSelect &&
-                                      provider.selectedServer?.id ==
-                                          server.id;
+                                  provider.selectedServer?.id == server.id;
                               return _ServerTile(
                                 server: server,
                                 selected: selected,
@@ -259,7 +306,7 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final textColor = selected
         ? (color ?? AppColors.emerald)
-        : Colors.white.withOpacity(0.6);
+        : Colors.white.withValues(alpha: 0.6);
 
     return PressScale(
       onTap: onTap,
@@ -298,9 +345,7 @@ class _AutoTile extends StatelessWidget {
       pressedScale: 0.98,
       child: GlassCard(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        tint: selected
-            ? AppColors.emerald.withValues(alpha: 0.10)
-            : null,
+        tint: selected ? AppColors.emerald.withValues(alpha: 0.10) : null,
         child: Row(
           children: <Widget>[
             Container(
@@ -421,8 +466,7 @@ class _ServerTile extends StatelessWidget {
                       ),
                     ),
                     const CompactBorder(
-                      borderRadius:
-                          BorderRadius.all(Radius.circular(999)),
+                      borderRadius: BorderRadius.all(Radius.circular(999)),
                     ),
                   ],
                 ),
@@ -452,9 +496,12 @@ class _ServerTile extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: _protocolColor.withOpacity(0.15),
+                          color: _protocolColor.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(

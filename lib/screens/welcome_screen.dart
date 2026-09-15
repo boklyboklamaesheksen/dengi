@@ -35,61 +35,70 @@ class WelcomeScreen extends StatelessWidget {
       body: HaloField(
         active: true,
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                    const Spacer(flex: 4),
-                    _BrandLogo(),
-                    const SizedBox(height: 28),
-                    const Text(
-                      'RABOCHIY VPN',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 4.2,
-                      ),
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const Spacer(flex: 4),
+                        _BrandLogo(),
+                        const SizedBox(height: 28),
+                        Text(
+                          l10n.appTitle,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 4.2,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          l10n.welcomeSubtitle,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: 14,
+                            height: 1.5,
+                          ),
+                        ),
+                        const Spacer(flex: 5),
+                        _PrimaryAction(
+                          label: l10n.welcomeCreateNew,
+                          onTap: () => _createNewAccount(context),
+                        ),
+                        const SizedBox(height: 14),
+                        _SecondaryAction(
+                          label: l10n.welcomeRestoreMnemonic,
+                          onTap: () => _restoreFromMnemonic(context),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          l10n.welcomeFooter,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.35),
+                            fontSize: 11.5,
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                      ],
                     ),
-                    const SizedBox(height: 14),
-                    Text(
-                      l10n.welcomeSubtitle,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
-                        fontSize: 14,
-                        height: 1.5,
-                      ),
-                    ),
-                    const Spacer(flex: 5),
-                    _PrimaryAction(
-                      label: l10n.welcomeCreateNew,
-                      onTap: () => _createNewAccount(context),
-                    ),
-                    const SizedBox(height: 14),
-                    _SecondaryAction(
-                      label: l10n.welcomeRestoreMnemonic,
-                      onTap: () => _restoreFromMnemonic(context),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      l10n.welcomeFooter,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.35),
-                        fontSize: 11.5,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
-        );
+        ),
+      ),
+    );
   }
 }
 
@@ -133,8 +142,8 @@ class _PrimaryAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return PressScale(
       onTap: onTap,
-      child: SizedBox(
-        height: 58,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 58),
         child: LiquidTile(
           borderRadius: AppRadii.tile,
           accent: AppColors.emerald,
@@ -142,6 +151,7 @@ class _PrimaryAction extends StatelessWidget {
           child: Center(
             child: Text(
               label,
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 15,
@@ -166,13 +176,14 @@ class _SecondaryAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return PressScale(
       onTap: onTap,
-      child: SizedBox(
-        height: 58,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 58),
         child: LiquidTile(
           borderRadius: AppRadii.tile,
           child: Center(
             child: Text(
               label,
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 14.5,

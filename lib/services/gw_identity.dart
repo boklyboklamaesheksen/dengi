@@ -24,13 +24,13 @@ class GwIdentity {
 
   static final ECDomainParameters _domain = ECDomainParameters('secp256k1');
   static final BigInt _n = _domain.n;
-  static final ECPoint _G = _domain.G;
+  static final ECPoint _generator = _domain.G;
 
   /// Identity derived from the mnemonic phrase.
   static GwIdentity fromMnemonic(String mnemonic) {
     final digest = sha256.convert(utf8.encode(mnemonic.trim())).bytes;
     final priv = _bytesToBigInt(Uint8List.fromList(digest)) % _n;
-    final pubPoint = (_G * priv)!;
+    final pubPoint = (_generator * priv)!;
     final x = _bigIntTo32(pubPoint.x!.toBigInteger()!);
     final y = _bigIntTo32(pubPoint.y!.toBigInteger()!);
     return GwIdentity._(priv, _toHex(x) + _toHex(y));
@@ -51,7 +51,8 @@ class GwIdentity {
       final uncompressed = Uint8List(65)..[0] = 4;
       uncompressed.setRange(1, 65, ephBytes);
       ephPoint = curve.decodePoint(uncompressed)!;
-    } else if (ephBytes.length == 65 && ephBytes[0] == 0) {
+    } else if (ephBytes.length == 65 &&
+        (ephBytes[0] == 0 || ephBytes[0] == 4)) {
       final uncompressed = Uint8List(65)..[0] = 4;
       uncompressed.setRange(1, 65, ephBytes.sublist(1));
       ephPoint = curve.decodePoint(uncompressed)!;
@@ -64,8 +65,10 @@ class GwIdentity {
     final sharedX = _bigIntTo32(sharedPoint!.x!.toBigInteger()!);
 
     // key = SHA-256(shared_X || "gw|key")
-    final keyMaterial =
-        Uint8List.fromList([...sharedX, ...utf8.encode(keyLabel)]);
+    final keyMaterial = Uint8List.fromList([
+      ...sharedX,
+      ...utf8.encode(keyLabel),
+    ]);
     final aesKey = Uint8List.fromList(sha256.convert(keyMaterial).bytes);
 
     final iv = base64Decode(ivBase64);
@@ -118,6 +121,9 @@ class GwIdentity {
     final clean = hex.trim().toLowerCase().startsWith('0x')
         ? hex.trim().substring(2)
         : hex.trim();
+    if (clean.length.isOdd) {
+      throw const FormatException('Odd-length public key');
+    }
     final out = Uint8List(clean.length ~/ 2);
     for (var i = 0; i < out.length; i++) {
       out[i] = int.parse(clean.substring(i * 2, i * 2 + 2), radix: 16);

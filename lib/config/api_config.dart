@@ -10,7 +10,25 @@
 class ApiConfig {
   /// Backend domain (auth, server catalogue, tariffs, payments, GW nodes).
   /// Remote Config key: `api_base_url`
-  static String baseUrl = 'https://mc.yarik.app';
+  static const _override = String.fromEnvironment('RABOCHIY_API_BASE');
+  static String baseUrl = _override.isEmpty
+      ? 'https://mc.yarik.app'
+      : _override;
+
+  static bool applyRemoteBaseUrl(String value) {
+    if (_override.isNotEmpty) return false;
+    final uri = Uri.tryParse(value.trim());
+    if (uri == null ||
+        uri.scheme != 'https' ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty ||
+        uri.hasQuery ||
+        uri.hasFragment) {
+      return false;
+    }
+    baseUrl = uri.toString().replaceAll(RegExp(r'/+$'), '');
+    return true;
+  }
 
   // Local debugging (set manually when needed):
   //   Android emulator:      'http://10.0.2.2:3004'

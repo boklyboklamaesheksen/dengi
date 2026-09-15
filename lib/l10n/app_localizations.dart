@@ -12,7 +12,7 @@ import 'app_localizations_eu.dart';
 /// EN/RU are hand-written; EU catalogues are generated and bundled offline.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -25,11 +25,11 @@ abstract class AppLocalizations {
 
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
@@ -89,6 +89,7 @@ abstract class AppLocalizations {
   String get refresh;
   String get serverNotSelected;
   String get failedToLoadServers;
+  String get apiConfigurationError;
   String serversCount(num count);
 
   // Settings
@@ -300,10 +301,9 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      AppLocalizations.supportedLocales.any(
-        (supported) => supported.languageCode == locale.languageCode,
-      );
+  bool isSupported(Locale locale) => AppLocalizations.supportedLocales.any(
+    (supported) => supported.languageCode == locale.languageCode,
+  );
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;

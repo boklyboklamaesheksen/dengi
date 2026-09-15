@@ -1,4 +1,5 @@
 {
+  "apiConfigurationError": "De API-configuratie ontbreekt in deze versie. Installeer een geconfigureerde versie of neem contact op met support.",
   "connect": "Verbinden",
   "disconnect": "Verbinding verbreken",
   "connected": "Verbonden",

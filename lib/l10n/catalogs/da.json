@@ -1,4 +1,5 @@
 {
+  "apiConfigurationError": "Denne version mangler API-konfiguration. Installér en konfigureret udgave, eller kontakt support.",
   "connect": "Forbind",
   "disconnect": "Afbryd",
   "connected": "Forbundet",

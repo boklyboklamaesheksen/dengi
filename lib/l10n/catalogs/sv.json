@@ -1,4 +1,5 @@
 {
+  "apiConfigurationError": "Den här versionen saknar API-konfiguration. Installera en konfigurerad version eller kontakta supporten.",
   "connect": "Anslut",
   "disconnect": "Koppla från",
   "connected": "Ansluten",

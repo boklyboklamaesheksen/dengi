@@ -1,4 +1,5 @@
 {
+  "apiConfigurationError": "Falta a configuração da API nesta versão. Instale uma versão configurada ou contacte o apoio.",
   "connect": "Ligar",
   "disconnect": "Desligar",
   "connected": "Ligado",

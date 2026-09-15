@@ -302,7 +302,9 @@ class VpnService {
     _eventsSub = _events.receiveBroadcastStream().listen(
       (dynamic raw) {
         if (_disposed || raw is! Map ||
-            _currentConfig?.protocol == ServerProtocol.gw) return;
+            _currentConfig?.protocol == ServerProtocol.gw) {
+          return;
+        }
         final status = EngineStatus.fromMap(raw);
         _engineStatusController.add(status);
 
