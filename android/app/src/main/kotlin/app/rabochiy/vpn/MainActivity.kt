@@ -264,7 +264,15 @@ class MainActivity : FlutterActivity() {
                             "awg" -> awgManager?.connect(remark, awgConfig, blockedApps)
                             else -> Result.failure(IllegalArgumentException("Unknown protocol: $protocol"))
                         }
-                        result.success(connectResult?.isSuccess ?: false)
+                        val failure = connectResult?.exceptionOrNull()
+                        if (failure is java.net.SocketTimeoutException) {
+                            // Tunnel came up but the server never answered the
+                            // handshake — surface a dedicated code so the UI can
+                            // say "server unreachable" instead of "engine broken".
+                            result.error("AWG_HANDSHAKE_TIMEOUT", "awg_handshake_timeout", null)
+                        } else {
+                            result.success(connectResult?.isSuccess ?: false)
+                        }
                     } catch (e: Exception) {
                         android.util.Log.e("MainActivity", "Connect failed", e)
                         result.error("CONNECT_ERROR", e.message, e.stackTraceToString())

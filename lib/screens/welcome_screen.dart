@@ -142,23 +142,18 @@ class _PrimaryAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return PressScale(
       onTap: onTap,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 58),
-        child: LiquidTile(
-          borderRadius: AppRadii.tile,
-          accent: AppColors.emerald,
-          selected: true,
-          child: Center(
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.6,
-              ),
-            ),
+      child: LiquidTile(
+        borderRadius: AppRadii.tile,
+        padding: EdgeInsets.zero,
+        accent: AppColors.emerald,
+        selected: true,
+        child: _ActionLabel(
+          label: label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.6,
           ),
         ),
       ),
@@ -176,22 +171,44 @@ class _SecondaryAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return PressScale(
       onTap: onTap,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 58),
-        child: LiquidTile(
-          borderRadius: AppRadii.tile,
-          child: Center(
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 14.5,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.4,
-              ),
-            ),
+      child: LiquidTile(
+        borderRadius: AppRadii.tile,
+        padding: EdgeInsets.zero,
+        child: _ActionLabel(
+          label: label,
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 14.5,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.4,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Same slab geometry as the home-screen `PrimaryAction` (58 px tall,
+/// label centred on both axes). The min-height lives *inside* the tile:
+/// `LiquidTile` stacks its fill with loose constraints, so a min-height
+/// applied outside lets the fill shrink-wrap the text and pin it to the
+/// top edge. Long translations at large text scales still wrap.
+class _ActionLabel extends StatelessWidget {
+  const _ActionLabel({required this.label, required this.style});
+
+  static const double _height = 58;
+
+  final String label;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: _height),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Text(label, textAlign: TextAlign.center, style: style),
         ),
       ),
     );

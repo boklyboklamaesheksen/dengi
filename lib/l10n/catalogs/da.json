@@ -101,6 +101,7 @@
   "errorVpnPermission": "Tillad VPN-forbindelsen i systemindstillingerne",
   "errorEngineNotReady": "VPN-motoren er ikke klar. Genstart appen.",
   "errorPlatformUnsupported": "VPN understøttes i øjeblikket kun på Android",
+  "errorServerUnreachable": "Serveren svarede ikke. Prøv en anden server, eller tjek din forbindelse.",
   "loginTitle": "Gendan konto",
   "loginSubtitle": "Indtast din gendannelsesfrase på 12 ord for at gendanne kontoen på denne enhed.",
   "loginPlaceholder": "ord1 ord2 ord3 … ord12",

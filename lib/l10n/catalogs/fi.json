@@ -101,6 +101,7 @@
   "errorVpnPermission": "Salli VPN-yhteys järjestelmäasetuksissa",
   "errorEngineNotReady": "VPN-moottori ei ole vielä valmis. Käynnistä sovellus uudelleen.",
   "errorPlatformUnsupported": "VPN on tällä hetkellä tuettu vain Androidissa",
+  "errorServerUnreachable": "Palvelin ei vastaa. Kokeile toista palvelinta tai tarkista yhteytesi.",
   "loginTitle": "Palauta tili",
   "loginSubtitle": "Palauta tilisi tähän laitteeseen antamalla 12 sanan palautuslause.",
   "loginPlaceholder": "sana1 sana2 sana3 … sana12",

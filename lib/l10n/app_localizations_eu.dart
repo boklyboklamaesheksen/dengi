@@ -211,6 +211,8 @@ class AppLocalizationsEu extends AppLocalizations {
   @override
   String get errorPlatformUnsupported => _messages['errorPlatformUnsupported']!;
   @override
+  String get errorServerUnreachable => _messages['errorServerUnreachable']!;
+  @override
   String get loginTitle => _messages['loginTitle']!;
   @override
   String get loginSubtitle => _messages['loginSubtitle']!;
@@ -505,6 +507,7 @@ const _catalogues = <String, Map<String, String>>{
     "errorNoServerSelected": "Choisissez un serveur pour vous connecter",
     "errorNoServers": "Aucun serveur disponible pour le moment",
     "errorPlatformUnsupported": "Le VPN est actuellement disponible uniquement sur Android",
+    "errorServerUnreachable": "Le serveur ne répond pas. Essayez un autre serveur ou vérifiez votre connexion.",
     "errorVpnPermission": "Autorisez la connexion VPN dans les paramètres système",
     "failedToLoadServers": "Impossible de charger les serveurs",
     "filterAll": "Tous",
@@ -711,6 +714,7 @@ const _catalogues = <String, Map<String, String>>{
     "errorNoServerSelected": "Kies een server om te verbinden",
     "errorNoServers": "Er zijn nu geen servers beschikbaar",
     "errorPlatformUnsupported": "VPN wordt momenteel alleen op Android ondersteund",
+    "errorServerUnreachable": "De server reageert niet. Probeer een andere server of controleer je verbinding.",
     "errorVpnPermission": "Sta de VPN-verbinding toe in de systeeminstellingen",
     "failedToLoadServers": "Servers laden mislukt",
     "filterAll": "Alle",
@@ -917,6 +921,7 @@ const _catalogues = <String, Map<String, String>>{
     "errorNoServerSelected": "Wählen Sie einen Server aus",
     "errorNoServers": "Zurzeit sind keine Server verfügbar",
     "errorPlatformUnsupported": "VPN wird derzeit nur auf Android unterstützt",
+    "errorServerUnreachable": "Der Server antwortet nicht. Versuchen Sie einen anderen Server oder prüfen Sie Ihre Verbindung.",
     "errorVpnPermission": "Erlauben Sie die VPN-Verbindung in den Systemeinstellungen",
     "failedToLoadServers": "Server konnten nicht geladen werden",
     "filterAll": "Alle",
@@ -1123,6 +1128,7 @@ const _catalogues = <String, Map<String, String>>{
     "errorNoServerSelected": "Elige un servidor para conectarte",
     "errorNoServers": "No hay servidores disponibles en este momento",
     "errorPlatformUnsupported": "La VPN solo está disponible en Android por ahora",
+    "errorServerUnreachable": "El servidor no responde. Prueba otro servidor o comprueba tu conexión.",
     "errorVpnPermission": "Permite la conexión VPN en los ajustes del sistema",
     "failedToLoadServers": "No se han podido cargar los servidores",
     "filterAll": "Todos",
@@ -1329,6 +1335,7 @@ const _catalogues = <String, Map<String, String>>{
     "errorNoServerSelected": "Scegli un server a cui connetterti",
     "errorNoServers": "Nessun server disponibile al momento",
     "errorPlatformUnsupported": "La VPN è attualmente disponibile solo su Android",
+    "errorServerUnreachable": "Il server non risponde. Prova un altro server o controlla la connessione.",
     "errorVpnPermission": "Autorizza la connessione VPN nelle impostazioni di sistema",
     "failedToLoadServers": "Impossibile caricare i server",
     "filterAll": "Tutti",
@@ -1535,6 +1542,7 @@ const _catalogues = <String, Map<String, String>>{
     "errorNoServerSelected": "Wybierz serwer, aby się połączyć",
     "errorNoServers": "Brak dostępnych serwerów",
     "errorPlatformUnsupported": "VPN jest obecnie dostępny tylko na Androidzie",
+    "errorServerUnreachable": "Serwer nie odpowiada. Wybierz inny serwer lub sprawdź połączenie.",
     "errorVpnPermission": "Zezwól na połączenie VPN w ustawieniach systemowych",
     "failedToLoadServers": "Nie udało się wczytać serwerów",
     "filterAll": "Wszystkie",
@@ -1743,6 +1751,7 @@ const _catalogues = <String, Map<String, String>>{
     "errorNoServerSelected": "Escolha um servidor para se ligar",
     "errorNoServers": "Não existem servidores disponíveis de momento",
     "errorPlatformUnsupported": "A VPN só é suportada em Android de momento",
+    "errorServerUnreachable": "O servidor não respondeu. Experimente outro servidor ou verifique a ligação.",
     "errorVpnPermission": "Autorize a ligação VPN nas definições do sistema",
     "failedToLoadServers": "Não foi possível carregar os servidores",
     "filterAll": "Todos",
@@ -1949,6 +1958,7 @@ const _catalogues = <String, Map<String, String>>{
     "errorNoServerSelected": "Alege un server pentru conectare",
     "errorNoServers": "Nu există servere disponibile momentan",
     "errorPlatformUnsupported": "VPN-ul este disponibil momentan doar pe Android",
+    "errorServerUnreachable": "Serverul nu răspunde. Încearcă alt server sau verifică conexiunea.",
     "errorVpnPermission": "Permite conexiunea VPN în setările sistemului",
     "failedToLoadServers": "Serverele nu au putut fi încărcate",
     "filterAll": "Toate",
@@ -2156,6 +2166,7 @@ const _catalogues = <String, Map<String, String>>{
     "errorNoServerSelected": "Välj en server att ansluta till",
     "errorNoServers": "Inga servrar är tillgängliga just nu",
     "errorPlatformUnsupported": "VPN stöds för närvarande bara på Android",
+    "errorServerUnreachable": "Servern svarar inte. Prova en annan server eller kontrollera din anslutning.",
     "errorVpnPermission": "Tillåt VPN-anslutningen i systeminställningarna",
     "failedToLoadServers": "Kunde inte läsa in servrarna",
     "filterAll": "Alla",
@@ -2362,6 +2373,7 @@ const _catalogues = <String, Map<String, String>>{
     "errorNoServerSelected": "Vælg en server at forbinde til",
     "errorNoServers": "Ingen servere er tilgængelige lige nu",
     "errorPlatformUnsupported": "VPN understøttes i øjeblikket kun på Android",
+    "errorServerUnreachable": "Serveren svarede ikke. Prøv en anden server, eller tjek din forbindelse.",
     "errorVpnPermission": "Tillad VPN-forbindelsen i systemindstillingerne",
     "failedToLoadServers": "Kunne ikke indlæse serverne",
     "filterAll": "Alle",
@@ -2568,6 +2580,7 @@ const _catalogues = <String, Map<String, String>>{
     "errorNoServerSelected": "Valitse palvelin yhteyttä varten",
     "errorNoServers": "Palvelimia ei ole tällä hetkellä saatavilla",
     "errorPlatformUnsupported": "VPN on tällä hetkellä tuettu vain Androidissa",
+    "errorServerUnreachable": "Palvelin ei vastaa. Kokeile toista palvelinta tai tarkista yhteytesi.",
     "errorVpnPermission": "Salli VPN-yhteys järjestelmäasetuksissa",
     "failedToLoadServers": "Palvelinten lataaminen epäonnistui",
     "filterAll": "Kaikki",
@@ -2774,6 +2787,7 @@ const _catalogues = <String, Map<String, String>>{
     "errorNoServerSelected": "Vyberte server pro připojení",
     "errorNoServers": "Momentálně nejsou dostupné žádné servery",
     "errorPlatformUnsupported": "VPN je nyní podporována pouze na Androidu",
+    "errorServerUnreachable": "Server neodpovídá. Zkuste jiný server nebo zkontrolujte připojení.",
     "errorVpnPermission": "Povolte připojení VPN v nastavení systému",
     "failedToLoadServers": "Servery se nepodařilo načíst",
     "filterAll": "Vše",

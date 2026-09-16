@@ -22,6 +22,8 @@ String localiseError(String? code, AppLocalizations l10n) {
       return l10n.errorEngineNotReady;
     case 'platform_unsupported':
       return l10n.errorPlatformUnsupported;
+    case 'awg_handshake_timeout':
+      return l10n.errorServerUnreachable;
     default:
       // Unknown code or a raw native error message — surface verbatim
       // wrapped in the generic prefix so operators see what the

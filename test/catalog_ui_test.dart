@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:rabochiy_vpn/config/app_theme.dart';
 import 'package:rabochiy_vpn/config/backend_signing.dart';
 import 'package:rabochiy_vpn/l10n/app_localizations.dart';
+import 'package:rabochiy_vpn/motion/glass.dart';
 import 'package:rabochiy_vpn/providers/app_provider.dart';
 import 'package:rabochiy_vpn/screens/server_list_screen.dart';
 import 'package:rabochiy_vpn/screens/welcome_screen.dart';
@@ -143,7 +144,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(gwServer.country), findsOneWidget);
     expect(find.byKey(const ValueKey('catalog-error')), findsOneWidget);
-    expect(find.byTooltip('Обновить'), findsOneWidget);
+    // The header holds only the title and the close button — no refresh
+    // control (the catalogue reloads automatically every time the sheet
+    // opens).
+    expect(find.byIcon(Icons.refresh_rounded), findsNothing);
+    expect(find.byIcon(Icons.close_rounded), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     if (const bool.fromEnvironment('CAPTURE_UI_PROOF')) {
@@ -160,7 +165,7 @@ void main() {
     }
 
     api.fetch = () async => throw const BackendConfigurationException();
-    await tester.tap(find.byTooltip('Обновить'));
+    await provider.loadServers();
     await tester.pumpAndSettle();
     expect(
       find.text(
@@ -170,9 +175,96 @@ void main() {
     );
     expect(find.text(gwServer.country), findsOneWidget);
     api.fetch = () async => [awgServer];
-    await tester.tap(find.byTooltip('Обновить'));
+    await provider.loadServers();
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('catalog-error')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('protocol filter chips are left-aligned in one row', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(396, 800);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final provider = AppProvider(
+      apiService: FakeApi(fetch: () async => [awgServer]),
+      gwApiService: FakeGwApi(fetch: () async => [gwServer]),
+      autoInitialize: false,
+    );
+    addTearDown(provider.dispose);
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: provider,
+        child: MaterialApp(
+          theme: AppTheme.darkTheme,
+          locale: const Locale('ru'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: const Scaffold(body: ServerListScreen()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final l10n = lookupAppLocalizations(const Locale('ru'));
+    // Server tiles carry a protocol badge with the same label, so scope
+    // the lookup to the chip row (chips are 13 px, badges 10 px).
+    Finder chip(String label) => find.byWidgetPredicate(
+      (w) => w is Text && w.data == label && w.style?.fontSize == 13,
+    );
+    final Rect all = tester.getRect(chip(l10n.filterAll));
+    final Rect awg = tester.getRect(chip('AmneziaWG 3.1'));
+    final Rect gw = tester.getRect(chip('GW'));
+    final Rect title = tester.getRect(find.text(l10n.selectServer));
+    // First chip hugs the left edge (16 px sheet padding + 14 px chip
+    // padding) rather than sitting in the middle of the sheet.
+    expect(all.left, lessThan(40));
+    expect(all.left, closeTo(title.left + 10, 1));
+    // Chips share one row, ordered left → right.
+    expect(all.center.dy, closeTo(awg.center.dy, 0.5));
+    expect(awg.center.dy, closeTo(gw.center.dy, 0.5));
+    expect(all.right, lessThan(awg.left));
+    expect(awg.right, lessThan(gw.left));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('welcome buttons centre their labels like the home CTA', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(396, 800);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.darkTheme,
+        locale: const Locale('ru'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const WelcomeScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final l10n = lookupAppLocalizations(const Locale('ru'));
+    for (final label in [l10n.welcomeCreateNew, l10n.welcomeRestoreMnemonic]) {
+      final Finder text = find.text(label);
+      final Finder tile = find.ancestor(
+        of: text,
+        matching: find.byType(LiquidTile),
+      );
+      final Rect tileRect = tester.getRect(tile);
+      final Rect textRect = tester.getRect(text);
+      // Same 58 px slab as the home CTA (the test font is wider than
+      // Roboto and may wrap the label, so only assert the minimum).
+      expect(tileRect.height, greaterThanOrEqualTo(58), reason: label);
+      // Label sits in the middle of the slab on both axes — the previous
+      // layout let the fill shrink-wrap and pinned the text to the top.
+      expect(textRect.center.dy, closeTo(tileRect.center.dy, 1), reason: label);
+      expect(textRect.center.dx, closeTo(tileRect.center.dx, 1), reason: label);
+      expect(textRect.top - tileRect.top, greaterThan(8), reason: label);
+      expect(tileRect.bottom - textRect.bottom, greaterThan(8), reason: label);
+    }
     expect(tester.takeException(), isNull);
   });
 }

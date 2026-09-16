@@ -101,6 +101,7 @@
   "errorVpnPermission": "Zezwól na połączenie VPN w ustawieniach systemowych",
   "errorEngineNotReady": "Silnik VPN nie jest gotowy. Uruchom aplikację ponownie.",
   "errorPlatformUnsupported": "VPN jest obecnie dostępny tylko na Androidzie",
+  "errorServerUnreachable": "Serwer nie odpowiada. Wybierz inny serwer lub sprawdź połączenie.",
   "loginTitle": "Przywróć konto",
   "loginSubtitle": "Wpisz frazę odzyskiwania składającą się z 12 słów, aby przywrócić konto na tym urządzeniu.",
   "loginPlaceholder": "słowo1 słowo2 słowo3 … słowo12",

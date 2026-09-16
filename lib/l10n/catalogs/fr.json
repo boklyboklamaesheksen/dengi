@@ -101,6 +101,7 @@
   "errorVpnPermission": "Autorisez la connexion VPN dans les paramètres système",
   "errorEngineNotReady": "Le moteur VPN n’est pas prêt. Redémarrez l’application.",
   "errorPlatformUnsupported": "Le VPN est actuellement disponible uniquement sur Android",
+  "errorServerUnreachable": "Le serveur ne répond pas. Essayez un autre serveur ou vérifiez votre connexion.",
   "loginTitle": "Restaurer le compte",
   "loginSubtitle": "Saisissez votre phrase de récupération de 12 mots pour retrouver votre compte sur cet appareil.",
   "loginPlaceholder": "mot1 mot2 mot3 … mot12",

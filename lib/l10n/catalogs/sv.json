@@ -101,6 +101,7 @@
   "errorVpnPermission": "Tillåt VPN-anslutningen i systeminställningarna",
   "errorEngineNotReady": "VPN-motorn är inte redo. Starta om appen.",
   "errorPlatformUnsupported": "VPN stöds för närvarande bara på Android",
+  "errorServerUnreachable": "Servern svarar inte. Prova en annan server eller kontrollera din anslutning.",
   "loginTitle": "Återställ konto",
   "loginSubtitle": "Ange återställningsfrasen med 12 ord för att återställa kontot på den här enheten.",
   "loginPlaceholder": "ord1 ord2 ord3 … ord12",
