@@ -4,6 +4,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../config/app_theme.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/error_messages.dart';
 import '../motion/glass.dart';
 import '../motion/press_feedback.dart';
 import '../providers/app_provider.dart';
@@ -69,7 +70,37 @@ class _HomeScreenState extends State<HomeScreen> {
     if (provider.errorMessage == 'premium_required') {
       provider.clearError();
       await _openPremiumScreen();
+      return;
     }
+
+    // The AWG engine now waits for a real handshake before reporting
+    // "connected", so a failed attempt lands here after the timeout. Tell
+    // the user why instead of silently dropping back to "not connected".
+    // A stale error from an earlier flow is ignored while a fresh attempt
+    // is still in flight or already up.
+    final String? error = provider.errorMessage;
+    final VpnStatus after = provider.vpnStatus;
+    if (error != null &&
+        after != VpnStatus.connecting &&
+        after != VpnStatus.connected) {
+      provider.clearError();
+      _showConnectError(localiseError(error, AppLocalizations.of(context)!));
+    }
+  }
+
+  void _showConnectError(String message) {
+    if (message.isEmpty) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 4),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: AppRadii.tile),
+        ),
+      );
   }
 
   TunnelState _tunnelStateFrom(VpnStatus status) {

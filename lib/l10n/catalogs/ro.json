@@ -101,6 +101,7 @@
   "errorVpnPermission": "Permite conexiunea VPN în setările sistemului",
   "errorEngineNotReady": "Motorul VPN nu este încă pregătit. Repornește aplicația.",
   "errorPlatformUnsupported": "VPN-ul este disponibil momentan doar pe Android",
+  "errorServerUnreachable": "Serverul nu răspunde. Încearcă alt server sau verifică conexiunea.",
   "loginTitle": "Restaurează contul",
   "loginSubtitle": "Introdu fraza de recuperare de 12 cuvinte pentru a restaura contul pe acest dispozitiv.",
   "loginPlaceholder": "cuvânt1 cuvânt2 cuvânt3 … cuvânt12",

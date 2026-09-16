@@ -174,6 +174,7 @@ abstract class AppLocalizations {
   String get errorVpnPermission;
   String get errorEngineNotReady;
   String get errorPlatformUnsupported;
+  String get errorServerUnreachable;
   String errorGeneric(String details);
 
   // Login / Restore screen

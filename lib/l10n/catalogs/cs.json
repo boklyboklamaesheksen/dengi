@@ -101,6 +101,7 @@
   "errorVpnPermission": "Povolte připojení VPN v nastavení systému",
   "errorEngineNotReady": "Modul VPN ještě není připraven. Restartujte aplikaci.",
   "errorPlatformUnsupported": "VPN je nyní podporována pouze na Androidu",
+  "errorServerUnreachable": "Server neodpovídá. Zkuste jiný server nebo zkontrolujte připojení.",
   "loginTitle": "Obnovit účet",
   "loginSubtitle": "Zadejte obnovovací frázi o 12 slovech pro obnovení účtu na tomto zařízení.",
   "loginPlaceholder": "slovo1 slovo2 slovo3 … slovo12",

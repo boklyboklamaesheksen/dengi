@@ -92,15 +92,7 @@ class _ServerListScreenState extends State<ServerListScreen> {
                               ),
                             ),
                           ),
-                          Consumer<AppProvider>(
-                            builder: (context, provider, _) => IconButton(
-                              tooltip: l10n.refresh,
-                              onPressed: provider.isLoading
-                                  ? null
-                                  : provider.loadServers,
-                              icon: const Icon(Icons.refresh_rounded),
-                            ),
-                          ),
+                          const SizedBox(width: 12),
                           PressScale(
                             onTap: () => Navigator.pop(context),
                             pressedScale: 0.9,
@@ -128,35 +120,43 @@ class _ServerListScreenState extends State<ServerListScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    // Protocol filter chips
+                    // Protocol filter chips. A bare Wrap shrink-wraps and
+                    // gets centred by the parent Column; forcing it to full
+                    // width keeps the chips pinned to the left edge (they
+                    // still wrap onto a second line on very narrow screens).
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _FilterChip(
-                            label: l10n.filterAll,
-                            selected: _protocolFilter == null,
-                            onTap: () => setState(() => _protocolFilter = null),
-                          ),
-                          _FilterChip(
-                            label: 'AmneziaWG 3.1',
-                            selected: _protocolFilter == ServerProtocol.awg,
-                            onTap: () => setState(
-                              () => _protocolFilter = ServerProtocol.awg,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Wrap(
+                          alignment: WrapAlignment.start,
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _FilterChip(
+                              label: l10n.filterAll,
+                              selected: _protocolFilter == null,
+                              onTap: () =>
+                                  setState(() => _protocolFilter = null),
                             ),
-                            color: AppColors.emerald,
-                          ),
-                          _FilterChip(
-                            label: 'GW',
-                            selected: _protocolFilter == ServerProtocol.gw,
-                            onTap: () => setState(
-                              () => _protocolFilter = ServerProtocol.gw,
+                            _FilterChip(
+                              label: 'AmneziaWG 3.1',
+                              selected: _protocolFilter == ServerProtocol.awg,
+                              onTap: () => setState(
+                                () => _protocolFilter = ServerProtocol.awg,
+                              ),
+                              color: AppColors.emerald,
                             ),
-                            color: AppColors.teal,
-                          ),
-                        ],
+                            _FilterChip(
+                              label: 'GW',
+                              selected: _protocolFilter == ServerProtocol.gw,
+                              onTap: () => setState(
+                                () => _protocolFilter = ServerProtocol.gw,
+                              ),
+                              color: AppColors.teal,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 10),

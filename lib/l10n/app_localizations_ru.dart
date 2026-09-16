@@ -382,6 +382,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'VPN сейчас работает только на Android';
 
   @override
+  String get errorServerUnreachable =>
+      'Сервер не отвечает. Попробуйте другой сервер или проверьте интернет.';
+
+  @override
   String errorGeneric(String details) => 'Ошибка: $details';
 
   // ── Login / Restore screen ───────────────────────────────────────────

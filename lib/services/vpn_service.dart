@@ -69,8 +69,22 @@ class EngineStatus {
 ///  - **EventChannel** `rabochiy_vpn/engine/status` — push status updates
 ///    and traffic counters (1 Hz).
 class VpnService {
+  /// [platformSupported] overrides the `Platform.isAndroid` probe so the
+  /// bridge logic can be exercised from `flutter test` on any host.
+  VpnService({bool? platformSupported})
+      : _platformSupportedOverride = platformSupported;
+
   static const MethodChannel _control = MethodChannel('rabochiy_vpn/engine');
   static const EventChannel _events = EventChannel('rabochiy_vpn/engine/status');
+
+  final bool? _platformSupportedOverride;
+
+  /// Bumped by every connect / disconnect / cancel. A connect attempt
+  /// captures the value and ignores its own late result once the counter
+  /// has moved on — the native AWG connect now blocks until the first
+  /// handshake (or a timeout), so a cancel or server switch routinely
+  /// overlaps an in-flight attempt.
+  int _connectGeneration = 0;
 
   VpnStatus _status = VpnStatus.disconnected;
   ServerConfig? _currentConfig;
@@ -100,7 +114,8 @@ class VpnService {
   /// Whether the platform exposes a real native engine. Used so the
   /// rest of the app behaves gracefully on iOS/desktop where the bridge
   /// is not (yet) implemented.
-  bool get _isPlatformSupported => Platform.isAndroid;
+  bool get _isPlatformSupported =>
+      _platformSupportedOverride ?? Platform.isAndroid;
 
   Future<bool> initialize() async {
     if (_disposed) return false;
@@ -142,12 +157,13 @@ class VpnService {
       _updateStatus(VpnStatus.error);
       return false;
     }
+    if (_status == VpnStatus.connected || _status == VpnStatus.connecting) {
+      await disconnect();
+    }
+    if (_disposed) return false;
+    final int gen = ++_connectGeneration;
+    bool stale() => _disposed || gen != _connectGeneration;
     try {
-      if (_status == VpnStatus.connected || _status == VpnStatus.connecting) {
-        await disconnect();
-      }
-      if (_disposed) return false;
-
       _updateStatus(VpnStatus.connecting);
       _errorMessage = null;
       _currentConfig = config;
@@ -167,7 +183,7 @@ class VpnService {
           excludedApps: excludedApps,
           allowedApps: allowedApps,
         );
-        if (_disposed || _currentConfig != config) return false;
+        if (stale()) return false;
         if (!ok) {
           _errorMessage = 'engine_not_ready';
           _updateStatus(VpnStatus.error);
@@ -176,7 +192,7 @@ class VpnService {
       }
 
       final granted = await _requestPermission();
-      if (_disposed || _currentConfig != config) return false;
+      if (stale()) return false;
       if (!granted) {
         _errorMessage = 'vpn_permission_denied';
         _updateStatus(VpnStatus.disconnected);
@@ -196,22 +212,30 @@ class VpnService {
         if (blockedApps != null && blockedApps.isNotEmpty)
           'blockedApps': blockedApps,
       });
+      if (stale()) return false;
       if (connected != true) {
-        if (_disposed || _currentConfig != config) return false;
         _errorMessage = 'engine_not_ready';
         _updateStatus(VpnStatus.error);
         return false;
       }
       return true;
     } on MissingPluginException {
+      if (stale()) return false;
       _errorMessage = 'engine_not_ready';
       _updateStatus(VpnStatus.error);
       return false;
     } on PlatformException catch (e) {
-      _errorMessage = e.message ?? e.code;
+      if (stale()) return false;
+      // Native AWG engine gave up waiting for the first handshake: the
+      // tunnel was torn down there, so the server (not the engine) is the
+      // problem. Keep the stable code so the UI can localise it.
+      _errorMessage = e.code == 'AWG_HANDSHAKE_TIMEOUT'
+          ? 'awg_handshake_timeout'
+          : (e.message ?? e.code);
       _updateStatus(VpnStatus.error);
       return false;
     } catch (e) {
+      if (stale()) return false;
       _errorMessage = e.toString();
       _updateStatus(VpnStatus.error);
       return false;
@@ -222,6 +246,7 @@ class VpnService {
   /// state: it simply tears the tunnel down (native side rolls back a
   /// half-raised handshake) and parks the UI in `disconnected`.
   Future<void> cancelConnect() async {
+    _connectGeneration++;
     if (!_isPlatformSupported) {
       _updateStatus(VpnStatus.disconnected);
       return;
@@ -243,6 +268,7 @@ class VpnService {
   }
 
   Future<bool> disconnect() async {
+    _connectGeneration++;
     if (!_isPlatformSupported) return true;
     try {
       _updateStatus(VpnStatus.disconnecting);

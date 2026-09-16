@@ -101,6 +101,7 @@
   "errorVpnPermission": "Sta de VPN-verbinding toe in de systeeminstellingen",
   "errorEngineNotReady": "De VPN-engine is nog niet klaar. Start de app opnieuw.",
   "errorPlatformUnsupported": "VPN wordt momenteel alleen op Android ondersteund",
+  "errorServerUnreachable": "De server reageert niet. Probeer een andere server of controleer je verbinding.",
   "loginTitle": "Account herstellen",
   "loginSubtitle": "Voer je herstelzin van 12 woorden in om je account op dit apparaat terug te krijgen.",
   "loginPlaceholder": "woord1 woord2 woord3 … woord12",

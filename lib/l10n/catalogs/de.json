@@ -101,6 +101,7 @@
   "errorVpnPermission": "Erlauben Sie die VPN-Verbindung in den Systemeinstellungen",
   "errorEngineNotReady": "Die VPN-Engine ist noch nicht bereit. Starten Sie die App neu.",
   "errorPlatformUnsupported": "VPN wird derzeit nur auf Android unterstützt",
+  "errorServerUnreachable": "Der Server antwortet nicht. Versuchen Sie einen anderen Server oder prüfen Sie Ihre Verbindung.",
   "loginTitle": "Konto wiederherstellen",
   "loginSubtitle": "Geben Sie Ihre 12-Wort-Wiederherstellungsphrase ein, um das Konto auf diesem Gerät zu nutzen.",
   "loginPlaceholder": "Wort1 Wort2 Wort3 … Wort12",

@@ -364,6 +364,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'VPN is currently supported only on Android';
 
   @override
+  String get errorServerUnreachable =>
+      'Server did not respond. Try another server or check your connection.';
+
+  @override
   String errorGeneric(String details) => 'Error: $details';
 
   // ── Login / Restore screen ───────────────────────────────────────────

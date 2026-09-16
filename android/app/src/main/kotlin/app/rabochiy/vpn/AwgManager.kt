@@ -3,6 +3,7 @@ package app.rabochiy.vpn
 import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -27,6 +28,22 @@ class AwgManager(
 ) {
     companion object {
         private const val TAG = "RabochiyAwgManager"
+
+        /**
+         * How long we wait for the first WireGuard handshake before
+         * declaring the server unreachable. A healthy peer answers in well
+         * under a second; the engine retransmits the initiation every 5 s,
+         * so 20 s gives four attempts on slow or DPI-throttled links (and
+         * matches the GW engine's connect timeout).
+         */
+        const val HANDSHAKE_TIMEOUT_MS = 20_000L
+        private const val HANDSHAKE_POLL_MS = 250L
+
+        /**
+         * Keepalive injected when the server config lacks one. 25 s is the
+         * de-facto WireGuard default for NATed clients.
+         */
+        private const val DEFAULT_KEEPALIVE_SEC = 25
 
         /** Static holder for excluded packages requested by the Flutter side. */
         @Volatile
@@ -93,8 +110,7 @@ class AwgManager(
         val b = backend ?: return false
         val t = currentTunnel ?: return false
         return try {
-            val stats = b.getStatistics(t)
-            stats.totalRx() > 0 || stats.totalTx() > 0
+            b.getLastHandshake(t) > 0L
         } catch (_: Exception) {
             false
         }
@@ -103,6 +119,15 @@ class AwgManager(
     /**
      * Brings up an AmneziaWG tunnel using a base64-encoded `awg-quick`
      * configuration.
+     *
+     * WireGuard has no connection setup phase: `setState(UP)` only opens
+     * the TUN device and starts the userspace engine, so it returns long
+     * before (or regardless of whether) the server ever answers. To keep
+     * the UI honest we stay in [State.CONNECTING] until the first
+     * handshake completes and only then report [State.CONNECTED]. If no
+     * handshake arrives within [HANDSHAKE_TIMEOUT_MS] the tunnel is torn
+     * down and [State.ERROR] is reported instead of a fake "connected"
+     * with a black-holed network.
      */
     suspend fun connect(
         remark: String,
@@ -132,11 +157,15 @@ class AwgManager(
                         android.util.Base64.DEFAULT
                     )
                     // The 3.1 config parser owns per-app exclusions.
-                    val configText = if (blockedApps.isNullOrEmpty()) {
+                    var configText = if (blockedApps.isNullOrEmpty()) {
                         String(configBytes, Charsets.UTF_8)
                     } else {
                         injectExcludedApplications(String(configBytes, Charsets.UTF_8), blockedApps)
                     }
+                    // A keepalive makes the engine fire the first handshake
+                    // immediately on UP (instead of waiting for user traffic)
+                    // and keeps NAT mappings alive while the app is idle.
+                    configText = ensurePersistentKeepalive(configText)
                     val config = Config.parse(ByteArrayInputStream(configText.toByteArray(Charsets.UTF_8)))
 
                     val sanitizedName = remark.take(Tunnel.NAME_MAX_LENGTH).ifEmpty { "rabochiy_awg" }
@@ -149,12 +178,28 @@ class AwgManager(
                     // Undo a tunnel raised after the user cancelled.
                     if (cancelGeneration.get() != gen) {
                         Log.i(TAG, "Connect was cancelled mid-handshake — rolling back")
-                        b.setState(tunnel, Tunnel.State.DOWN, null)
-                        currentTunnel = null
-                        currentConfig = null
+                        tearDown(b, tunnel)
                         currentState = State.DISCONNECTED
                         onStateChange(State.DISCONNECTED, null)
                         return@withLock Result.failure<Tunnel>(InterruptedException("cancelled"))
+                    }
+
+                    val handshakeAt = awaitFirstHandshake(b, tunnel, gen)
+                    if (cancelGeneration.get() != gen) {
+                        Log.i(TAG, "Connect was cancelled while waiting for handshake — rolling back")
+                        tearDown(b, tunnel)
+                        currentState = State.DISCONNECTED
+                        onStateChange(State.DISCONNECTED, null)
+                        return@withLock Result.failure<Tunnel>(InterruptedException("cancelled"))
+                    }
+                    if (handshakeAt <= 0L) {
+                        Log.w(TAG, "No AmneziaWG handshake within ${HANDSHAKE_TIMEOUT_MS} ms — server unreachable")
+                        tearDown(b, tunnel)
+                        currentState = State.ERROR
+                        onStateChange(State.ERROR, null)
+                        return@withLock Result.failure<Tunnel>(
+                            java.net.SocketTimeoutException("awg_handshake_timeout")
+                        )
                     }
 
                     currentState = State.CONNECTED
@@ -173,6 +218,39 @@ class AwgManager(
                 }
             }
         }
+    }
+
+    /**
+     * Polls the Go engine until the peer reports a handshake or the
+     * deadline passes. Returns the handshake time (epoch ms) or 0 on
+     * timeout. Bails out early if [disconnect] bumped the cancel counter.
+     */
+    private suspend fun awaitFirstHandshake(b: Backend, tunnel: Tunnel, gen: Int): Long {
+        val deadline = android.os.SystemClock.elapsedRealtime() + HANDSHAKE_TIMEOUT_MS
+        while (android.os.SystemClock.elapsedRealtime() < deadline) {
+            if (cancelGeneration.get() != gen) return 0L
+            val hs = try {
+                b.getLastHandshake(tunnel)
+            } catch (e: Exception) {
+                Log.w(TAG, "getLastHandshake failed", e)
+                -2L
+            }
+            // -3 == tunnel no longer active (torn down underneath us).
+            if (hs == -3L) return 0L
+            if (hs > 0L) return hs * 1000L
+            delay(HANDSHAKE_POLL_MS)
+        }
+        return 0L
+    }
+
+    private fun tearDown(b: Backend, tunnel: Tunnel) {
+        try {
+            b.setState(tunnel, Tunnel.State.DOWN, null)
+        } catch (e: Exception) {
+            Log.w(TAG, "Tear-down after failed connect threw", e)
+        }
+        currentTunnel = null
+        currentConfig = null
     }
 
     /**
@@ -289,6 +367,43 @@ class AwgManager(
             lines.joinToString("\n")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to apply split tunneling to AWG config", e)
+            configText
+        }
+    }
+
+    /**
+     * Adds `PersistentKeepalive = 25` to every `[Peer]` section that does
+     * not already declare one. Server-provided values are left untouched.
+     */
+    private fun ensurePersistentKeepalive(configText: String): String {
+        return try {
+            val lines = configText.lines().toMutableList()
+            val out = ArrayList<String>(lines.size + 2)
+            var inPeer = false
+            var peerHasKeepalive = false
+            fun closePeer() {
+                if (inPeer && !peerHasKeepalive) {
+                    out.add("PersistentKeepalive = $DEFAULT_KEEPALIVE_SEC")
+                }
+            }
+            for (line in lines) {
+                val trimmed = line.trim()
+                if (trimmed.startsWith("[")) {
+                    closePeer()
+                    inPeer = trimmed.equals("[Peer]", ignoreCase = true)
+                    peerHasKeepalive = false
+                } else if (inPeer) {
+                    val key = trimmed.substringBefore('=').trim()
+                    if (key.equals("PersistentKeepalive", ignoreCase = true)) {
+                        peerHasKeepalive = true
+                    }
+                }
+                out.add(line)
+            }
+            closePeer()
+            out.joinToString("\n")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to inject keepalive into AWG config", e)
             configText
         }
     }
