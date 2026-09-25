@@ -1,0 +1,59 @@
+<en-US>
+Improved connection stability. Fixed server-switching errors. Fixed crashes on the welcome screen. Improved server list display on small screens. General performance improvements and bug fixes.
+</en-US>
+
+<ru-RU>
+Улучшена стабильность подключения к серверам. Исправлены ошибки при переключении между серверами. Исправлены вылеты на экране приветствия. Улучшено отображение списка серверов на экранах с малым разрешением. Общие улучшения производительности и исправление мелких багов.
+</ru-RU>
+
+<fr-FR>
+Stabilité de la connexion améliorée. Erreurs de changement de serveur corrigées. Crashs sur l'écran d'accueil corrigés. Affichage de la liste des serveurs amélioré sur les petits écrans. Améliorations générales de performance et correction de bugs.
+</fr-FR>
+
+<nl-NL>
+Verbindingsstabiliteit verbeterd. Fouten bij het wisselen van server hersteld. Crashen op het welkomstscherm hersteld. Weergave van de serverlijst op kleine schermen verbeterd. Algemene prestatieverbeteringen en bugfixes.
+</nl-NL>
+
+<de-DE>
+Verbindungsstabilität verbessert. Fehler beim Serverwechsel behoben. Abstürze auf dem Begrüßungsbildschirm behoben. Serverlisten-Anzeige auf kleinen Bildschirmen verbessert. Allgemeine Leistungsverbesserungen und Fehlerbehebungen.
+</de-DE>
+
+<es-ES>
+Estabilidad de conexión mejorada. Errores al cambiar de servidor corregidos. Fallos en la pantalla de bienvenida corregidos. Visualización de la lista de servidores mejorada en pantallas pequeñas. Mejoras generales de rendimiento y corrección de errores.
+</es-ES>
+
+<it-IT>
+Stabilità della connessione migliorata. Errori di cambio server corretti. Crash nella schermata di benvenuto corretti. Visualizzazione dell'elenco server migliorata su schermi piccoli. Miglioramenti generali delle prestazioni e correzione di bug.
+</it-IT>
+
+<pl-PL>
+Poprawiona stabilność połączenia. Naprawiono błędy przy przełączaniu serwerów. Naprawiono wylogowania na ekranie powitalnym. Ulepszone wyświetlanie listy serwerów na małych ekranach. Ogólne ulepszenia wydajności i naprawa błędów.
+</pl-PL>
+
+<sv-SE>
+Förbättrad anslutningsstabilitet. Fel vid serverswitchning åtgärdade. Crasher på välkomstskärmen åtgärdade. Serverlistvisning förbättrad på små skärmar. Allmänna prestandaförbättringar och buggfixar.
+</sv-SE>
+
+<da-DK>
+Forbindelsesstabilitet forbedret. Fejl ved serverskift rettet. Crashes på velkomstskærmen rettet. Serverlistefremvisning forbedret på små skærme. Generelle ydelsesforbedringer og fejlrettelser.
+</da-DK>
+
+<fi-FI>
+Yhteyden vakautta parannettu. Palvelimen vaihtovirheet korjattu. Tervetulonäytön kaatumiset korjattu. Palvelinlistan näyttöä parannettu pienillä näytöillä. Yleisiä suorituskykyä parannettu ja virheitä korjattu.
+</fi-FI>
+
+<pt-PT>
+Estabilidade da ligação melhorada. Erros ao mudar de servidor corrigidos. Falhas no ecrã de boas-vindas corrigidas. Exibição da lista de servidores melhorada em ecrãs pequenos. Melhorias gerais de desempenho e correção de erros.
+</pt-PT>
+
+<ro>
+Stabilitatea conexiunii îmbunătățită. Erorile la schimbarea serverului corectate. Prăbușirile pe ecranul de întâmpinare corectate. Afișarea listei de servere îmbunătățită pe ecrane mici. Îmbunătățiri generale de performanță și remedieri de buguri.
+</ro>
+
+<cs-CZ>
+Vylepšena stabilita připojení. Opraveny chyby při přepínání serverů. Opraveny pády na úvodní obrazovce. Vylepšené zobrazení seznamu serverů na malých obrazovkách. Obecná vylepšení výkonu a opravy chyb.
+</cs-CZ>
+
+<tr-TR>
+Bağlantı kararlılığı geliştirildi. Sunucu değiştirme hataları düzeltildi. Karşılama ekranında oluşan çökmeler düzeltildi. Küçük ekranlarda sunucu listesi görünümü iyileştirildi. Genel performans iyileştirmeleri ve hata düzeltmeleri.
+</tr-TR>

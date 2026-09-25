@@ -1,0 +1,515 @@
+# РАБОЧИЙ VPN / GOOGLE PLAY — EU, ВЫПУСК 1.0.2 (4)
+
+Подготовлено 16 сентября 2026 года.
+
+## КАК ИСПОЛЬЗОВАТЬ
+
+Добавьте в Google Play Console переводы основной страницы для кодов ниже. Копируйте только содержимое полей «Название», «Краткое описание» и «Полное описание», без служебных заголовков. Страницы en-US и ru-RU из page.txt не заменяются.
+
+Приоритет первой проверки: Нидерланды и Франция, затем Германия, Испания, Италия, Польша; далее Швеция, Дания, Финляндия, Португалия, Румыния и Чехия. Это редакционный порядок тестирования, НЕ установленный рейтинг поисковых запросов. Обоснование, источники и поисковые гипотезы: docs/EU_MARKET_RESEARCH.md. Публичные отчёты об установках не дают точной частотности запросов Google Play.
+
+Набор содержит 12 новых языков. Немецкая страница также подходит для Австрии; французская и нидерландская — для соответствующих аудиторий Бельгии; французская и немецкая — для Люксембурга; шведская — для шведоязычных пользователей Финляндии. Английский остаётся доступен, в том числе для Ирландии и Мальты. Это не локализация всех официальных языков ЕС. Язык страницы выбирается по языку пользователя, а не только по стране; для отдельного предложения стране используйте custom store listing.
+
+Общие поля: категория «Инструменты» (Tools); контакт поддержки support@vpnhub.ltd; Telegram https://t.me/rabochyvpn_chat. Сохраните действующий публичный URL политики конфиденциальности из вашей Play Console: в исходниках его нет, придумывать адрес нельзя. Подготовьте скриншоты нового интерфейса на каждом языке; тексты ниже не заменяют изображения. Отдельного поля keywords у Google Play нет. Не вставляйте список ключей в описание.
+
+Оговорки к описаниям: доступность стран и серверов определяется текущим каталогом; платные серверы требуют PRO. Не обещаем доступ ко всем сервисам, обход полного отключения интернета, снижение пинга при любой сети, абсолютную анонимность или награды Google. В исходном page.txt есть противоречие между «без регистрации» и «быстрая регистрация»: здесь точно указано создание аккаунта без email и телефона. Политика No Logs относится к содержимому VPN-трафика, а не к отсутствию технических данных. Перед публикацией владелец должен сверить заявленные бесплатный трафик и серверную политику с действующим тарифом и Data safety.
+
+## ЧТО ИСПРАВЛЕНО В 1.0.2
+
+Исправлена подпись каталога серверов — без ключа сборка теперь падает с понятной ошибкой. Ошибки AWG больше не скрывают рабочие GW-серверы и наоборот. Исправлены гонки обновления каталога, кеш после выхода из аккаунта, устаревший выбранный сервер и автовыбор платного узла для бесплатного аккаунта. Исправлены обработка ключей GW, потеря GW-конфигурации при копировании и ошибки счётчиков трафика. Устранены переполнения welcome-экрана и проблемы списка серверов на маленьких экранах. AWG handshake теперь корректно определяет connected-state. Добавлены 6 новых тестов.
+
+---
+
+## ПЕРЕВОДЫ СТРАНИЦ
+
+### [fr-FR]
+
+**Страны / аудитория:** Франция; франкоязычные Бельгия и Люксембург.
+
+**Название:** Rabochiy VPN: connexion privée
+
+**Краткое описание:** VPN pour Android, Wi-Fi public et choix des applications dans le tunnel.
+
+**Полное описание:**
+
+Une connexion VPN simple pour vos déplacements et votre vie privée au quotidien. Rabochiy VPN chiffre le trafic entre votre appareil Android et le serveur VPN, à la maison, sur le réseau mobile ou sur le Wi-Fi d'un hôtel.
+
+Connectez-vous en un geste, choisissez un emplacement dans la liste ou laissez l'application sélectionner un serveur. Retrouvez un accès gratuit et des options PRO dans la même application.
+
+Vos applications, votre choix
+Le tunnel fractionné vous permet de ne faire passer que certaines applications par le VPN. Vous pouvez aussi protéger toutes les applications sauf celles que vous excluez. Pratique pour garder une application bancaire ou un service local sur votre connexion habituelle sans couper le VPN pour les autres. Une application exclue n'est pas protégée par le tunnel.
+
+Un VPN sans formulaire personnel
+Créez un compte sans adresse email ni numéro de téléphone. Conservez votre phrase de récupération : elle permet de retrouver le compte sur un autre appareil. Ne la partagez jamais, même avec l'assistance.
+
+Des serveurs à choisir selon votre connexion
+Parcourez les emplacements disponibles, changez de serveur et consultez la vitesse ainsi que les statistiques du trafic. L'accès gratuit n'a pas de quota de trafic annoncé ; certains serveurs nécessitent PRO. Les débits dépendent du réseau, de la distance et de la charge du serveur.
+
+Une confidentialité expliquée
+Notre politique prévoit de ne pas conserver l'historique de navigation, les requêtes DNS ou le contenu du trafic VPN. L'application utilise aussi des données techniques de compte, de connexion et de diagnostic, décrites dans la politique de confidentialité.
+
+Pour commencer
+1. Créez ou restaurez votre compte.
+2. Enregistrez votre phrase de récupération.
+3. Choisissez un serveur, puis autorisez la connexion VPN Android.
+4. Ajustez le tunnel fractionné si nécessaire.
+
+Le VPN complète HTTPS ; il ne remplace pas les mises à jour, les mots de passe sûrs ou la vigilance face au phishing. Il nécessite une connexion Internet et ne garantit pas l'accès à chaque service. Une question ? Retrouvez l'assistance Telegram dans l'application.
+
+---
+
+### [nl-NL]
+
+**Страны / аудитория:** Нидерланды; нидерландоязычная Бельгия.
+
+**Название:** Rabochiy VPN: privéverbinding
+
+**Краткое описание:** VPN voor Android op openbare wifi, met serverkeuze en split tunneling.
+
+**Полное описание:**
+
+Onderweg in de trein, op reis of op de wifi van een hotel? Met Rabochiy VPN voeg je een versleutelde verbinding toe tussen je Android-apparaat en de VPN-server. Een overzichtelijke VPN-app voor dagelijks gebruik, zonder ingewikkelde configuratie.
+
+Kies zelf een beschikbare server of gebruik de automatische selectie. Gratis toegang en PRO-opties staan in dezelfde app.
+
+Niet elke app hoeft door de VPN
+Met split tunneling bepaal je welke apps de tunnel gebruiken. Laat alleen je gekozen apps via VPN verbinden, of sluit bepaalde apps juist uit. Zo kun je bijvoorbeeld een bankapp of lokale dienst rechtstreeks laten verbinden terwijl andere apps de VPN blijven gebruiken. Uitgesloten apps vallen buiten de bescherming van de tunnel.
+
+Beginnen zonder e-mail of telefoonnummer
+Maak een account zonder persoonlijke registratievelden. Je herstelzin geeft je toegang tot hetzelfde account op een ander apparaat. Bewaar die veilig en deel hem met niemand, ook niet met de helpdesk.
+
+Zicht op je verbinding
+Bekijk beschikbare locaties, wissel van server en volg de snelheid en het dataverkeer in de app. Gratis toegang heeft geen aangekondigd datalimiet; voor sommige servers is PRO nodig. De snelheid hangt af van je netwerk, de afstand en de serverbelasting, niet alleen van de VPN.
+
+Duidelijk over privacy
+Volgens ons privacybeleid bewaren we geen browsegeschiedenis, DNS-verzoeken of inhoud van VPN-verkeer. Er zijn wel technische account-, verbindings- en diagnosegegevens. In het privacybeleid lees je hoe daarmee wordt omgegaan.
+
+Zo werkt het
+1. Maak een account of herstel je bestaande account.
+2. Bewaar de herstelzin op een veilige plek.
+3. Kies een server en geef Android toestemming voor de VPN-verbinding.
+4. Stel zo nodig split tunneling in.
+
+Een VPN is een aanvulling op HTTPS, geen vervanging voor updates of oplettendheid bij verdachte links. Er blijft een internetverbinding nodig en toegang tot elke website of dienst is niet gegarandeerd. Hulp nodig? Open de Telegram-helpdesk vanuit de app.
+
+---
+
+### [de-DE]
+
+**Страны / аудитория:** Германия, Австрия; немецкоязычная аудитория Люксембурга.
+
+**Название:** Rabochiy VPN: privat verbinden
+
+**Краткое описание:** VPN für Android: für öffentliches WLAN und Apps nach Wahl im Tunnel.
+
+**Полное описание:**
+
+Sie möchten unterwegs eine VPN-Verbindung nutzen, ohne jede App darüber zu leiten? Rabochiy VPN verbindet Ihr Android-Gerät mit einem VPN-Server und verschlüsselt den Datenverkehr auf diesem Weg – im Mobilfunknetz und im WLAN.
+
+Wählen Sie einen verfügbaren Standort selbst oder nutzen Sie die automatische Serverauswahl. Kostenlose Nutzung und PRO-Optionen finden Sie in einer App.
+
+Split-Tunneling statt ständigem Umschalten
+Bestimmen Sie, welche Apps den VPN-Tunnel verwenden. Sie können nur ausgewählte Apps einschließen oder einzelne Apps ausschließen. So bleibt etwa eine Banking-App oder ein lokaler Dienst auf der normalen Verbindung, während andere Apps das VPN nutzen. Ausgeschlossene Apps sind nicht durch den Tunnel geschützt.
+
+Ohne E-Mail und Telefonnummer starten
+Erstellen Sie ein Konto ohne persönliche Registrierungsangaben. Mit Ihrer Wiederherstellungsphrase können Sie es auf einem anderen Gerät wiederherstellen. Bewahren Sie diese sicher auf und geben Sie sie niemandem weiter, auch nicht dem Support.
+
+Verbindung und Datenverbrauch im Blick
+Sehen Sie verfügbare Serverstandorte, wechseln Sie den Server und prüfen Sie Geschwindigkeit und Datenstatistik. Für den kostenlosen Zugang ist kein Datenvolumenlimit angegeben; einige Server erfordern PRO. Die tatsächliche Geschwindigkeit hängt von Netz, Entfernung und Serverlast ab.
+
+Nachvollziehbare Datenschutzangaben
+Unsere Datenschutzrichtlinie sieht keine Speicherung von Browserverlauf, DNS-Anfragen oder Inhalten des VPN-Verkehrs vor. Technische Konto-, Verbindungs- und Diagnosedaten werden gesondert in der Datenschutzerklärung beschrieben.
+
+So geht es los
+1. Konto erstellen oder wiederherstellen.
+2. Wiederherstellungsphrase sicher aufbewahren.
+3. Server wählen und die Android-VPN-Berechtigung erteilen.
+4. Bei Bedarf Apps für Split-Tunneling auswählen.
+
+Ein VPN ergänzt HTTPS, ersetzt aber weder Sicherheitsupdates noch den Schutz vor Phishing. Eine Internetverbindung ist erforderlich; der Zugriff auf jeden Dienst ist nicht garantiert. Bei Fragen erreichen Sie den Telegram-Support direkt aus der App.
+
+---
+
+### [es-ES]
+
+**Страны / аудитория:** Испания.
+
+**Название:** Rabochiy VPN: conexión privada
+
+**Краткое описание:** VPN para Android y wifi pública. Elige servidor y qué apps usan el túnel.
+
+**Полное описание:**
+
+Tu conexión cambia entre los datos móviles, la wifi del hotel y la red de casa. Rabochiy VPN te permite crear un túnel cifrado entre tu dispositivo Android y el servidor VPN sin configurar certificados ni archivos a mano.
+
+Conecta con un toque y elige una ubicación disponible o la selección automática. La aplicación reúne acceso gratuito y opciones PRO.
+
+Una VPN que puedes elegir por aplicación
+El túnel dividido permite usar la VPN solo en las aplicaciones que marques. También puedes dejar fuera aplicaciones concretas y enviar el resto por el túnel. Resulta útil para mantener una app bancaria o un servicio local en la conexión habitual sin desconectar la VPN de las demás. Las aplicaciones excluidas quedan fuera de la protección del túnel.
+
+Sin correo ni teléfono para empezar
+Crea una cuenta sin introducir un correo electrónico o número de teléfono. Guarda tu frase de recuperación para recuperar el acceso en otro dispositivo. No la compartas con nadie, ni siquiera con el equipo de ayuda.
+
+Control de la conexión
+Consulta ubicaciones, cambia de servidor y revisa la velocidad y las estadísticas de tráfico. El acceso gratuito no tiene una cuota de datos anunciada; algunos servidores requieren PRO. La velocidad depende de la red, la distancia y la carga del servidor.
+
+Privacidad sin promesas imposibles
+Nuestra política establece que no guardamos el historial de navegación, las consultas DNS ni el contenido del tráfico VPN. La aplicación también utiliza datos técnicos de cuenta, conexión y diagnóstico, explicados en la política de privacidad.
+
+Primeros pasos
+1. Crea una cuenta o restaura la tuya.
+2. Guarda la frase de recuperación.
+3. Elige un servidor y autoriza la conexión VPN de Android.
+4. Configura el túnel dividido si lo necesitas.
+
+La VPN complementa HTTPS, pero no sustituye las actualizaciones ni evita por sí sola el phishing. Necesita una conexión a Internet y no garantiza el acceso a todos los servicios. Si tienes dudas, abre la ayuda de Telegram desde la aplicación.
+
+---
+
+### [it-IT]
+
+**Страны / аудитория:** Италия.
+
+**Название:** Rabochiy VPN: connessione
+
+**Краткое описание:** VPN per Android e Wi-Fi pubblico, con scelta del server e split tunneling.
+
+**Полное описание:**
+
+Una VPN per usare il telefono in viaggio senza complicare le connessioni di tutti i giorni. Rabochiy VPN cifra il traffico tra il dispositivo Android e il server VPN, sulla rete mobile o sul Wi-Fi di casa, hotel e altri luoghi pubblici.
+
+Scegli una posizione disponibile oppure usa la selezione automatica del server. Nell'app trovi accesso gratuito e opzioni PRO.
+
+Scegli tu quali app passano nel tunnel
+Con lo split tunneling puoi includere solo le app selezionate oppure escludere alcune app dal tunnel. Puoi lasciare un'app bancaria o un servizio locale sulla connessione abituale e usare la VPN per le altre. Le app escluse non sono protette dal tunnel VPN.
+
+Un account senza email o numero di telefono
+Per iniziare non servono dati personali nei campi di registrazione. Conserva la frase di recupero: ti permette di ritrovare l'account su un altro dispositivo. Non condividerla mai, nemmeno con l'assistenza.
+
+La connessione sotto controllo
+Consulta le posizioni disponibili, cambia server e controlla velocità e statistiche del traffico. L'accesso gratuito non ha una quota di traffico dichiarata; alcuni server richiedono PRO. Prestazioni e velocità dipendono dalla rete, dalla distanza e dal carico del server.
+
+Informazioni chiare sulla privacy
+La nostra politica prevede di non conservare cronologia di navigazione, richieste DNS o contenuti del traffico VPN. L'app usa anche dati tecnici dell'account, della connessione e della diagnostica, descritti nell'informativa sulla privacy.
+
+Come iniziare
+1. Crea un account o ripristina quello esistente.
+2. Salva la frase di recupero in un luogo sicuro.
+3. Scegli il server e autorizza la connessione VPN di Android.
+4. Se necessario, scegli le app per lo split tunneling.
+
+La VPN affianca HTTPS: non sostituisce aggiornamenti, password sicure o attenzione ai tentativi di phishing. Serve una connessione Internet e l'accesso a ogni servizio non è garantito. Per assistenza, apri Telegram dall'app.
+
+---
+
+### [pl-PL]
+
+**Страны / аудитория:** Польша.
+
+**Название:** Rabochiy VPN: prywatne łącze
+
+**Краткое описание:** VPN na Androida z wyborem serwera i osobnymi ustawieniami dla aplikacji.
+
+**Полное описание:**
+
+Chcesz korzystać z VPN, ale nie kierować przez niego każdej aplikacji? Rabochiy VPN tworzy szyfrowany tunel między urządzeniem z Androidem a serwerem VPN. Możesz używać go w sieci komórkowej i Wi-Fi, w domu lub w podróży.
+
+Wybierz dostępną lokalizację albo skorzystaj z automatycznego wyboru serwera. Dostęp bezpłatny i opcje PRO znajdziesz w jednej aplikacji.
+
+Dzielone tunelowanie po twojemu
+Wybierz aplikacje, które mają korzystać z VPN, lub wskaż wyjątki łączące się bezpośrednio. To przydatne, gdy chcesz pozostawić aplikację bankową albo lokalną usługę na zwykłym połączeniu, a resztę skierować przez tunel. Wyłączone aplikacje nie są chronione przez tunel VPN.
+
+Konto bez e-maila i numeru telefonu
+Utwórz konto bez podawania tych danych. Zapisz frazę odzyskiwania: pozwoli przywrócić dostęp na innym urządzeniu. Nie udostępniaj jej nikomu, również pomocy technicznej.
+
+Wgląd w transfer
+Przeglądaj dostępne lokalizacje, zmieniaj serwery i sprawdzaj szybkość oraz statystyki ruchu. Bezpłatny dostęp nie ma deklarowanego limitu transferu; część serwerów wymaga PRO. Szybkość zależy od sieci, odległości i obciążenia serwera. VPN nie gwarantuje niższego pingu w grach.
+
+Prywatność bez straszenia
+Zgodnie z naszą polityką nie zapisujemy historii przeglądania, zapytań DNS ani zawartości ruchu VPN. Dane techniczne konta, połączenia i diagnostyki są opisane w polityce prywatności. HTTPS już szyfruje połączenia z obsługującymi go stronami; VPN dodaje tunel, ale nie chroni automatycznie przed phishingiem.
+
+Jak zacząć
+1. Utwórz konto lub przywróć istniejące.
+2. Zapisz frazę odzyskiwania w bezpiecznym miejscu.
+3. Wybierz serwer i zezwól na połączenie VPN w Androidzie.
+4. W razie potrzeby skonfiguruj dzielone tunelowanie.
+
+Do działania potrzebne jest połączenie z internetem. Dostęp do każdej strony lub usługi nie jest gwarantowany. Pomoc na Telegramie otworzysz bezpośrednio z aplikacji.
+
+---
+
+### [sv-SE]
+
+**Страны / аудитория:** Швеция; шведоязычная Финляндия.
+
+**Название:** Rabochiy VPN: privat surf
+
+**Краткое описание:** VPN för Android med delad tunnling och serverval hemma och på resan.
+
+**Полное описание:**
+
+Ett VPN som låter dig välja vilka appar som ska använda tunneln. Rabochiy VPN krypterar trafiken mellan din Android-enhet och VPN-servern, både på mobilnätet och på wifi hemma eller på resan.
+
+Välj en tillgänglig plats själv eller använd automatiskt serverval. Gratis åtkomst och PRO-alternativ finns i samma app.
+
+Låt lokala appar ansluta direkt
+Med delad tunnling kan du låta bara valda appar använda VPN. Du kan också välja undantag och skicka övriga appar genom tunneln. Praktiskt om en bankapp eller lokal tjänst behöver din vanliga anslutning. Appar som undantas skyddas inte av VPN-tunneln. Det innebär inte någon garanti för en viss bank- eller e-legitimationstjänst.
+
+Kom igång utan e-post eller telefonnummer
+Skapa ett konto utan att ange dessa uppgifter. Spara din återställningsfras så att du kan få tillbaka kontot på en annan enhet. Dela aldrig frasen med någon, inte ens supporten.
+
+Se hur anslutningen används
+Bläddra bland tillgängliga platser, byt server och se hastighet och trafikstatistik. Gratis åtkomst har ingen angiven datakvot; vissa servrar kräver PRO. Hastigheten beror på nätet, avståndet och serverbelastningen.
+
+Tydlig information om integritet
+Vår policy anger att vi inte sparar webbhistorik, DNS-frågor eller innehållet i VPN-trafiken. Appen använder också tekniska konto-, anslutnings- och diagnosdata som beskrivs i integritetspolicyn.
+
+Så börjar du
+1. Skapa ett konto eller återställ ditt befintliga.
+2. Spara återställningsfrasen på en säker plats.
+3. Välj server och tillåt Androids VPN-anslutning.
+4. Ställ in delad tunnling vid behov.
+
+VPN kompletterar HTTPS men ersätter inte säkerhetsuppdateringar eller försiktighet vid nätfiske. En internetanslutning krävs och åtkomst till varje tjänst kan inte garanteras. Du hittar Telegram-supporten direkt i appen.
+
+---
+
+### [da-DK]
+
+**Страны / аудитория:** Дания.
+
+**Название:** Rabochiy VPN: privat net
+
+**Краткое описание:** VPN til Android med servervalg og opdelt tunneling på wifi og mobilnet.
+
+**Полное описание:**
+
+På hotellets wifi eller på farten med mobilen? Rabochiy VPN opretter en krypteret tunnel mellem din Android-enhed og VPN-serveren. Du kan vælge forbindelsen uden at skulle ændre indstillinger i hver enkelt app.
+
+Vælg en tilgængelig placering, eller lad appen vælge en server automatisk. Gratis adgang og PRO-muligheder er samlet i samme app.
+
+Vælg, hvilke apps der bruger VPN
+Med opdelt tunneling kan du sende kun udvalgte apps gennem tunnelen eller vælge apps, der skal gå udenom. Det er nyttigt, hvis en bankapp eller lokal tjeneste skal bruge den almindelige forbindelse. Apps uden for tunnelen er ikke beskyttet af VPN-forbindelsen. Der loves ikke kompatibilitet med en bestemt bank eller identitetstjeneste.
+
+Start uden e-mail og telefonnummer
+Opret en konto uden at oplyse disse data. Gem din gendannelsesfrase, så du kan få adgang til kontoen på en anden enhed. Del den aldrig med andre, heller ikke supporten.
+
+Overblik over forbindelsen
+Se tilgængelige serverplaceringer, skift server, og følg hastighed og trafikstatistik. Gratis adgang har ingen oplyst datakvote; nogle servere kræver PRO. Hastigheden afhænger af netværk, afstand og serverbelastning.
+
+Privatliv forklaret
+Vores politik siger, at vi ikke gemmer browserhistorik, DNS-forespørgsler eller indholdet af VPN-trafik. Appen bruger også tekniske konto-, forbindelses- og diagnosedata, som er beskrevet i privatlivspolitikken.
+
+Kom i gang
+1. Opret en konto, eller gendan en eksisterende.
+2. Gem gendannelsesfrasen et sikkert sted.
+3. Vælg server, og tillad VPN-forbindelsen i Android.
+4. Vælg eventuelt apps til opdelt tunneling.
+
+VPN supplerer HTTPS, men erstatter ikke opdateringer eller opmærksomhed på phishing. Der kræves en internetforbindelse, og adgang til alle tjenester kan ikke garanteres. Find Telegram-supporten i appen, hvis du har spørgsmål.
+
+---
+
+### [fi-FI]
+
+**Страны / аудитория:** Финляндия.
+
+**Название:** Rabochiy VPN: yksityinen
+
+**Краткое описание:** VPN Androidille: palvelinvalinta ja sovelluskohtainen jaettu tunnelointi.
+
+**Полное описание:**
+
+VPN-yhteys matkalle ja arkeen ilman monimutkaisia asetuksia. Rabochiy VPN salaa liikenteen Android-laitteesi ja VPN-palvelimen välillä mobiiliverkossa sekä kodin, hotellin tai muun paikan wifi-verkossa.
+
+Valitse saatavilla oleva sijainti tai käytä automaattista palvelinvalintaa. Ilmainen käyttö ja PRO-vaihtoehdot ovat samassa sovelluksessa.
+
+Kaikkien sovellusten ei tarvitse käyttää VPN:ää
+Jaetulla tunneloinnilla voit valita vain VPN:ää käyttävät sovellukset tai määrittää sovellukset, jotka ohittavat tunnelin. Näin esimerkiksi pankkisovellus tai paikallinen palvelu voi käyttää tavallista yhteyttä muiden käyttäessä VPN:ää. Tunnelin ulkopuolelle jätetyt sovellukset eivät saa sen suojaa.
+
+Alkuun ilman sähköpostia tai puhelinnumeroa
+Luo tili ilman näiden tietojen antamista. Säilytä palautuslauseesi turvallisesti: sillä saat tilisi takaisin toisella laitteella. Älä jaa lausetta kenellekään, edes tukipalvelulle.
+
+Näe yhteytesi tiedot
+Selaa palvelinsijainteja, vaihda palvelinta ja seuraa nopeutta sekä liikennetilastoja. Ilmaiselle käytölle ei ole ilmoitettu datakiintiötä; osa palvelimista edellyttää PRO-tilausta. Nopeus riippuu verkosta, etäisyydestä ja palvelimen kuormasta.
+
+Tietosuoja selkeästi
+Käytäntömme mukaan emme tallenna selaushistoriaa, DNS-kyselyjä tai VPN-liikenteen sisältöä. Sovellus käyttää myös teknisiä tili-, yhteys- ja diagnostiikkatietoja, joista kerrotaan tietosuojakäytännössä.
+
+Näin aloitat
+1. Luo tili tai palauta nykyinen tilisi.
+2. Tallenna palautuslause turvalliseen paikkaan.
+3. Valitse palvelin ja salli Androidin VPN-yhteys.
+4. Määritä tarvittaessa jaettu tunnelointi.
+
+VPN täydentää HTTPS-salausta, mutta ei korvaa päivityksiä eikä suojaa itsessään tietojenkalastelulta. Käyttö edellyttää internetyhteyttä, eikä pääsyä jokaiseen palveluun voida taata. Telegram-tuen löydät sovelluksesta.
+
+---
+
+### [pt-PT]
+
+**Страны / аудитория:** Португалия, европейский португальский.
+
+**Название:** Rabochiy VPN: ligação privada
+
+**Краткое описание:** VPN para Android, Wi-Fi público e escolha das aplicações que usam o túnel.
+
+**Полное описание:**
+
+Uma ligação VPN para usar o telemóvel em viagem e no dia a dia. Rabochiy VPN cifra o tráfego entre o dispositivo Android e o servidor VPN, tanto nos dados móveis como no Wi-Fi de casa ou de um hotel.
+
+Escolha uma localização disponível ou use a seleção automática do servidor. O acesso gratuito e as opções PRO estão na mesma aplicação.
+
+Aplicações locais sem desligar tudo
+O túnel dividido permite escolher apenas as aplicações que devem usar a VPN ou excluir aplicações específicas. Pode manter uma aplicação bancária ou um serviço local na ligação habitual enquanto as restantes usam o túnel. As aplicações excluídas não ficam protegidas pela VPN.
+
+Sem email ou número de telefone para começar
+Crie uma conta sem fornecer estes dados. Guarde a frase de recuperação para voltar a aceder à conta noutro dispositivo. Nunca a partilhe com ninguém, nem com a equipa de apoio.
+
+Acompanhe a ligação
+Consulte as localizações disponíveis, mude de servidor e veja a velocidade e as estatísticas de tráfego. O acesso gratuito não tem uma quota de dados anunciada; alguns servidores requerem PRO. A velocidade depende da rede, da distância e da carga do servidor.
+
+Privacidade com informação clara
+A nossa política prevê não guardar o histórico de navegação, pedidos DNS ou conteúdo do tráfego VPN. A aplicação também utiliza dados técnicos da conta, da ligação e do diagnóstico, explicados na política de privacidade.
+
+Como começar
+1. Crie uma conta ou restaure a que já tem.
+2. Guarde a frase de recuperação num local seguro.
+3. Escolha um servidor e autorize a ligação VPN no Android.
+4. Configure o túnel dividido, se precisar.
+
+A VPN complementa o HTTPS, mas não substitui atualizações ou atenção ao phishing. É necessária uma ligação à Internet e não se garante acesso a todos os serviços. Para obter ajuda, abra o apoio no Telegram a partir da aplicação.
+
+---
+
+### [ro]
+
+**Страны / аудитория:** Румыния. Код Google Play — ro, не ro-RO.
+
+**Название:** Rabochiy VPN: acces privat
+
+**Краткое описание:** VPN pentru Android, cu alegerea serverului și tunelare separată pe aplicații.
+
+**Полное описание:**
+
+Cauți un VPN ușor de folosit, cu control asupra aplicațiilor conectate? Rabochiy VPN creează un tunel criptat între dispozitivul Android și serverul VPN, pe date mobile sau Wi-Fi.
+
+Alege o locație disponibilă ori folosește selecția automată a serverului. Accesul gratuit și opțiunile PRO sunt în aceeași aplicație.
+
+Tunelare divizată pentru aplicațiile tale
+Poți trimite prin VPN doar aplicațiile selectate sau poți exclude anumite aplicații din tunel. Este util când vrei ca o aplicație bancară sau un serviciu local să folosească legătura obișnuită, fără să oprești VPN-ul pentru celelalte. Aplicațiile excluse nu sunt protejate de tunel.
+
+Începe fără e-mail și număr de telefon
+Creează un cont fără să furnizezi aceste date. Păstrează fraza de recuperare pentru a putea restaura contul pe alt dispozitiv. Nu o divulga nimănui, nici echipei de asistență.
+
+Vezi cum funcționează conexiunea
+Consultă locațiile disponibile, schimbă serverul și urmărește viteza și statisticile de trafic. Accesul gratuit nu are o cotă de trafic anunțată; unele servere necesită PRO. Viteza depinde de rețea, distanță și încărcarea serverului. VPN-ul nu garantează un ping mai mic în jocuri.
+
+Confidențialitate explicată
+Politica noastră prevede că nu păstrăm istoricul de navigare, cererile DNS sau conținutul traficului VPN. Aplicația folosește și date tehnice de cont, conexiune și diagnostic, descrise în politica de confidențialitate.
+
+Primii pași
+1. Creează un cont sau restaurează contul existent.
+2. Salvează fraza de recuperare într-un loc sigur.
+3. Alege un server și permite conexiunea VPN în Android.
+4. Configurează tunelarea divizată dacă ai nevoie.
+
+VPN-ul completează HTTPS, dar nu înlocuiește actualizările sau atenția la phishing. Ai nevoie de o conexiune la internet, iar accesul la orice serviciu nu este garantat. Pentru ajutor, deschide asistența Telegram din aplicație.
+
+---
+
+### [cs-CZ]
+
+**Страны / аудитория:** Чехия.
+
+**Название:** Rabochiy VPN: soukromé spojení
+
+**Краткое описание:** VPN pro Android s výběrem serveru a děleným tunelováním pro jednotlivé aplikace.
+
+**Полное описание:**
+
+VPN na cesty i pro běžné používání telefonu. Rabochiy VPN šifruje provoz mezi zařízením s Androidem a serverem VPN, v mobilní síti i na domácí nebo hotelové Wi-Fi.
+
+Vyberte dostupné umístění sami nebo použijte automatický výběr serveru. Bezplatný přístup a možnosti PRO najdete v jedné aplikaci.
+
+Rozhodněte, které aplikace používají VPN
+Dělené tunelování umožňuje posílat tunelem jen vybrané aplikace nebo naopak určit aplikace, které se připojí přímo. Bankovní aplikaci či místní službu tak můžete ponechat na běžném připojení a ostatní aplikace vést přes VPN. Vyloučené aplikace nejsou tunelem chráněny.
+
+Začněte bez e-mailu a telefonního čísla
+Vytvořte účet bez zadávání těchto údajů. Uložte si obnovovací frázi: umožní obnovit účet na jiném zařízení. Nikomu ji nesdělujte, ani podpoře.
+
+Přehled o připojení
+Prohlížejte dostupná umístění, měňte server a sledujte rychlost i statistiky provozu. Bezplatný přístup nemá uvedenou datovou kvótu; některé servery vyžadují PRO. Rychlost závisí na síti, vzdálenosti a zatížení serveru, nikoli jen na VPN.
+
+Srozumitelně o soukromí
+Naše zásady stanovují, že neukládáme historii prohlížení, dotazy DNS ani obsah provozu VPN. Aplikace používá také technické údaje o účtu, připojení a diagnostice, které popisují zásady ochrany soukromí.
+
+Jak začít
+1. Vytvořte účet nebo obnovte stávající.
+2. Bezpečně si uložte obnovovací frázi.
+3. Vyberte server a povolte připojení VPN v Androidu.
+4. Podle potřeby nastavte dělené tunelování.
+
+VPN doplňuje HTTPS, ale nenahrazuje bezpečnostní aktualizace ani opatrnost vůči phishingu. Vyžaduje internetové připojení a nezaručuje přístup ke každé službě. Pomoc na Telegramu otevřete přímo z aplikace.
+
+---
+
+## ПРИМЕЧАНИЯ К ВЫПУСКУ — КОПИРУЙТЕ БЛОК ЦЕЛИКОМ
+
+Коды языков ниже соответствуют языкам страницы в Play Console. Каждый текст короче 500 символов. Нативный SIGSEGV не объявляется исправленным без подтверждения на устройствах.
+
+<en-US>
+Fixed signed server catalogue — build now fails with a clear error when the signing key is missing. AWG errors no longer hide working GW servers and vice versa. Fixed update races, stale cache after logout, outdated selected server and auto-selection of a paid node for a free account. Fixed GW key handling, GW config loss on copy and traffic counter errors. Fixed welcome-screen overflow and server-list issues on small screens. AWG handshake now correctly reports connected state. Added 6 new tests.
+</en-US>
+
+<ru-RU>
+Исправлена подпись каталога серверов — без ключа сборка падает с понятной ошибкой. Ошибки AWG больше не скрывают рабочие GW-серверы и наоборот. Исправлены гонки обновления, кеш после выхода из аккаунта, устаревший сервер и автовыбор платного узла для бесплатного аккаунта. Исправлены ключи GW, потеря конфига при копировании и ошибки счётчиков трафика. Устранены переполнения welcome-экрана и проблемы списка серверов на маленьких экранах. AWG handshake корректно определяет connected-state. Добавлены 6 тестов.
+</ru-RU>
+
+<fr-FR>
+Correction de la signature du catalogue de serveurs — la compilation échoue avec une erreur clé en l'absence de clé. Les erreurs AWG ne masquent plus les serveurs GW fonctionnels et inversement. Correction des concours d'actualisation, du cache après déconnexion, du serveur obsolète et de la sélection automatique d'un nœud payant pour un compte gratuit. Correction de la gestion des clés GW, de la perte de config GW lors de la copie et des erreurs de compteur de trafic. Débordement de l'écran d'accueil et problèmes de liste de serveurs sur petits écrans corrigés. Le handshake AWG signale correctement l'état connecté. 6 tests ajoutés.
+</fr-FR>
+
+<nl-NL>
+Ondertekening van het servercatalogus hersteld — build mislukt met een duidelijke fout zonder sleutel. AWG-fouten verbergen geen werkende GW-servers meer en omgekeerd. Hersteld: update-races, cache na uitloggen, verouderde geselecteerde server en automatische selectie van een betaald knooppunt voor een gratis account. GW-sleutelverlies, config-verlies bij kopiëren en verkeerstellerfouten hersteld. Overstroming van het welkomstscherm en serverlijstproblemen op kleine schermen opgelost. AWG-handshake meldt correct de verbonden status. 6 tests toegevoegd.
+</nl-NL>
+
+<de-DE>
+Signierung des Serverkatalogs behoben — Build schlägt ohne Schlüssel mit klarem Fehler fehl. AWG-Fehler verbergen keine funktionierenden GW-Server mehr und umgekehrt. Update-Races, Cache nach Abmeldung, veralteter ausgewählter Server und automatische Auswahl eines kostenpflichtigen Knotens für ein kostenloses Konto behoben. GW-Schlüsselverarbeitung, Config-Verlust beim Kopieren und Fehler in Datenzählern behoben. Überlauf des Begrüßungsbildschirms und Serverlisten-Probleme auf kleinen Bildschirmen behoben. AWG-Handshake meldet korrekt den Verbundenheitsstatus. 6 Tests hinzugefügt.
+</de-DE>
+
+<es-ES>
+Corregida la firma del catálogo de servidores — la compilación falla con error claro sin clave. Los errores AWG ya no ocultan servidores GW funcionales y viceversa. Corregidas carreras de actualización, caché tras cerrar sesión, servidor obsoleto y selección automática de nodo de pago para cuenta gratuita. Corregido el manejo de claves GW, pérdida de config GW al copiar y errores de contadores de tráfico. Solucionado desbordamiento de pantalla de bienvenida y problemas de lista de servidores en pantallas pequeñas. El handshake AWG ahora reporta correctamente el estado conectado. 6 tests añadidos.
+</es-ES>
+
+<it-IT>
+Corretta la firma del catalogo server — la build ora fallisce con errore chiaro senza chiave. Gli errori AWG non nascondono più i server GW funzionanti e viceversa. Corrette le gare di aggiornamento, la cache dopo il logout, il server obsoleto e la selezione automatica di un nodo a pagamento per un account gratuito. Corretta la gestione delle chiavi GW, la perdita di config GW durante la copia e gli errori dei contatori del traffico. Risolto lo sfondamento della schermata di benvenuto e i problemi della lista server su schermi piccoli. Il handshake AWG ora riporta correttamente lo stato connesso. 6 test aggiunti.
+</it-IT>
+
+<pl-PL>
+Naprawiono podpis katalogu serwerów — kompilacja kończy się oczywistym błędem bez klucza. Błędy AWG już nie ukrywają działających serwerów GW i odwrotnie. Naprawiono wyścigi aktualizacji, cache po wylogowaniu, przestarzały wybrany serwer i automatyczny wybór węzła płatnego dla konta darmowego. Naprawiono obsługę kluczy GW, utratę konfiguracji GW przy kopiowaniu i błędy liczników ruchu. Usunięto przepełnienie ekranu powitalnego i problemy z listą serwerów na małych ekranach. Handshake AWG prawidłowo raportuje stan połączenia. Dodano 6 testów.
+</pl-PL>
+
+<sv-SE>
+Signeringen av serverkatalogen åtgärdades — bygget misslyckas med tydligt fel utan nyckel. AWG-fel döljer inte längre fungerande GW-servrar och tvärtom. Uppdateringsrace, cache efter utloggning, föråldrad vald server och automatiskt val av betalnod för ett gratiskonto åtgärdades. GW-nyckelhantering, config-förlust vid kopiering och trafikräknarfel åtgärdades. Överflöd på välkomstskärmen och serverlisteproblem på små skärmar löstes. AWG-handshake rapporterar nu korrekt anslutet status. 6 tester tillagda.
+</sv-SE>
+
+<da-DK>
+Signeringen af serverkataloget er rettet — bygget fejler med en klar fejl uden nøgle. AWG-fejl skjuler ikke længere fungerende GW-servere og omvendt. Opdateringsløb, cache efter logning, forældret valgt server og automatisk valg af betalingsnode for en gratis konto er rettet. GW-nøglehåndtering, config-tab ved kopiering og trafiktællerfejl er rettet. Overflødighed på velkomstskærmen og serverlisteproblemer på små skærme er løst. AWG-handshake rapporterer nu korrekt forbundet status. 6 tests tilføjet.
+</da-DK>
+
+<fi-FI>
+Korjattu palvelinkatalogin allekirjoitus — käännös epäonnistuu selvällä virheellä ilman avainta. AWG-virheet eivät enää piilota toimivia GW-palvelimita ja päinvastoin. Korjattu päivityksen yhtäaikaisuudet, välimuisti kirjautumisen jälkeen, vanhentunut valittu palvelin ja automaattinen maksullisen solmun valinta ilmaiselle tille. GW-avaimen käsittely, config-kato kopiointiin ja liikennelaskurivirheet korjattu. Tervetulonäytön ylivuoto ja palvelinlistan ongelmat pienillä näytöillä korjattu. AWG-handshake ilmoittaa nyt oikein yhdistetyyn tilan. 6 testiä lisätty.
+</fi-FI>
+
+<pt-PT>
+Corrigida a assinatura do catálogo de servidores — a compilação falha com erro claro sem chave. Os erros AWG já não ocultam servidores GW funcionais e vice-versa. Corrigidas corridas de atualização, cache após logout, servidor obsoleto e seleção automática de nó pago para conta gratuita. Corrigida a gestão de chaves GW, perda de config GW ao copiar e erros de contadores de tráfego. Resolvido transbordamento do ecrã de boas-vindas e problemas da lista de servidores em ecrãs pequenos. O handshake AWG agora comunica corretamente o estado conectado. 6 testes adicionados.
+</pt-PT>
+
+<ro>
+Corectată semnătura catalogului de servere — compilarea eșuează cu o eroare clară fără cheie. Eroarele AWG nu mai ascund serverele GW funcționale și invers. Corectate cursele de actualizare, cache-ul după deconectare, serverul învechit și selecția automată a unui nod plătit pentru un cont gratuit. Corectată gestionarea cheilor GW, pierderea configurației GW la copiere și erorile contoarelor de trafic. Rezolvat overflow-ul ecranului de întâmpinare și problemele listei de servere pe ecrane mici. Handshake-ul AWG raportează acum corect starea conectat. 6 teste adăugate.
+</ro>
+
+<cs-CZ>
+Opravena signace serverového katalogu — sestavení selže s jasnou chybou bez klíče. Chyby AWG již neskrývají funkční servery GW a naopak. Opraveny závody aktualizací, mezipaměť po odhlášení, zastaralý vybraný server a automatický výběr placeného uzlu pro bezplatný účet. Opravena manipulace s klíči GW, ztráta konfigurace GW při kopírování a chyby počítadel provozu. Opraven přetečení úvodní obrazovky a problémy seznamu serverů na malých obrazovkách. AWG handshake nahlásí správně stav připojení. Přidáno 6 testů.
+</cs-CZ>
