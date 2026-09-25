@@ -6,14 +6,32 @@ import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
-import java.net.DatagramPacket
-import java.net.DatagramSocket
+import java.io.OutputStream
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import java.net.SocketAddress
+import java.net.StandardProtocolFamily
+import java.nio.ByteBuffer
+import java.nio.channels.CancelledKeyException
+import java.nio.channels.ClosedSelectorException
+import java.nio.channels.DatagramChannel
+import java.nio.channels.SelectionKey
+import java.nio.channels.Selector
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.Callable
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.RejectedExecutionException
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
@@ -25,11 +43,22 @@ import java.util.concurrent.atomic.AtomicLong
  * пришлось бы поднимать заново весь стек — новый порт, новый yaml, перезапуск
  * tun2socks, пересоздание TUN. Теперь порт и tun живут через переподключения
  * нетронутыми, а меняется только транспорт под ними.
+ *
+ * Все ресурсы ограничены сверху: пулы потоков, очереди, число UDP-ассоциаций и
+ * DNS-кэш. Раньше UDP-ассоциацию закрывало только наше собственное закрытие
+ * сокета, которого никогда не было, — каждый UDP-поток через tun2socks навсегда
+ * оставлял поток и буфер 64 КБ, и через несколько часов процесс падал с
+ * OutOfMemoryError (куча или pthread_create).
+ *
+ * @param udpIdleTimeoutMs через сколько молчащая UDP-ассоциация закрывается.
+ * @param dnsResolver подмена DNS-over-TCP резолва (host, запрос) -> ответ; для тестов.
  */
 class VleeSocksServer(
     private val transportProvider: () -> VleeSshTransport?,
     private val onTransportFailure: () -> Unit = {},
     private val dnsOverTcp: Boolean = true,
+    private val udpIdleTimeoutMs: Long = UDP_IDLE_TIMEOUT_MS,
+    private val dnsResolver: ((String, ByteArray) -> ByteArray?)? = null,
 ) {
     companion object {
         private const val TAG = "VleeSocks"
@@ -53,31 +82,123 @@ class VleeSocksServer(
          * ещё не знает (оборванный Wi-Fi выглядит именно так).
          */
         private const val DEAD_AFTER_FAILURES = 3
+
+        /**
+         * Одновременных SOCKS-сессий; CONNECT занимает два потока. Сверх лимита
+         * клиенту сразу отказываем: это лучше, чем уронить процесс.
+         */
+        internal const val MAX_SESSIONS = 128
+
+        /** UDP-ассоциаций одновременно; при переполнении закрывается самая тихая. */
+        internal const val MAX_UDP_ASSOCIATIONS = 256
+
+        /** Меньше, чем hev держит сессию (60 с): закрываем первыми, он видит EOF. */
+        private const val UDP_IDLE_TIMEOUT_MS = 30_000L
+        private const val UDP_SWEEP_MS = 1_000L
+        private const val UDP_READS_PER_WAKEUP = 32
+        private const val UDP_BUFFER_BYTES = 65_535
+        private const val UDP_RELAY_WORKERS = 8
+        private const val UDP_RELAY_QUEUE = 128
+        private const val DNS_QUEUE = 64
+        private const val DNS_CACHE_MAX = 512
+
+        /** Ключ кэша содержит ID запроса, поэтому кэш ловит только ретрансмиты. */
+        private const val DNS_CACHE_TTL_MS = 15_000L
+        private const val POOL_KEEPALIVE_SEC = 30L
+        private const val ACCEPT_BACKOFF_MS = 200L
+        private const val LOG_INTERVAL_MS = 10_000L
+
         private val SUCCESS_REPLY = byteArrayOf(VERSION.toByte(), 0x00, 0x00, ATYP_IPV4.toByte(), 0, 0, 0, 0, 0, 0)
         private val GENERAL_FAILURE = byteArrayOf(VERSION.toByte(), 0x01, 0x00, ATYP_IPV4.toByte(), 0, 0, 0, 0, 0, 0)
         private val CMD_UNSUPPORTED = byteArrayOf(VERSION.toByte(), 0x07, 0x00, ATYP_IPV4.toByte(), 0, 0, 0, 0, 0, 0)
+
+        private fun nowMs(): Long = System.nanoTime() / 1_000_000
+
+        /**
+         * Задачи сами ловят Throwable, так что сюда доходят только сбои самого
+         * ThreadPoolExecutor (OutOfMemoryError от pthread_create при замене
+         * воркера). Раньше такой сбой убивал весь процесс.
+         */
+        private val LOG_UNCAUGHT = Thread.UncaughtExceptionHandler { t, e ->
+            Log.e(TAG, "uncaught in ${t.name}", e)
+        }
+
+        private fun daemonThreads(name: String): ThreadFactory {
+            val seq = AtomicInteger()
+            return ThreadFactory { r ->
+                Thread(r, "$name-${seq.incrementAndGet()}").apply {
+                    isDaemon = true
+                    uncaughtExceptionHandler = LOG_UNCAUGHT
+                }
+            }
+        }
+
+        /** Переиспользует свободные потоки, растёт до [max], дальше — отказ. */
+        private fun elasticPool(name: String, max: Int) = ThreadPoolExecutor(
+            0, max, POOL_KEEPALIVE_SEC, TimeUnit.SECONDS,
+            SynchronousQueue<Runnable>(), daemonThreads(name),
+        )
+
+        private fun fixedPool(name: String, threads: Int, queue: BlockingQueue<Runnable>) =
+            ThreadPoolExecutor(
+                threads, threads, POOL_KEEPALIVE_SEC, TimeUnit.SECONDS, queue, daemonThreads(name),
+            ).apply { allowCoreThreadTimeOut(true) }
     }
 
-    private var serverSocket: ServerSocket? = null
-    private val executor: ExecutorService = Executors.newCachedThreadPool { r ->
-        Thread(r, "vlee-socks-worker").apply { isDaemon = true }
+    /** Предупреждение не чаще раза в [LOG_INTERVAL_MS]: UDP-флуд не должен забивать logcat. */
+    private class ThrottledLog {
+        private val last = AtomicLong(nowMs() - LOG_INTERVAL_MS)
+        private val suppressed = AtomicInteger()
+
+        fun warn(message: () -> String) {
+            val now = nowMs()
+            val prev = last.get()
+            if (now - prev < LOG_INTERVAL_MS || !last.compareAndSet(prev, now)) {
+                suppressed.incrementAndGet()
+                return
+            }
+            val skipped = suppressed.getAndSet(0)
+            Log.w(TAG, if (skipped == 0) message() else "${message()} (+$skipped similar)")
+        }
     }
+
+    private class DnsCacheEntry(val response: ByteArray, val expiresAtMs: Long)
+
+    private var serverSocket: ServerSocket? = null
+    @Volatile private var stopped = false
+
+    /** Рукопожатия и CONNECT-сессии (download-половина работает здесь же). */
+    private val sessionExecutor = elasticPool("vlee-socks-worker", MAX_SESSIONS)
+
+    /** Upload-половина CONNECT: сессий не больше MAX_SESSIONS, значит и насосов. */
+    private val pumpExecutor = elasticPool("vlee-socks-up", MAX_SESSIONS)
+
+    /** DNS-датаграммы ждут ответа здесь; переполнение очереди = потеря датаграммы. */
+    private val udpRelayExecutor =
+        fixedPool("vlee-udp-relay", UDP_RELAY_WORKERS, ArrayBlockingQueue(UDP_RELAY_QUEUE))
+
     // DNS-over-TCP резолвы идут параллельно: один медленный апстрим не должен
     // задерживать остальные запросы (раньше единственный поток + таймаут 5 с
     // на запрос выстраивали все резолвы страницы в очередь).
-    private val dnsExecutor: ExecutorService = Executors.newFixedThreadPool(DNS_WORKERS) { r ->
-        Thread(r, "vlee-dns-tcp").apply { isDaemon = true }
-    }
+    private val dnsExecutor = fixedPool("vlee-dns-tcp", DNS_WORKERS, ArrayBlockingQueue(DNS_QUEUE))
+
+    // Все UDP-ассоциации обслуживает один селекторный поток. Поток на
+    // ассоциацию (как раньше) при DNS-трафике быстро упирался в лимит потоков.
+    @Volatile private var udpSelector: Selector? = null
+    private val udpAssociations: MutableSet<UdpAssociation> = ConcurrentHashMap.newKeySet()
+    private val pendingUdp = ConcurrentLinkedQueue<UdpAssociation>()
+
     // ─── DNS-кэш и дедупликация ───
     // Каждый DNS-over-TCP запрос открывал НОВЫЙ SSH-канал, а нода — новое
     // TCP-соединение на публичный резолвер. Тысячи туннелей × повторяющиеся
     // запросы = TCP SYN флуд на 8.8.8.8:53 (OVH банит ноду как DNS-атакера).
-    // Кэш (TTL из ответа) + дедупликация одинаковых запросов в полёте
-    // срезают большую часть апстрим-трафика.
-    private val dnsCache = java.util.concurrent.ConcurrentHashMap<String, Pair<ByteArray, Long>>()
-    private val dnsInFlight = java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.CompletableFuture<ByteArray?>>()
-    /** Одновременных DNS-over-TCP каналов не больше этого (остальные ждут). */
-    private val dnsChannelCap = java.util.concurrent.Semaphore(24)
+    // Кэш ретрансмитов + дедупликация одинаковых запросов в полёте срезают
+    // повторы. Кэш — LRU с потолком: безразмерная карта росла весь сеанс.
+    private val dnsCache = object : LinkedHashMap<String, DnsCacheEntry>(64, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, DnsCacheEntry>?) =
+            size > DNS_CACHE_MAX
+    }
+    private val dnsInFlight = ConcurrentHashMap<String, CompletableFuture<ByteArray?>>()
     /**
      * Предпочитаемый апстрим — локальный резолвер самой ноды (127.0.0.53,
      * systemd-resolved): наружные запросы идут обычным UDP от её кэша, без
@@ -89,6 +210,10 @@ class VleeSocksServer(
 
     /** Подряд идущие неудачи открытия канала; сбрасывается на первом успехе. */
     private val openFailures = AtomicInteger(0)
+
+    private val rejectLog = ThrottledLog()
+    private val udpDropLog = ThrottledLog()
+    private val udpNoRouteLog = ThrottledLog()
 
     /**
      * Открывает direct-tcpip канал через текущий транспорт.
@@ -154,27 +279,66 @@ class VleeSocksServer(
     }
 
     fun start() {
-        val ss = ServerSocket(0, 128, InetAddress.getByName("127.0.0.1"))
-        serverSocket = ss
-        port = ss.localPort
-        Log.i(TAG, "listening on 127.0.0.1:$port")
-        Thread({
-            while (!ss.isClosed) {
-                try {
-                    val client = ss.accept()
-                    Log.d(TAG, "accepted ${client.remoteSocketAddress}")
-                    executor.execute { handleClient(client) }
-                } catch (_: IOException) {
-                    break
-                }
-            }
-        }, "vlee-socks-accept").apply { isDaemon = true }.start()
+        try {
+            val ss = ServerSocket(0, 128, InetAddress.getByName("127.0.0.1"))
+            serverSocket = ss
+            port = ss.localPort
+            val selector = Selector.open()
+            udpSelector = selector
+            Log.i(TAG, "listening on 127.0.0.1:$port")
+            startDaemon("vlee-socks-accept") { acceptLoop(ss) }
+            startDaemon("vlee-socks-udp") { udpLoop(selector) }
+        } catch (t: Throwable) {
+            // Сервис назначает socksServer только после start(): закрыть
+            // полуоткрытое, кроме нас, некому.
+            stop()
+            throw t
+        }
     }
 
     fun stop() {
+        stopped = true
         runCatching { serverSocket?.close() }
-        executor.shutdownNow()
+        runCatching { udpSelector?.close() }
+        closeAllUdp()
+        sessionExecutor.shutdownNow()
+        pumpExecutor.shutdownNow()
+        udpRelayExecutor.shutdownNow()
         dnsExecutor.shutdownNow()
+    }
+
+    private fun startDaemon(name: String, body: () -> Unit) {
+        Thread(body, name).apply {
+            isDaemon = true
+            uncaughtExceptionHandler = LOG_UNCAUGHT
+        }.start()
+    }
+
+    private fun acceptLoop(ss: ServerSocket) {
+        while (!ss.isClosed) {
+            val client = try {
+                ss.accept()
+            } catch (_: IOException) {
+                break
+            }
+            try {
+                Log.d(TAG, "accepted ${client.remoteSocketAddress}")
+                sessionExecutor.execute { handleClient(client) }
+            } catch (_: RejectedExecutionException) {
+                if (!stopped) rejectLog.warn { "session limit ($MAX_SESSIONS) reached, client dropped" }
+                closeQuietly(client)
+            } catch (t: Throwable) {
+                // pthread_create отказал (OutOfMemoryError): раньше это роняло
+                // процесс прямо из accept-цикла. Теперь отказ одному клиенту.
+                Log.e(TAG, "cannot start session worker: $t")
+                closeQuietly(client)
+                try {
+                    Thread.sleep(ACCEPT_BACKOFF_MS)
+                } catch (_: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                }
+            }
+        }
     }
 
     private fun handleClient(socket: Socket) {
@@ -230,8 +394,10 @@ class VleeSocksServer(
                     closeQuietly(socket)
                 }
             }
-        } catch (e: Exception) {
-            Log.w(TAG, "socks session failed for ${socket.remoteSocketAddress}: $e")
+        } catch (t: Throwable) {
+            // Throwable, а не Exception: Error (OOM при старте потока), вылетев
+            // из задачи, заставлял пул создавать поток-замену — и падать уже там.
+            Log.w(TAG, "socks session failed for ${socket.remoteSocketAddress}: $t")
             closeQuietly(socket)
         }
     }
@@ -248,9 +414,6 @@ class VleeSocksServer(
         val channel = openChannel(target.first, target.second)
             ?: return replyAndClose(output, GENERAL_FAILURE, socket)
 
-        output.write(SUCCESS_REPLY)
-        output.flush()
-
         connections.incrementAndGet()
         try {
             val chIn = channel.inputStream
@@ -259,25 +422,32 @@ class VleeSocksServer(
             // Обе половины дуплекса живут независимо. Раньше выход из upload-цикла
             // по EOF от приложения сразу закрывал канал и сокет в finally — ответ
             // сервера, ещё летящий в обратную сторону, обрезался на полуслове.
-            val upstream = Thread({
-                try {
-                    val buf = ByteArray(RELAY_BUFFER_BYTES)
-                    val localIn = socket.getInputStream()
-                    while (true) {
-                        val n = localIn.read(buf)
-                        if (n < 0) break
-                        chOut.write(buf, 0, n)
-                        chOut.flush()
+            val upstreamDone = CountDownLatch(1)
+            try {
+                pumpExecutor.execute {
+                    try {
+                        pumpUpstream(socket, chOut)
+                    } catch (t: Throwable) {
+                        Log.w(TAG, "upstream relay failed: $t")
+                    } finally {
+                        upstreamDone.countDown()
                     }
-                } catch (_: IOException) {
-                } finally {
-                    // EOF вверх по потоку — сообщаем его SSH-каналу, но канал не
-                    // рвём: сервер ещё может досылать ответ.
-                    runCatching { chOut.close() }
                 }
-            }, "vlee-socks-up").apply { isDaemon = true }
+            } catch (t: Throwable) {
+                // Нет потока для upload-половины (лимит или pthread_create):
+                // честный отказ клиенту вместо падения процесса.
+                Log.w(TAG, "CONNECT ${target.first}:${target.second}: no relay thread: $t")
+                runCatching {
+                    output.write(GENERAL_FAILURE)
+                    output.flush()
+                }
+                return
+            }
 
-            upstream.start()
+            // Ответ — внутри try: если запись упадёт, канал всё равно закроется
+            // в finally (раньше он оставался открытым на сервере).
+            output.write(SUCCESS_REPLY)
+            output.flush()
 
             // Downstream крутим прямо в текущем воркере: на соединение уходит два
             // потока, а не три (на загрузке страницы это десятки соединений).
@@ -299,7 +469,7 @@ class VleeSocksServer(
             // Ответ уже дочитан; на догрузку запроса даём ограниченное время:
             // иначе застрявший на read() upload-поток жил бы до конца сессии,
             // даже когда удалённая сторона давно закрылась.
-            upstream.join(RELAY_DRAIN_TIMEOUT_MS)
+            upstreamDone.await(RELAY_DRAIN_TIMEOUT_MS, TimeUnit.MILLISECONDS)
         } catch (_: InterruptedException) {
             Thread.currentThread().interrupt()
         } finally {
@@ -310,57 +480,201 @@ class VleeSocksServer(
         }
     }
 
+    private fun pumpUpstream(socket: Socket, chOut: OutputStream) {
+        try {
+            val buf = ByteArray(RELAY_BUFFER_BYTES)
+            val localIn = socket.getInputStream()
+            while (true) {
+                val n = localIn.read(buf)
+                if (n < 0) break
+                chOut.write(buf, 0, n)
+                chOut.flush()
+            }
+        } catch (_: IOException) {
+        } finally {
+            // EOF вверх по потоку — сообщаем его SSH-каналу, но канал не
+            // рвём: сервер ещё может досылать ответ.
+            runCatching { chOut.close() }
+        }
+    }
+
+    /**
+     * UDP ASSOCIATE. Воркер освобождается сразу после ответа: датаграммы
+     * обслуживает общий [udpLoop], а закрывает ассоциацию таймаут простоя.
+     * Раньше воркер крутил здесь цикл `while (!socket.isClosed)`, который
+     * никогда не завершался: isClosed отражает только НАШЕ закрытие, а
+     * tun2socks закрывает управляющее соединение со своей стороны.
+     */
     private fun handleUdpAssociate(socket: Socket, input: DataInputStream, output: DataOutputStream) {
         readSkipReserved(input)
         readAddress(input)
 
-        val udp = DatagramSocket(InetSocketAddress(InetAddress.getByName("127.0.0.1"), 0))
-        udp.reuseAddress = true
-        udp.soTimeout = 1000
-
-        val reply = byteArrayOf(
-            VERSION.toByte(), 0x00, 0x00, ATYP_IPV4.toByte(),
-            127, 0, 0, 1,
-            (udp.localPort shr 8).toByte(), udp.localPort.toByte(),
-        )
-        output.write(reply)
-        output.flush()
-
-        connections.incrementAndGet()
+        val channel = DatagramChannel.open(StandardProtocolFamily.INET)
         try {
-            val buffer = ByteArray(65536)
-            while (!socket.isClosed) {
-                val packet = DatagramPacket(buffer, buffer.size)
-                try {
-                    udp.receive(packet)
-                } catch (_: java.net.SocketTimeoutException) {
-                    continue
-                } catch (_: IOException) {
-                    break
-                }
+            channel.socket().bind(InetSocketAddress(InetAddress.getByName("127.0.0.1"), 0))
+            channel.configureBlocking(false)
+            val udpPort = channel.socket().localPort
+            val reply = byteArrayOf(
+                VERSION.toByte(), 0x00, 0x00, ATYP_IPV4.toByte(),
+                127, 0, 0, 1,
+                (udpPort shr 8).toByte(), udpPort.toByte(),
+            )
+            output.write(reply)
+            output.flush()
+        } catch (t: Throwable) {
+            runCatching { channel.close() }
+            throw t
+        }
 
-                val datagram = parseUdpDatagram(packet) ?: continue
-                val replyTo = packet.socketAddress
-                // Ответ ждём в отдельном воркере — цикл приёма остаётся свободным
-                // и следующие датаграммы не стоят в очереди за этой.
-                executor.execute {
-                    val response = relayUdp(datagram)
-                    if (response == null) {
-                        Log.w(
-                            TAG,
-                            "UDP ${datagram.dstHost.hostAddress}:${datagram.dstPort} " +
-                                "len=${datagram.payload.size} no relay path"
-                        )
-                        return@execute
+        val association = UdpAssociation(socket, channel)
+        udpAssociations.add(association)
+        if (udpAssociations.size > MAX_UDP_ASSOCIATIONS) evictIdlestUdp(except = association)
+        // stop() мог пройти между созданием и регистрацией.
+        if (stopped) {
+            association.close()
+            return
+        }
+        pendingUdp.add(association)
+        udpSelector?.wakeup()
+    }
+
+    private inner class UdpAssociation(
+        val control: Socket,
+        val channel: DatagramChannel,
+    ) {
+        @Volatile var lastActiveMs = nowMs()
+        private val closed = AtomicBoolean(false)
+        val isClosed: Boolean get() = closed.get()
+
+        init {
+            connections.incrementAndGet()
+        }
+
+        /** Неблокирующая отправка: при полном буфере датаграмма теряется, как и положено UDP. */
+        fun send(packet: ByteArray, to: SocketAddress) {
+            if (closed.get()) return
+            try {
+                channel.send(ByteBuffer.wrap(packet), to)
+                lastActiveMs = nowMs()
+            } catch (_: IOException) {
+            }
+        }
+
+        fun close() {
+            if (!closed.compareAndSet(false, true)) return
+            udpAssociations.remove(this)
+            runCatching { channel.close() }
+            // tun2socks видит EOF управляющего соединения и завершает свою сессию.
+            closeQuietly(control)
+            connections.decrementAndGet()
+        }
+    }
+
+    private fun udpLoop(selector: Selector) {
+        // Один буфер на все ассоциации вместо 64 КБ на каждую.
+        val buffer = ByteBuffer.allocate(UDP_BUFFER_BYTES)
+        var nextSweepMs = nowMs() + UDP_SWEEP_MS
+        try {
+            while (!stopped) {
+                selector.select(UDP_SWEEP_MS)
+                registerPendingUdp(selector)
+                val keys = selector.selectedKeys().iterator()
+                while (keys.hasNext()) {
+                    val key = keys.next()
+                    keys.remove()
+                    val association = key.attachment() as UdpAssociation
+                    try {
+                        if (key.isValid && key.isReadable) drainUdp(association, buffer)
+                    } catch (_: CancelledKeyException) {
+                        association.close()
                     }
-                    val out = DatagramPacket(response, response.size, replyTo)
-                    runCatching { udp.send(out) }
+                }
+                val now = nowMs()
+                if (now >= nextSweepMs) {
+                    closeIdleUdp(now)
+                    nextSweepMs = now + UDP_SWEEP_MS
                 }
             }
+        } catch (_: ClosedSelectorException) {
+        } catch (t: Throwable) {
+            if (!stopped) Log.e(TAG, "UDP loop failed", t)
         } finally {
-            connections.decrementAndGet()
-            runCatching { udp.close() }
-            closeQuietly(socket)
+            closeAllUdp()
+            runCatching { selector.close() }
+        }
+    }
+
+    private fun registerPendingUdp(selector: Selector) {
+        while (true) {
+            val association = pendingUdp.poll() ?: return
+            if (association.isClosed) continue
+            try {
+                association.channel.register(selector, SelectionKey.OP_READ, association)
+            } catch (_: IOException) {
+                association.close()
+            }
+        }
+    }
+
+    private fun drainUdp(association: UdpAssociation, buffer: ByteBuffer) {
+        repeat(UDP_READS_PER_WAKEUP) {
+            buffer.clear()
+            val from = try {
+                association.channel.receive(buffer)
+            } catch (_: IOException) {
+                association.close()
+                return
+            } ?: return
+            association.lastActiveMs = nowMs()
+            buffer.flip()
+            val datagram = parseUdpDatagram(buffer.array(), buffer.arrayOffset(), buffer.limit())
+                ?: return@repeat
+            dispatchUdp(association, datagram, from)
+        }
+    }
+
+    private fun dispatchUdp(association: UdpAssociation, datagram: UdpDatagram, replyTo: SocketAddress) {
+        if (!dnsOverTcp || datagram.dstPort != DNS_PORT) {
+            // Кроме DNS, UDP через SSH не ходит (QUIC и пр. откатываются на TCP);
+            // отбрасываем сразу, не занимая воркеры.
+            udpNoRouteLog.warn {
+                "UDP ${datagram.dstHost.hostAddress}:${datagram.dstPort} " +
+                    "len=${datagram.payload.size} no relay path"
+            }
+            return
+        }
+        try {
+            // Ответ ждём в воркере — цикл приёма остаётся свободным и следующие
+            // датаграммы не стоят в очереди за этой.
+            udpRelayExecutor.execute {
+                try {
+                    relayDns(datagram)?.let { association.send(it, replyTo) }
+                } catch (t: Throwable) {
+                    Log.w(TAG, "UDP relay failed: $t")
+                }
+            }
+        } catch (t: Throwable) {
+            // Очередь полна (или нет потока): UDP допускает потери.
+            udpDropLog.warn { "UDP relay saturated, datagram dropped: $t" }
+        }
+    }
+
+    private fun closeIdleUdp(now: Long) {
+        for (association in udpAssociations) {
+            if (now - association.lastActiveMs > udpIdleTimeoutMs) association.close()
+        }
+    }
+
+    private fun evictIdlestUdp(except: UdpAssociation) {
+        val idlest = udpAssociations.filter { it !== except }.minByOrNull { it.lastActiveMs } ?: return
+        udpDropLog.warn { "UDP association limit ($MAX_UDP_ASSOCIATIONS) reached, closing the idlest" }
+        idlest.close()
+    }
+
+    private fun closeAllUdp() {
+        for (association in udpAssociations) association.close()
+        while (true) {
+            (pendingUdp.poll() ?: break).close()
         }
     }
 
@@ -370,11 +684,8 @@ class VleeSocksServer(
         val payload: ByteArray,
     )
 
-    private fun parseUdpDatagram(packet: DatagramPacket): UdpDatagram? {
+    private fun parseUdpDatagram(data: ByteArray, offset: Int, len: Int): UdpDatagram? {
         try {
-            val data = packet.data
-            val offset = packet.offset
-            val len = packet.length
             if (len < 10) return null
             if (data[offset + 2].toInt() != 0) return null
             var pos = offset + 3
@@ -388,7 +699,7 @@ class VleeSocksServer(
                     host = InetAddress.getByAddress(data.copyOfRange(pos, pos + 16)); pos += 16
                 }
                 else -> {
-                    Log.w(TAG, "UDP datagram with unsupported ATYP $atyp dropped")
+                    udpNoRouteLog.warn { "UDP datagram with unsupported ATYP $atyp dropped" }
                     return null
                 }
             }
@@ -403,64 +714,71 @@ class VleeSocksServer(
         }
     }
 
-    private fun relayUdp(dgram: UdpDatagram): ByteArray? {
-        if (dnsOverTcp && dgram.dstPort == DNS_PORT && dgram.payload.isNotEmpty()) {
-            val dstHost = dgram.dstHost.hostAddress ?: "8.8.8.8"
-            val key = dstHost + ":" + java.util.Arrays.hashCode(dgram.payload)
-            // Кэш: повторные запросы не создают апстрим-соединений вообще.
-            dnsCache[key]?.let { entry ->
-                if (entry.second > System.currentTimeMillis()) return entry.first
-                dnsCache.remove(key, entry)
-            }
-            // Дедуп: идентичный запрос уже в полёте — ждём его результат.
-            var future: java.util.concurrent.CompletableFuture<ByteArray?>? = null
-            while (true) {
-                val inFlight = dnsInFlight[key]
-                if (inFlight != null) {
-                    try { return inFlight.get(3_000L, java.util.concurrent.TimeUnit.MILLISECONDS) }
-                    catch (_: Exception) { return null }
-                }
-                val mine = java.util.concurrent.CompletableFuture<ByteArray?>()
-                if (dnsInFlight.putIfAbsent(key, mine) == null) { future = mine; break }
-            }
-            val response: ByteArray? = try {
-                dnsExecutor.submit(
-                    java.util.concurrent.Callable<ByteArray?> {
-                        resolveDnsOverTcp(dstHost, dgram.payload)
-                    }
-                ).get(DNS_TCP_TIMEOUT_MS.toLong(), java.util.concurrent.TimeUnit.MILLISECONDS)
-            } catch (_: java.util.concurrent.RejectedExecutionException) {
-                dnsInFlight.remove(key)
-                null
-            } catch (e: Exception) {
+    /** DNS-запрос через DNS-over-TCP по SSH; возвращает готовую SOCKS-датаграмму. */
+    private fun relayDns(dgram: UdpDatagram): ByteArray? {
+        val dstHost = dgram.dstHost.hostAddress ?: return null
+        // Точные байты запроса вместо хэш-кода: коллизия хэша отдавала чужой ответ.
+        val key = dstHost + ":" + String(dgram.payload, Charsets.ISO_8859_1)
+        dnsCacheGet(key)?.let { return buildUdpResponse(dgram.dstHost, DNS_PORT, it) }
+
+        // Дедуп: идентичный запрос уже в полёте — ждём его результат.
+        val mine = CompletableFuture<ByteArray?>()
+        dnsInFlight.putIfAbsent(key, mine)?.let { inFlight ->
+            val shared = try {
+                inFlight.get(3_000L, TimeUnit.MILLISECONDS)
+            } catch (_: Exception) {
                 null
             }
-            dnsInFlight.remove(key)
-            if (response != null) {
-                dnsCache[key] = response to System.currentTimeMillis() + dnsResponseTtl(response)
-            }
-            future?.complete(response)
-            return response
+            return shared?.let { buildUdpResponse(dgram.dstHost, DNS_PORT, it) }
         }
-        return null
+
+        var response: ByteArray? = null
+        try {
+            val resolve = dnsResolver ?: ::resolveDnsOverTcp
+            val task = dnsExecutor.submit(Callable { resolve(dstHost, dgram.payload) })
+            try {
+                response = task.get(DNS_TCP_TIMEOUT_MS.toLong(), TimeUnit.MILLISECONDS)
+                response?.let { dnsCachePut(key, it) }
+            } catch (e: Exception) {
+                // Прерываем зависший резолв: иначе он навсегда занимал DNS-воркер,
+                // а новые запросы копились в очереди без предела.
+                task.cancel(true)
+                if (e is InterruptedException) Thread.currentThread().interrupt()
+            }
+        } catch (_: RejectedExecutionException) {
+            // DNS-очередь полна: запрос теряется, клиент повторит.
+        } finally {
+            dnsInFlight.remove(key, mine)
+            mine.complete(response)
+        }
+        return response?.let { buildUdpResponse(dgram.dstHost, DNS_PORT, it) }
     }
 
+    private fun dnsCacheGet(key: String): ByteArray? = synchronized(dnsCache) {
+        val entry = dnsCache[key] ?: return null
+        if (entry.expiresAtMs > nowMs()) return entry.response
+        dnsCache.remove(key)
+        null
+    }
+
+    private fun dnsCachePut(key: String, response: ByteArray) {
+        synchronized(dnsCache) {
+            dnsCache[key] = DnsCacheEntry(response, nowMs() + DNS_CACHE_TTL_MS)
+        }
+    }
+
+    /** Возвращает сырой DNS-ответ (без SOCKS-заголовка). */
     private fun resolveDnsOverTcp(host: String, query: ByteArray): ByteArray? {
         var upstream = host
         if (localResolverUsable || System.currentTimeMillis() - localResolverLastTry > 120_000) {
             upstream = "127.0.0.53"
         }
-        dnsChannelCap.acquire()
-        try {
-            val result = resolveDnsOverTcpInner(upstream, query)
-            if (upstream == "127.0.0.53") {
-                localResolverUsable = result != null
-                if (result == null) localResolverLastTry = System.currentTimeMillis()
-            }
-            return result
-        } finally {
-            dnsChannelCap.release()
+        val result = resolveDnsOverTcpInner(upstream, query)
+        if (upstream == "127.0.0.53") {
+            localResolverUsable = result != null
+            if (result == null) localResolverLastTry = System.currentTimeMillis()
         }
+        return result
     }
 
     private fun resolveDnsOverTcpInner(host: String, query: ByteArray): ByteArray? {
@@ -482,7 +800,7 @@ class VleeSocksServer(
             if (respLen <= 0 || respLen > 65535) return null
             val response = ByteArray(respLen)
             chIn.readFully(response)
-            return buildUdpResponse(host, DNS_PORT, response)
+            return response
         } catch (_: Exception) {
             return null
         } finally {
@@ -490,45 +808,17 @@ class VleeSocksServer(
         }
     }
 
-    /** Грубый парсер TTL из секции Answer; нестандартный ответ — 15 с. */
-    private fun dnsResponseTtl(response: ByteArray): Long {
-        return try {
-            var pos = 12
-            while (response[pos].toInt() != 0) pos += 1 + response[pos]
-            pos += 5
-            var ttl = Long.MAX_VALUE
-            var answers = ((response[pos].toInt() and 0xFF) shl 8) or (response[pos + 1].toInt() and 0xFF)
-            pos += 2
-            while (answers-- > 0 && pos + 10 <= response.size) {
-                if (response[pos].toInt() and 0xC0 == 0xC0) pos += 2 else {
-                    while (response[pos].toInt() != 0) pos += 1 + response[pos]
-                    pos += 1
-                }
-                pos += 8
-                val recTtl = ((response[pos].toLong() and 0xFF) shl 24) or
-                    ((response[pos + 1].toLong() and 0xFF) shl 16) or
-                    ((response[pos + 2].toLong() and 0xFF) shl 8) or
-                    (response[pos + 3].toLong() and 0xFF)
-                if (recTtl in 1 until ttl) ttl = recTtl
-                pos += 4 + (((response[pos + 8].toInt() and 0xFF) shl 8) or (response[pos + 9].toInt() and 0xFF))
-            }
-            if (ttl == Long.MAX_VALUE) 15_000L else (ttl.coerceIn(1, 300) * 1000)
-        } catch (_: Exception) {
-            15_000L
-        }
-    }
-
-    private fun buildUdpResponse(host: String, port: Int, payload: ByteArray): ByteArray {
-        val out = ByteArrayOutputStream()
+    /**
+     * [source] — адрес, на который слало приложение, даже если ответил
+     * резолвер ноды: hev подставляет адрес из заголовка источником пакета.
+     * Раньше туда попадал 127.0.0.53, и ядро отбрасывало такой ответ.
+     */
+    private fun buildUdpResponse(source: InetAddress, port: Int, payload: ByteArray): ByteArray {
+        val out = ByteArrayOutputStream(payload.size + 22)
         out.write(byteArrayOf(0, 0, 0))
-        val addr = InetAddress.getByName(host)
-        if (addr.address.size == 4) {
-            out.write(ATYP_IPV4)
-            out.write(addr.address)
-        } else {
-            out.write(ATYP_IPV6)
-            out.write(addr.address)
-        }
+        val raw = source.address
+        out.write(if (raw.size == 4) ATYP_IPV4 else ATYP_IPV6)
+        out.write(raw)
         out.write((port shr 8) and 0xFF)
         out.write(port and 0xFF)
         out.write(payload)

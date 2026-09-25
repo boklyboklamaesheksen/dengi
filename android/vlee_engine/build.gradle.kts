@@ -20,8 +20,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
+
+    testOptions {
+        // android.util.Log returns defaults in plain JVM tests instead of throwing.
+        unitTests.isReturnDefaultValues = true
     }
 
     // Транзитивные bc*.jar (sshj -> bcpkix/bcutil) тащат дубли манифестов —
@@ -36,10 +38,17 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
 dependencies {
     // hev.htproxy.TProxyService + libhev-socks5-tunnel.so live in the
     // hysteria2_engine module; the class is packaged once via the app module.
     compileOnly(project(":hysteria2_engine"))
     implementation("com.hierynomus:sshj:0.39.0")
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
+    testImplementation("junit:junit:4.13.2")
 }

@@ -4,18 +4,18 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.graphics.Color
 import android.net.VpnService
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
-import android.view.WindowInsetsController
-import androidx.core.view.WindowCompat
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import com.witvpn.vlee.VleeManager
 import com.witvpn.vlee.model.VleeServerConfig
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
@@ -30,7 +30,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MainActivity : FlutterActivity() {
+// FlutterFragmentActivity (a ComponentActivity) so androidx enableEdgeToEdge() is available.
+class MainActivity : FlutterFragmentActivity() {
     companion object {
         private const val PKG_CHANNEL = "app.rabochiy.vpn/pkg_info"
         private const val ENGINE_CHANNEL = "rabochiy_vpn/engine"
@@ -63,22 +64,13 @@ class MainActivity : FlutterActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        configureSystemBarsForEdgeToEdge()
-    }
-
-    private fun configureSystemBarsForEdgeToEdge() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-            window.insetsController?.setSystemBarsAppearance(
-                0,
-                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
-                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-            )
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.isNavigationBarContrastEnforced = false
-        }
+        // Same edge-to-edge layout on every API level (Android 15 enforces it).
+        // Called after super.onCreate, which paints Flutter's translucent status
+        // bar; dark styles keep light icons on the always-dark UI.
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+        )
     }
 
     override fun onResume() {

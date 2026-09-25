@@ -229,6 +229,39 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('server list scrolls clear of the navigation bar', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(396, 800);
+    // Edge-to-edge: the sheet is drawn under a 48 dp navigation bar.
+    tester.view.padding = const FakeViewPadding(bottom: 48);
+    tester.view.viewPadding = const FakeViewPadding(bottom: 48);
+    addTearDown(tester.view.reset);
+    final provider = AppProvider(
+      apiService: FakeApi(fetch: () async => [awgServer]),
+      gwApiService: FakeGwApi(fetch: () async => [gwServer]),
+      autoInitialize: false,
+    );
+    addTearDown(provider.dispose);
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: provider,
+        child: MaterialApp(
+          theme: AppTheme.darkTheme,
+          locale: const Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: const Scaffold(body: ServerListScreen()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final ListView list = tester.widget(find.byType(ListView));
+    expect(list.padding?.resolve(TextDirection.ltr).bottom, 24 + 48);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('welcome buttons centre their labels like the home CTA', (
     tester,
   ) async {

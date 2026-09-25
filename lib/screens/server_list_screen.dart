@@ -17,6 +17,8 @@ class ServerListScreen extends StatefulWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      // Edge-to-edge: keep the sheet below the status bar / display cutout.
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.65),
       builder: (_) => const ServerListScreen(),
@@ -234,7 +236,14 @@ class _ServerListScreenState extends State<ServerListScreen> {
                           final headerCount = errorBanner == null ? 1 : 2;
                           return ListView.separated(
                             controller: scrollController,
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                            // The sheet runs under the navigation bar; the
+                            // last server must still scroll clear of it.
+                            padding: EdgeInsets.fromLTRB(
+                              16,
+                              0,
+                              16,
+                              24 + MediaQuery.paddingOf(context).bottom,
+                            ),
                             itemCount: servers.length + headerCount,
                             separatorBuilder: (_, _) =>
                                 const SizedBox(height: 8),

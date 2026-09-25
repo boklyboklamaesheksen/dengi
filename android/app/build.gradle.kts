@@ -22,7 +22,8 @@ flutter {
 android {
     namespace = "app.rabochiy.vpn"
     compileSdk = 36
-    ndkVersion = "27.0.12077973"
+    // AGP 9.1 / Flutter 3.47 default; used only to strip and symbolize the prebuilt .so files.
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         // Required by `coreLibraryDesugaring` for older Android API
@@ -35,10 +36,6 @@ android {
 
     buildFeatures {
         buildConfig = true
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
@@ -149,6 +146,12 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
 dependencies {
     // Firebase BoM — управляет совместимыми версиями Firebase SDK
     implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
@@ -168,6 +171,8 @@ dependencies {
     // Coroutines used by the Kotlin VPN managers (AwgManager) glued
     // to Flutter via MethodChannel.
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    // enableEdgeToEdge() in MainActivity (Play's Android 15 edge-to-edge check).
+    implementation("androidx.activity:activity:1.12.4")
     // Java 8+ APIs used by the AmneziaWG sources on older devices
     // (we keep minSdk via Flutter, so desugaring is mandatory).
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
