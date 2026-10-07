@@ -1,8 +1,8 @@
-Política de privacidad — Rabochiy VPN
+Política de privacidad — Zapret VPN
 Actualizada: 1 de septiembre de 2026
 
 Sobre este documento
-Esta política explica la recogida, el uso y la protección de la información al usar la aplicación y el servicio. Al usar Rabochiy VPN aceptas esta política; si no estás de acuerdo, deja de usar la aplicación. Recogemos el mínimo de datos y no registramos tu actividad en Internet. GW y AmneziaWG son estándares técnicos; su mención no implica relación con servicios del mismo nombre.
+Esta política explica la recogida, el uso y la protección de la información al usar la aplicación y el servicio. Al usar Zapret VPN aceptas esta política; si no estás de acuerdo, deja de usar la aplicación. Recogemos el mínimo de datos y no registramos tu actividad en Internet. GW y AmneziaWG son estándares técnicos; su mención no implica relación con servicios del mismo nombre.
 
 Lo que no guardamos
 No seguimos tu ubicación GPS ni guardamos las webs visitadas, las consultas DNS, las direcciones de los servidores a los que accedes, tu IP real ni los horarios o la duración de tus sesiones. Los servidores encaminan paquetes sin registros de actividad de los usuarios.
@@ -26,8 +26,8 @@ Publicidad
 Puede utilizarse código de redes publicitarias para financiar los servidores gratuitos. Un análisis estático puede detectar firmas publicitarias. Los socios pueden recoger datos anonimizados, como el identificador publicitario y clics o visualizaciones de anuncios, según sus propias políticas. Estos datos no se vinculan a tu actividad dentro del túnel VPN. Puedes restablecer el identificador publicitario o desactivar la personalización en Android.
 
 Destinatarios y cambios
-Rabochiy VPN no está dirigido a menores de 13 años y no recoge sus datos deliberadamente. Avísanos si sabes que un menor de 13 usa la aplicación. Podemos actualizar esta política; la fecha indica la versión vigente. Los cambios importantes se anuncian en nuestro chat de Telegram.
+Zapret VPN no está dirigido a menores de 13 años y no recoge sus datos deliberadamente. Avísanos si sabes que un menor de 13 usa la aplicación. Podemos actualizar esta política; la fecha indica la versión vigente. Los cambios importantes se anuncian en nuestro chat de Telegram.
 
 Contacto
-Telegram: https://t.me/rabochyvpn_chat
+Telegram: https://t.me/chatzapret
 Correo: support@vpnhub.ltd

@@ -1,8 +1,8 @@
-Politique de confidentialité — Rabochiy VPN
+Politique de confidentialité — Zapret VPN
 Mise à jour : 1er septembre 2026
 
 À propos de ce document
-Cette politique décrit la collecte, l’utilisation et la protection des informations lors de l’utilisation de l’application et du service. En utilisant Rabochiy VPN, vous acceptez cette politique ; sinon, cessez d’utiliser l’application. Le service repose sur une collecte minimale et ne consigne pas votre activité Internet. GW et AmneziaWG sont des normes techniques ; leur mention n’implique aucun lien avec des services portant ces noms.
+Cette politique décrit la collecte, l’utilisation et la protection des informations lors de l’utilisation de l’application et du service. En utilisant Zapret VPN, vous acceptez cette politique ; sinon, cessez d’utiliser l’application. Le service repose sur une collecte minimale et ne consigne pas votre activité Internet. GW et AmneziaWG sont des normes techniques ; leur mention n’implique aucun lien avec des services portant ces noms.
 
 Ce que nous ne conservons pas
 Nous ne suivons pas votre position GPS et ne conservons ni les sites visités, ni les requêtes DNS, ni les adresses des serveurs auxquels vous accédez, ni votre véritable adresse IP, ni les horaires ou la durée de vos sessions. Les serveurs acheminent les paquets sans journaux d’activité des utilisateurs.
@@ -26,8 +26,8 @@ Publicité
 Du code de réseaux publicitaires peut être utilisé pour financer les serveurs gratuits. Une analyse statique peut identifier des signatures publicitaires. Les partenaires peuvent collecter des données anonymisées, notamment l’identifiant publicitaire et les clics ou vues d’annonces, selon leurs propres politiques. Ces données ne sont pas liées à votre activité dans le tunnel VPN. Vous pouvez réinitialiser l’identifiant publicitaire ou désactiver la personnalisation dans Android.
 
 Public concerné et mises à jour
-Rabochiy VPN n’est pas destiné aux moins de 13 ans et ne collecte pas volontairement leurs données. Signalez-nous si un enfant de moins de 13 ans utilise l’application. Cette politique peut être modifiée ; sa date indique la version actuelle. Les changements importants sont annoncés dans notre discussion Telegram.
+Zapret VPN n’est pas destiné aux moins de 13 ans et ne collecte pas volontairement leurs données. Signalez-nous si un enfant de moins de 13 ans utilise l’application. Cette politique peut être modifiée ; sa date indique la version actuelle. Les changements importants sont annoncés dans notre discussion Telegram.
 
 Contact
-Telegram : https://t.me/rabochyvpn_chat
+Telegram : https://t.me/chatzapret
 Email : support@vpnhub.ltd

@@ -3,7 +3,7 @@
 // The Java sources under `src/main/java/org/amnezia/awg/**` and the
 // pre-built `libwg-go.so` / `libwg.so` / `libwg-quick.so` binaries
 // under `src/main/jniLibs/**` are vendored as-is; only the build script
-// is rewritten in Kotlin DSL to fit the rest of Rabochiy VPN's Gradle
+// is rewritten in Kotlin DSL to fit the rest of Zapret VPN's Gradle
 // configuration.
 plugins {
     id("com.android.library")

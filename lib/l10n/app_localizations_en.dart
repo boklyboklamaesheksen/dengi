@@ -4,7 +4,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([super.locale = 'en']);
 
   @override
-  String get appTitle => 'Rabochiy VPN';
+  String get appTitle => 'Zapret VPN';
 
   @override
   String get connect => 'Connect';
@@ -660,12 +660,12 @@ class AppLocalizationsEn extends AppLocalizations {
 }
 
 const String _privacyPolicyEn = '''
-Privacy Policy — Rabochiy VPN
+Privacy Policy — Zapret VPN
 Last updated: 1 September 2026
 
 About this document
 
-Welcome to Rabochiy VPN. We respect and protect your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile app and services. By using Rabochiy VPN, you agree to the terms of this Policy. If you do not agree with them, please stop using the app. Rabochiy VPN is an application built to provide secure and anonymous access to the Internet. We have built our service on the principles of minimal data collection. Unlike many other services, we do not log (record) your internet activity. Rabochiy VPN is a tool to protect your internet connection; the protocols mentioned (GW, AmneziaWG, etc.) are technical standards only and do not associate us with any services that share the same name.
+Welcome to Zapret VPN. We respect and protect your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile app and services. By using Zapret VPN, you agree to the terms of this Policy. If you do not agree with them, please stop using the app. Zapret VPN is an application built to provide secure and anonymous access to the Internet. We have built our service on the principles of minimal data collection. Unlike many other services, we do not log (record) your internet activity. Zapret VPN is a tool to protect your internet connection; the protocols mentioned (GW, AmneziaWG, etc.) are technical standards only and do not associate us with any services that share the same name.
 
 What we do not do
 
@@ -699,11 +699,11 @@ Data and account deletion
 
 You can delete your account yourself at any time through the app settings. After deletion, the identifier and all associated subscription data are permanently removed from our servers. If an account is not used for more than 12 months after logout, it is automatically deleted. Local data on the device is removed when you uninstall the app or clear its data through Android settings.
 
-In the current version of Rabochiy VPN, ad network code may be used to display ads, which allows us to maintain the free servers. Static code analysis may show tracker signatures classified as "advertising". This means that ad modules may collect anonymized data for targeted advertising, such as: Advertising ID (Ad ID); information about how you interact with ads (clicks, views). This data is collected by advertising partners (third parties) under their own privacy policies and is not linked to your activity inside the VPN tunnel. You can reset your advertising ID or opt out of ad personalization in your Android device settings.
+In the current version of Zapret VPN, ad network code may be used to display ads, which allows us to maintain the free servers. Static code analysis may show tracker signatures classified as "advertising". This means that ad modules may collect anonymized data for targeted advertising, such as: Advertising ID (Ad ID); information about how you interact with ads (clicks, views). This data is collected by advertising partners (third parties) under their own privacy policies and is not linked to your activity inside the VPN tunnel. You can reset your advertising ID or opt out of ad personalization in your Android device settings.
 
 Who the app is for
 
-Rabochiy VPN is not intended for children under 13. We deliberately do not collect data from children under 13. If you become aware that a child under 13 is using the app, please let us know.
+Zapret VPN is not intended for children under 13. We deliberately do not collect data from children under 13. If you become aware that a child under 13 is using the app, please let us know.
 
 Policy updates
 
@@ -711,6 +711,6 @@ We reserve the right to update this document. The date in the header always refl
 
 Contact us
 
-Telegram: https://t.me/rabochyvpn_chat
+Telegram: https://t.me/chatzapret
 Email: support@vpnhub.ltd
 ''';

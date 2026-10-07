@@ -160,7 +160,7 @@ dependencies {
     // Добавляем NDK для отслеживания крашей внутри нативных библиотек (.so)
     implementation("com.google.firebase:firebase-crashlytics-ndk")
 
-    // Rabochiy VPN native engines ─────────────────────────────────────
+    // Zapret VPN native engines ─────────────────────────────────────
     // AmneziaWG userspace tunnel: GoBackend + libwg-go.so.
     implementation(project(":amneziawg-tunnel"))
     implementation(project(":vlee_engine"))

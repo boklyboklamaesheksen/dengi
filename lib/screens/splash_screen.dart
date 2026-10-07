@@ -227,12 +227,15 @@ class _SplashScreenState extends State<SplashScreen>
         const _AppLogoBadge(size: 118),
         const SizedBox(height: 28),
         const Text(
-          'RABOCHIY VPN',
+          'ZAPRET VPN',
           style: TextStyle(
             color: Colors.white,
+            fontFamily: AppFonts.brand,
             fontSize: 30,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 4.4,
+            // Single Regular face: never request an extra weight, the glyphs
+            // are already dense. Tracking mirrors the logotype in the icon.
+            fontWeight: FontWeight.w400,
+            letterSpacing: -0.66, // -0.022 * fontSize
           ),
         ),
         const SizedBox(height: 56),
@@ -346,7 +349,7 @@ class _MnemonicRevealScreenState extends State<_MnemonicRevealScreen> {
                     color: AppColors.textPrimary,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    fontFamily: 'monospace',
+                    fontFamily: AppFonts.body,
                     height: 1.6,
                     letterSpacing: 0.2,
                   ),
@@ -555,7 +558,7 @@ class _AppLogoBadge extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(size * 0.21),
           child: const Image(
-            image: AssetImage('assets/images/logo_rabochiy.png'),
+            image: AssetImage('assets/images/logo_zapret.png'),
             fit: BoxFit.cover,
           ),
         ),

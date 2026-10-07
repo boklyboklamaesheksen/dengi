@@ -160,7 +160,7 @@ class _MeterTile extends StatelessWidget {
           RichText(
             text: TextSpan(
               style: const TextStyle(
-                fontFamily: 'Inter',
+                fontFamily: AppFonts.display,
                 color: AppColors.textPrimary,
                 fontSize: 22,
                 fontWeight: FontWeight.w600,

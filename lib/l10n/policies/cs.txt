@@ -1,8 +1,8 @@
-Zásady ochrany soukromí — Rabochiy VPN
+Zásady ochrany soukromí — Zapret VPN
 Aktualizováno: 1. září 2026
 
 O dokumentu
-Tyto zásady popisují shromažďování, použití a ochranu informací při používání aplikace a služby. Používáním Rabochiy VPN s nimi souhlasíte; jinak aplikaci přestaňte používat. Shromažďujeme minimum údajů a nezaznamenáváme vaši internetovou aktivitu. GW a AmneziaWG jsou technické standardy; jejich uvedení neznamená vztah ke stejnojmenným službám.
+Tyto zásady popisují shromažďování, použití a ochranu informací při používání aplikace a služby. Používáním Zapret VPN s nimi souhlasíte; jinak aplikaci přestaňte používat. Shromažďujeme minimum údajů a nezaznamenáváme vaši internetovou aktivitu. GW a AmneziaWG jsou technické standardy; jejich uvedení neznamená vztah ke stejnojmenným službám.
 
 Co neukládáme
 Nesledujeme polohu GPS a neukládáme navštívené weby, dotazy DNS, adresy serverů, ke kterým přistupujete, skutečnou IP adresu ani časy a délku relací. Servery předávají pakety bez záznamů aktivity uživatelů.
@@ -26,8 +26,8 @@ Reklama
 Kód reklamních sítí může být použit k financování bezplatných serverů. Statická analýza může odhalit reklamní signatury. Partneři mohou podle svých zásad shromažďovat anonymizované údaje, například reklamní ID, kliknutí a zobrazení. Tyto údaje se nespojují s vaší aktivitou v tunelu VPN. Reklamní ID můžete resetovat nebo vypnout personalizaci v Androidu.
 
 Komu je aplikace určena a změny
-Rabochiy VPN není určen dětem mladším 13 let a jejich údaje záměrně neshromažďujeme. Informujte nás, pokud aplikaci používá dítě mladší 13 let. Zásady můžeme aktualizovat; datum označuje aktuální verzi. Významné změny oznamujeme v našem chatu na Telegramu.
+Zapret VPN není určena dětem mladším 13 let a jejich údaje záměrně neshromažďujeme. Informujte nás, pokud aplikaci používá dítě mladší 13 let. Zásady můžeme aktualizovat; datum označuje aktuální verzi. Významné změny oznamujeme v našem chatu na Telegramu.
 
 Kontakt
-Telegram: https://t.me/rabochyvpn_chat
+Telegram: https://t.me/chatzapret
 E-mail: support@vpnhub.ltd

@@ -1,6 +1,6 @@
 import 'package:flutter/animation.dart';
 
-/// Curated easing curves for Rabochiy VPN.
+/// Curated easing curves for Zapret VPN.
 ///
 /// These are plain cubic-bezier coefficients — the same four-point math
 /// that every modern design system exposes. The palette below is picked so

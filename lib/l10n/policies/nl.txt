@@ -1,8 +1,8 @@
-Privacybeleid — Rabochiy VPN
+Privacybeleid — Zapret VPN
 Bijgewerkt: 1 september 2026
 
 Over dit document
-Dit beleid beschrijft hoe informatie wordt verzameld, gebruikt en beschermd bij het gebruik van de app en de dienst. Door Rabochiy VPN te gebruiken ga je hiermee akkoord; stop met het gebruik als je niet akkoord gaat. We verzamelen zo weinig mogelijk gegevens en leggen je internetactiviteiten niet vast. GW en AmneziaWG zijn technische standaarden; vermelding betekent geen band met gelijknamige diensten.
+Dit beleid beschrijft hoe informatie wordt verzameld, gebruikt en beschermd bij het gebruik van de app en de dienst. Door Zapret VPN te gebruiken ga je hiermee akkoord; stop met het gebruik als je niet akkoord gaat. We verzamelen zo weinig mogelijk gegevens en leggen je internetactiviteiten niet vast. GW en AmneziaWG zijn technische standaarden; vermelding betekent geen band met gelijknamige diensten.
 
 Wat we niet bewaren
 We volgen je GPS-locatie niet en bewaren geen bezochte websites, DNS-verzoeken, adressen van bezochte servers, je echte IP-adres of de tijdstippen en duur van je sessies. De servers sturen pakketten door zonder gebruikersactiviteiten te loggen.
@@ -26,8 +26,8 @@ Advertenties
 Code van advertentienetwerken kan worden gebruikt om gratis servers te bekostigen. Statische analyse kan advertentiesignaturen herkennen. Partners kunnen volgens hun eigen privacybeleid geanonimiseerde gegevens verzamelen, zoals advertentie-ID, klikken en weergaven. Die gegevens worden niet gekoppeld aan je activiteiten in de VPN-tunnel. Je kunt de advertentie-ID opnieuw instellen of gepersonaliseerde advertenties uitschakelen in Android.
 
 Doelgroep en wijzigingen
-Rabochiy VPN is niet bedoeld voor kinderen onder 13 jaar. We verzamelen hun gegevens niet bewust. Laat het ons weten als een kind onder 13 de app gebruikt. We kunnen dit beleid aanpassen; de datum geeft de actuele versie aan. Belangrijke wijzigingen melden we in onze Telegram-chat.
+Zapret VPN is niet bedoeld voor kinderen onder 13 jaar. We verzamelen hun gegevens niet bewust. Laat het ons weten als een kind onder 13 de app gebruikt. We kunnen dit beleid aanpassen; de datum geeft de actuele versie aan. Belangrijke wijzigingen melden we in onze Telegram-chat.
 
 Contact
-Telegram: https://t.me/rabochyvpn_chat
+Telegram: https://t.me/chatzapret
 E-mail: support@vpnhub.ltd

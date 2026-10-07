@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="vlee_notif_title">Rabochiy VPN</string>
-    <string name="vlee_notif_channel">Rabochiy VPN</string>
+    <string name="vlee_notif_title">Zapret VPN</string>
+    <string name="vlee_notif_channel">Zapret VPN</string>
     <string name="vlee_notif_connected">VPN VERBONDEN</string>
     <string name="vlee_notif_reconnecting">Opnieuw verbinden…</string>
 </resources>

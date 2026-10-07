@@ -1,8 +1,8 @@
-Tietosuojakäytäntö — Rabochiy VPN
+Tietosuojakäytäntö — Zapret VPN
 Päivitetty: 1. syyskuuta 2026
 
 Tietoa asiakirjasta
-Tässä käytännössä kuvataan tietojen kerääminen, käyttö ja suojaaminen sovellusta ja palvelua käytettäessä. Käyttämällä Rabochiy VPN:ää hyväksyt käytännön; jos et hyväksy sitä, lopeta käyttö. Keräämme mahdollisimman vähän tietoja emmekä kirjaa internettoimintaasi. GW ja AmneziaWG ovat teknisiä standardeja; nimet eivät tarkoita yhteyttä samannimisiin palveluihin.
+Tässä käytännössä kuvataan tietojen kerääminen, käyttö ja suojaaminen sovellusta ja palvelua käytettäessä. Käyttämällä Zapret VPN -palvelua hyväksyt käytännön; jos et hyväksy sitä, lopeta käyttö. Keräämme mahdollisimman vähän tietoja emmekä kirjaa internettoimintaasi. GW ja AmneziaWG ovat teknisiä standardeja; nimet eivät tarkoita yhteyttä samannimisiin palveluihin.
 
 Mitä emme tallenna
 Emme seuraa GPS-sijaintia emmekä tallenna vierailtuja sivustoja, DNS-kyselyjä, käytettyjen kohdepalvelinten osoitteita, oikeaa IP-osoitettasi tai istuntojen ajankohtia ja kestoja. Palvelimet reitittävät paketteja ilman käyttäjien toimintalokeja.
@@ -26,8 +26,8 @@ Mainokset
 Mainosverkkojen koodia voidaan käyttää ilmaisten palvelinten rahoittamiseen. Staattinen analyysi voi tunnistaa mainoskoodin. Kumppanit voivat omien käytäntöjensä mukaan kerätä anonymisoituja tietoja, kuten mainostunnisteen, klikkauksia ja näyttökertoja. Tietoja ei yhdistetä toimintaasi VPN-tunnelissa. Voit nollata mainostunnisteen tai poistaa personoinnin käytöstä Androidissa.
 
 Kohderyhmä ja muutokset
-Rabochiy VPN ei ole tarkoitettu alle 13-vuotiaille, emmekä kerää heidän tietojaan tietoisesti. Ilmoita meille, jos alle 13-vuotias käyttää sovellusta. Voimme päivittää käytäntöä; päivämäärä kertoo nykyisen version. Merkittävistä muutoksista ilmoitetaan Telegram-keskustelussamme.
+Zapret VPN ei ole tarkoitettu alle 13-vuotiaille, emmekä kerää heidän tietojaan tietoisesti. Ilmoita meille, jos alle 13-vuotias käyttää sovellusta. Voimme päivittää käytäntöä; päivämäärä kertoo nykyisen version. Merkittävistä muutoksista ilmoitetaan Telegram-keskustelussamme.
 
 Yhteystiedot
-Telegram: https://t.me/rabochyvpn_chat
+Telegram: https://t.me/chatzapret
 Sähköposti: support@vpnhub.ltd

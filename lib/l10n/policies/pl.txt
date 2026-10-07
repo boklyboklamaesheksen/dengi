@@ -1,8 +1,8 @@
-Polityka prywatności — Rabochiy VPN
+Polityka prywatności — Zapret VPN
 Aktualizacja: 1 września 2026
 
 O dokumencie
-Polityka opisuje zbieranie, wykorzystywanie i ochronę informacji podczas korzystania z aplikacji i usługi. Korzystając z Rabochiy VPN, akceptujesz tę politykę; w przeciwnym razie przestań korzystać z aplikacji. Zbieramy minimalną ilość danych i nie rejestrujemy aktywności internetowej. GW i AmneziaWG to standardy techniczne; ich nazwy nie oznaczają powiązania z usługami o tych samych nazwach.
+Polityka opisuje zbieranie, wykorzystywanie i ochronę informacji podczas korzystania z aplikacji i usługi. Korzystając z usługi Zapret VPN, akceptujesz tę politykę; w przeciwnym razie przestań korzystać z aplikacji. Zbieramy minimalną ilość danych i nie rejestrujemy aktywności internetowej. GW i AmneziaWG to standardy techniczne; ich nazwy nie oznaczają powiązania z usługami o tych samych nazwach.
 
 Czego nie przechowujemy
 Nie śledzimy lokalizacji GPS ani nie zapisujemy odwiedzanych stron, zapytań DNS, adresów serwerów, do których uzyskujesz dostęp, twojego rzeczywistego IP ani terminów i czasu trwania sesji. Serwery przekazują pakiety bez rejestrowania aktywności użytkowników.
@@ -26,8 +26,8 @@ Reklamy
 Kod sieci reklamowych może służyć finansowaniu bezpłatnych serwerów. Analiza statyczna może wykrywać sygnatury reklamowe. Partnerzy mogą zbierać zanonimizowane dane, np. identyfikator reklamowy oraz kliknięcia i wyświetlenia reklam, zgodnie z własnymi politykami. Dane te nie są łączone z aktywnością w tunelu VPN. W Androidzie można zresetować identyfikator reklamowy lub wyłączyć personalizację.
 
 Odbiorcy i zmiany
-Rabochiy VPN nie jest przeznaczony dla dzieci poniżej 13 lat i nie zbiera celowo ich danych. Poinformuj nas, jeśli dziecko poniżej 13 lat korzysta z aplikacji. Możemy aktualizować tę politykę; data wskazuje aktualną wersję. Istotne zmiany ogłaszamy na naszym czacie Telegram.
+Zapret VPN nie jest przeznaczona dla dzieci poniżej 13 lat i nie zbiera celowo ich danych. Poinformuj nas, jeśli dziecko poniżej 13 lat korzysta z aplikacji. Możemy aktualizować tę politykę; data wskazuje aktualną wersję. Istotne zmiany ogłaszamy na naszym czacie Telegram.
 
 Kontakt
-Telegram: https://t.me/rabochyvpn_chat
+Telegram: https://t.me/chatzapret
 E-mail: support@vpnhub.ltd

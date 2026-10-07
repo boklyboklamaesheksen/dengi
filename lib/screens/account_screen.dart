@@ -734,7 +734,7 @@ class _MnemonicCard extends StatelessWidget {
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 13,
-                        fontFamily: 'monospace',
+                        fontFamily: AppFonts.body,
                         height: 1.5,
                       ),
                     ),

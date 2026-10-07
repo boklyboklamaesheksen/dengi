@@ -101,7 +101,7 @@ class _PressScaleState extends State<PressScale>
   }
 }
 
-/// Route builder that animates a destination with Rabochiy's signature curves.
+/// Route builder that animates a destination with Zapret's signature curves.
 /// Honours [RabochiyEffect.smoothTransitions] via the [motionEnabled] flag.
 Route<T> rabochiyPageRoute<T>({
   required WidgetBuilder builder,

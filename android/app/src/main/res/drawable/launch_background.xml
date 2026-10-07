@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Rabochiy VPN launch splash - deep slate base with centered app icon -->
+<!-- Zapret VPN launch splash - deep slate base with centered app icon -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/ic_launcher_background" />
     <item>

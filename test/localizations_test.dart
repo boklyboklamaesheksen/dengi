@@ -14,10 +14,11 @@ Widget localizedApp() => MaterialApp(
 void main() {
   test('Russian branding includes the privacy document; English is unchanged', () {
     final ru = lookupAppLocalizations(const Locale('ru'));
-    expect(ru.appTitle, 'Рабочий VPN');
-    expect(ru.privacyPolicyContent, contains('Рабочий VPN'));
+    expect(ru.appTitle, 'Запрет VPN');
+    expect(ru.privacyPolicyContent, contains('Запрет VPN'));
     expect(ru.privacyPolicyContent, isNot(contains('Rabochiy VPN')));
-    expect(lookupAppLocalizations(const Locale('en')).appTitle, 'Rabochiy VPN');
+    expect(ru.privacyPolicyContent, isNot(contains('Лента VPN')));
+    expect(lookupAppLocalizations(const Locale('en')).appTitle, 'Zapret VPN');
   });
 
   test('all supported languages have documents and resolved placeholders', () {
@@ -43,11 +44,11 @@ void main() {
   testWidgets('device language selects translations and English fallback', (tester) async {
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
     for (final entry in <Locale, String>{
-      const Locale('ru', 'RU'): 'Рабочий VPN|Подключить',
-      const Locale('de', 'AT'): 'Rabochiy VPN|Verbinden',
-      const Locale('fr', 'BE'): 'Rabochiy VPN|Connecter',
-      const Locale('pt', 'PT'): 'Rabochiy VPN|Ligar',
-      const Locale('ja', 'JP'): 'Rabochiy VPN|Connect',
+      const Locale('ru', 'RU'): 'Запрет VPN|Подключить',
+      const Locale('de', 'AT'): 'Zapret VPN|Verbinden',
+      const Locale('fr', 'BE'): 'Zapret VPN|Connecter',
+      const Locale('pt', 'PT'): 'Zapret VPN|Ligar',
+      const Locale('ja', 'JP'): 'Zapret VPN|Connect',
     }.entries) {
       tester.platformDispatcher.localesTestValue = [entry.key];
       await tester.pumpWidget(localizedApp());

@@ -53,6 +53,7 @@ class WelcomeScreen extends StatelessWidget {
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: Colors.white,
+                            fontFamily: AppFonts.brand,
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 4.2,
@@ -123,7 +124,7 @@ class _BrandLogo extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(24),
           child: const Image(
-            image: AssetImage('assets/images/logo_rabochiy.png'),
+            image: AssetImage('assets/images/logo_zapret.png'),
             fit: BoxFit.cover,
           ),
         ),

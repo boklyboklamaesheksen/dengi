@@ -38,7 +38,7 @@ enum ServerProtocol {
   };
 }
 
-/// Server configuration as returned by the Rabochiy VPN backend.
+/// Server configuration as returned by the Zapret VPN backend.
 class ServerConfig {
   // ── Identity / display ────────────────────────────────────────────
   final String id;

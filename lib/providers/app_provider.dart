@@ -11,7 +11,7 @@ import '../services/split_tunnel_service.dart';
 import '../services/traffic_stats_service.dart';
 import '../services/vpn_service.dart';
 
-/// Central state container for Rabochiy VPN.
+/// Central state container for Zapret VPN.
 ///
 /// Drives every reactive widget in the app. The provider owns:
 ///   * [VpnService] — bridge to the native AmneziaWG / GW engines.

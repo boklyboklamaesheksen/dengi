@@ -57,7 +57,7 @@ class EngineStatus {
   }
 }
 
-/// Bridge between Flutter and the native Rabochiy VPN engine.
+/// Bridge between Flutter and the native Zapret VPN engine.
 ///
 /// On Android the native side hosts the AmneziaWG backend
 /// (`AwgManager` / `libwg-go.so`) for `ServerProtocol.awg`, plus the

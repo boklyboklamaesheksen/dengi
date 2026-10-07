@@ -1,8 +1,8 @@
-Integritetspolicy — Rabochiy VPN
+Integritetspolicy — Zapret VPN
 Uppdaterad: 1 september 2026
 
 Om dokumentet
-Policyn beskriver hur information samlas in, används och skyddas när du använder appen och tjänsten. Genom att använda Rabochiy VPN godkänner du policyn; sluta använda appen om du inte godkänner den. Vi samlar in så lite data som möjligt och loggar inte din internetaktivitet. GW och AmneziaWG är tekniska standarder; namnen innebär ingen koppling till tjänster med samma namn.
+Policyn beskriver hur information samlas in, används och skyddas när du använder appen och tjänsten. Genom att använda Zapret VPN godkänner du policyn; sluta använda appen om du inte godkänner den. Vi samlar in så lite data som möjligt och loggar inte din internetaktivitet. GW och AmneziaWG är tekniska standarder; namnen innebär ingen koppling till tjänster med samma namn.
 
 Vad vi inte sparar
 Vi följer inte din GPS-position och sparar inte besökta webbplatser, DNS-frågor, adresser till servrar du besöker, din riktiga IP-adress eller sessionernas tidpunkter och längd. Servrarna vidarebefordrar paket utan loggar över användaraktivitet.
@@ -26,8 +26,8 @@ Annonser
 Kod från annonsnätverk kan användas för att finansiera gratisservrar. Statisk analys kan visa annonssignaturer. Partner kan enligt sina egna policyer samla in anonymiserade uppgifter, som annons-ID, klick och visningar. Dessa uppgifter kopplas inte till din aktivitet i VPN-tunneln. Du kan återställa annons-ID eller stänga av personanpassning i Android.
 
 Målgrupp och ändringar
-Rabochiy VPN är inte avsett för barn under 13 år och samlar inte medvetet in deras data. Kontakta oss om ett barn under 13 använder appen. Vi kan uppdatera policyn; datumet visar aktuell version. Viktiga ändringar meddelas i vår Telegram-chatt.
+Zapret VPN är inte avsett för barn under 13 år och samlar inte medvetet in deras data. Kontakta oss om ett barn under 13 använder appen. Vi kan uppdatera policyn; datumet visar aktuell version. Viktiga ändringar meddelas i vår Telegram-chatt.
 
 Kontakt
-Telegram: https://t.me/rabochyvpn_chat
+Telegram: https://t.me/chatzapret
 E-post: support@vpnhub.ltd

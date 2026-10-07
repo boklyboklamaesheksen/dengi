@@ -1,8 +1,8 @@
-Politica de confidențialitate — Rabochiy VPN
+Politica de confidențialitate — Zapret VPN
 Actualizată: 1 septembrie 2026
 
 Despre document
-Această politică explică colectarea, utilizarea și protejarea informațiilor la folosirea aplicației și serviciului. Folosind Rabochiy VPN, accepți politica; în caz contrar, încetează utilizarea. Colectăm minimum de date și nu înregistrăm activitatea ta pe internet. GW și AmneziaWG sunt standarde tehnice; menționarea lor nu implică legături cu servicii cu aceleași nume.
+Această politică explică colectarea, utilizarea și protejarea informațiilor la folosirea aplicației și serviciului. Folosind Zapret VPN, accepți politica; în caz contrar, încetează utilizarea. Colectăm minimum de date și nu înregistrăm activitatea ta pe internet. GW și AmneziaWG sunt standarde tehnice; menționarea lor nu implică legături cu servicii cu aceleași nume.
 
 Ce nu păstrăm
 Nu urmărim locația GPS și nu păstrăm site-urile vizitate, cererile DNS, adresele serverelor accesate, IP-ul real sau orele și durata sesiunilor. Serverele direcționează pachetele fără jurnale de activitate ale utilizatorilor.
@@ -26,8 +26,8 @@ Publicitate
 Codul rețelelor publicitare poate fi folosit pentru finanțarea serverelor gratuite. Analiza statică poate detecta semnături publicitare. Partenerii pot colecta date anonimizate, precum identificatorul publicitar, clicuri și afișări, potrivit propriilor politici. Aceste date nu sunt asociate activității din tunelul VPN. Poți reseta identificatorul publicitar sau dezactiva personalizarea în Android.
 
 Public și actualizări
-Rabochiy VPN nu este destinat copiilor sub 13 ani și nu colectează intenționat datele lor. Anunță-ne dacă un copil sub 13 ani folosește aplicația. Putem actualiza această politică; data indică versiunea curentă. Schimbările importante sunt anunțate în chatul nostru Telegram.
+Zapret VPN nu este destinată copiilor sub 13 ani și nu colectează intenționat datele lor. Anunță-ne dacă un copil sub 13 ani folosește aplicația. Putem actualiza această politică; data indică versiunea curentă. Schimbările importante sunt anunțate în chatul nostru Telegram.
 
 Contact
-Telegram: https://t.me/rabochyvpn_chat
+Telegram: https://t.me/chatzapret
 E-mail: support@vpnhub.ltd

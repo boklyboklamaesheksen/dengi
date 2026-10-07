@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../config/app_theme.dart';
 
-/// Optimized solid backdrop for Rabochiy VPN.
+/// Optimized solid backdrop for Zapret VPN.
 ///
 /// Replaced the heavy blur math with a highly optimized solid color
 /// filling. Eliminates GPU strain, prevents device heating, and saves

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../config/app_theme.dart';
+
 
 /// Large monospaced hh:mm:ss readout for the home screen.
 ///
@@ -28,7 +30,7 @@ class OrbitTimer extends StatelessWidget {
       value,
       style: const TextStyle(
         color: Colors.white,
-        fontFamily: 'Inter',
+        fontFamily: AppFonts.display,
         fontSize: 60,
         fontWeight: FontWeight.w300,
         letterSpacing: -2.4,

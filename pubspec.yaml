@@ -1,10 +1,10 @@
 name: rabochiy_vpn
-description: "Rabochiy VPN — premium privacy tunnel with a stark monochrome xAI-style UI."
+description: "Zapret VPN — premium privacy tunnel with a stark monochrome xAI-style UI."
 # Private application, not published to pub.dev
 publish_to: 'none'
 
 # Version follows semantic versioning: MAJOR.MINOR.PATCH+BUILD
-version: 1.0.3+5
+version: 26.10.4+8
 
 environment:
   sdk: ^3.13.3
@@ -92,19 +92,13 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "ic_launcher"
   ios: false
-  # Full-bleed square art — iOS rounds the corners itself; pre-adaptive
-  # Android launchers use this as-is and their own launcher theme supplies
-  # a masked shape on top.
-  image_path: "assets/images/logo_rabochiy.png"
+  # Source art only. The densities actually shipped in
+  # android/app/src/main/res/mipmap-* (including the adaptive foreground in
+  # mipmap-*/ic_launcher_foreground.png) come from the Lenta icon pack, so
+  # re-running this task is only needed if the artwork itself changes.
+  image_path: "assets/images/logo_zapret.png"
   remove_alpha_ios: false
   min_sdk_android: 21
-  # Solid background layer behind the cat foreground on adaptive icons.
-  # Must match the flat fill baked into both logo_rabochiy.png and the
-  # surrounding transparent areas of logo_rabochiy_foreground.png so every
-  # mask shape (circle, squircle, rounded square, teardrop) shows an
-  # unbroken dark canvas.
-  adaptive_icon_background: "#1F2228"
-  adaptive_icon_foreground: "assets/images/logo_rabochiy_foreground.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -116,6 +110,32 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+
+  # Two bundled typefaces, packed into the binary so rendering never falls
+  # back to the fonts the user's phone happens to have. Lenta (brand
+  # voice, single Regular face) is used for the wordmarks only; Inter
+  # carries every other string in the app.
+  fonts:
+    - family: Lenta
+      fonts:
+        - asset: assets/fonts/Lenta-Regular.ttf
+          weight: 400
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Inter-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Inter-Black.ttf
+          weight: 900
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

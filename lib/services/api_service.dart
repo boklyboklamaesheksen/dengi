@@ -8,7 +8,7 @@ import '../config/api_config.dart';
 import '../config/backend_signing.dart';
 import '../models/server_config_model.dart';
 
-/// Rabochiy VPN backend client.
+/// Zapret VPN backend client.
 ///
 /// Talks to the FastAPI service hosted on `https://mc.yarik.app`. The
 /// backend exposes two flavours of routes that we mix-and-match:

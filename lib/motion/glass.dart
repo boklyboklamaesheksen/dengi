@@ -7,7 +7,7 @@ import 'lite_mode.dart';
 
 enum LiquidEdgeStyle { horizontal, diagonal }
 
-/// Visual constants for Rabochiy's "liquid glass" language.
+/// Visual constants for Zapret's "liquid glass" language.
 ///
 /// The system replaces the previous uniform white hairline with an
 /// asymmetric highlight recipe that reads as a panel floating above the

@@ -430,7 +430,7 @@ class _BigBytes extends StatelessWidget {
     return RichText(
       text: TextSpan(
           style: const TextStyle(
-            fontFamily: 'Inter',
+            fontFamily: AppFonts.display,
             fontSize: 48,
             fontWeight: FontWeight.w300,
             color: Colors.white,

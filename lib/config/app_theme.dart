@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Rabochiy VPN colour system — "Stark Mono".
+/// Zapret VPN colour system — "Stark Mono".
 ///
 /// Dark-first, monochrome palette modelled on the xAI design language:
 /// an almost-black canvas (#1F2228) with pure white as the single accent,
@@ -111,28 +111,35 @@ class AppRadii {
   static const BorderRadius tight = BorderRadius.all(Radius.circular(12));
 }
 
-/// Typography voices, xAI-style: a monospace face for display headlines
-/// and interactive labels, the system sans for reading text.
+/// Typography voices: two bundled families for the whole app.
 ///
-/// `AppFonts.display` intentionally references "GeistMono" first; when the
-/// font file is bundled it is used directly, otherwise it falls back to the
-/// platform monospace so the terminal-flavoured look survives everywhere.
+/// Both faces ship with the binary under `assets/fonts/`, so rendering never
+/// depends on the fonts installed on the user's phone. [brand] is the Lenta
+/// wordmark face — a single Regular (400) cut reserved for the logo text
+/// only (splash, home header, welcome): do not ask for `FontWeight.bold`
+/// on top of it, the glyphs are already dense and the closest-match picker
+/// must never be pushed past 400. Everything else — buttons, statuses,
+/// timers, body copy — speaks [display]/[body], the bundled Inter in
+/// weights 300–900.
 class AppFonts {
   AppFonts._();
 
-  /// Display / button voice — monospace (Geist Mono when bundled).
-  static const String display = 'GeistMono';
+  /// Brand wordmark voice — bundled Lenta Regular, logo text only.
+  static const String brand = 'Lenta';
 
-  /// Fallback chain that resolves to the system monospace on Android/iOS
-  /// until Geist Mono assets are added under `assets/fonts/`.
+  /// Display / button voice — bundled Inter.
+  static const String display = 'Inter';
+
+  /// Only consulted for glyphs the bundled faces do not cover (emoji and
+  /// the like); ordinary text never leaves the bundled families.
   static const List<String> displayFallback = <String>['monospace'];
 
-  /// Readable sans voice — system default (Roboto / SF), matching the
-  /// xAI "universalSans" role.
-  static const String? body = null;
+  /// Reading voice — the same bundled Inter, so body copy and headlines
+  /// share one look regardless of the platform default sans.
+  static const String body = 'Inter';
 }
 
-/// Material theme for Rabochiy VPN. Dark-only by design.
+/// Material theme for Zapret VPN. Dark-only by design.
 class AppTheme {
   AppTheme._();
 

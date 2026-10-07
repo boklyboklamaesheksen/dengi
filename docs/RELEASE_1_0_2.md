@@ -1,4 +1,4 @@
-# РАБОЧИЙ VPN / GOOGLE PLAY — EU, ВЫПУСК 1.0.2 (4)
+# ЗАПРЕТ VPN / GOOGLE PLAY — EU, ВЫПУСК 1.0.2 (4)
 
 Подготовлено 16 сентября 2026 года.
 
@@ -10,7 +10,7 @@
 
 Набор содержит 12 новых языков. Немецкая страница также подходит для Австрии; французская и нидерландская — для соответствующих аудиторий Бельгии; французская и немецкая — для Люксембурга; шведская — для шведоязычных пользователей Финляндии. Английский остаётся доступен, в том числе для Ирландии и Мальты. Это не локализация всех официальных языков ЕС. Язык страницы выбирается по языку пользователя, а не только по стране; для отдельного предложения стране используйте custom store listing.
 
-Общие поля: категория «Инструменты» (Tools); контакт поддержки support@vpnhub.ltd; Telegram https://t.me/rabochyvpn_chat. Сохраните действующий публичный URL политики конфиденциальности из вашей Play Console: в исходниках его нет, придумывать адрес нельзя. Подготовьте скриншоты нового интерфейса на каждом языке; тексты ниже не заменяют изображения. Отдельного поля keywords у Google Play нет. Не вставляйте список ключей в описание.
+Общие поля: категория «Инструменты» (Tools); контакт поддержки support@vpnhub.ltd; Telegram https://t.me/chatzapret. Сохраните действующий публичный URL политики конфиденциальности из вашей Play Console: в исходниках его нет, придумывать адрес нельзя. Подготовьте скриншоты нового интерфейса на каждом языке; тексты ниже не заменяют изображения. Отдельного поля keywords у Google Play нет. Не вставляйте список ключей в описание.
 
 Оговорки к описаниям: доступность стран и серверов определяется текущим каталогом; платные серверы требуют PRO. Не обещаем доступ ко всем сервисам, обход полного отключения интернета, снижение пинга при любой сети, абсолютную анонимность или награды Google. В исходном page.txt есть противоречие между «без регистрации» и «быстрая регистрация»: здесь точно указано создание аккаунта без email и телефона. Политика No Logs относится к содержимому VPN-трафика, а не к отсутствию технических данных. Перед публикацией владелец должен сверить заявленные бесплатный трафик и серверную политику с действующим тарифом и Data safety.
 
@@ -26,13 +26,13 @@
 
 **Страны / аудитория:** Франция; франкоязычные Бельгия и Люксембург.
 
-**Название:** Rabochiy VPN: connexion privée
+**Название:** Zapret VPN: connexion privée
 
 **Краткое описание:** VPN pour Android, Wi-Fi public et choix des applications dans le tunnel.
 
 **Полное описание:**
 
-Une connexion VPN simple pour vos déplacements et votre vie privée au quotidien. Rabochiy VPN chiffre le trafic entre votre appareil Android et le serveur VPN, à la maison, sur le réseau mobile ou sur le Wi-Fi d'un hôtel.
+Une connexion VPN simple pour vos déplacements et votre vie privée au quotidien. Zapret VPN chiffre le trafic entre votre appareil Android et le serveur VPN, à la maison, sur le réseau mobile ou sur le Wi-Fi d'un hôtel.
 
 Connectez-vous en un geste, choisissez un emplacement dans la liste ou laissez l'application sélectionner un serveur. Retrouvez un accès gratuit et des options PRO dans la même application.
 
@@ -62,13 +62,13 @@ Le VPN complète HTTPS ; il ne remplace pas les mises à jour, les mots de passe
 
 **Страны / аудитория:** Нидерланды; нидерландоязычная Бельгия.
 
-**Название:** Rabochiy VPN: privéverbinding
+**Название:** Zapret VPN: privéverbinding
 
 **Краткое описание:** VPN voor Android op openbare wifi, met serverkeuze en split tunneling.
 
 **Полное описание:**
 
-Onderweg in de trein, op reis of op de wifi van een hotel? Met Rabochiy VPN voeg je een versleutelde verbinding toe tussen je Android-apparaat en de VPN-server. Een overzichtelijke VPN-app voor dagelijks gebruik, zonder ingewikkelde configuratie.
+Onderweg in de trein, op reis of op de wifi van een hotel? Met Zapret VPN voeg je een versleutelde verbinding toe tussen je Android-apparaat en de VPN-server. Een overzichtelijke VPN-app voor dagelijks gebruik, zonder ingewikkelde configuratie.
 
 Kies zelf een beschikbare server of gebruik de automatische selectie. Gratis toegang en PRO-opties staan in dezelfde app.
 
@@ -98,13 +98,13 @@ Een VPN is een aanvulling op HTTPS, geen vervanging voor updates of oplettendhei
 
 **Страны / аудитория:** Германия, Австрия; немецкоязычная аудитория Люксембурга.
 
-**Название:** Rabochiy VPN: privat verbinden
+**Название:** Zapret VPN: privat verbinden
 
 **Краткое описание:** VPN für Android: für öffentliches WLAN und Apps nach Wahl im Tunnel.
 
 **Полное описание:**
 
-Sie möchten unterwegs eine VPN-Verbindung nutzen, ohne jede App darüber zu leiten? Rabochiy VPN verbindet Ihr Android-Gerät mit einem VPN-Server und verschlüsselt den Datenverkehr auf diesem Weg – im Mobilfunknetz und im WLAN.
+Sie möchten unterwegs eine VPN-Verbindung nutzen, ohne jede App darüber zu leiten? Zapret VPN verbindet Ihr Android-Gerät mit einem VPN-Server und verschlüsselt den Datenverkehr auf diesem Weg – im Mobilfunknetz und im WLAN.
 
 Wählen Sie einen verfügbaren Standort selbst oder nutzen Sie die automatische Serverauswahl. Kostenlose Nutzung und PRO-Optionen finden Sie in einer App.
 
@@ -134,13 +134,13 @@ Ein VPN ergänzt HTTPS, ersetzt aber weder Sicherheitsupdates noch den Schutz vo
 
 **Страны / аудитория:** Испания.
 
-**Название:** Rabochiy VPN: conexión privada
+**Название:** Zapret VPN: conexión privada
 
 **Краткое описание:** VPN para Android y wifi pública. Elige servidor y qué apps usan el túnel.
 
 **Полное описание:**
 
-Tu conexión cambia entre los datos móviles, la wifi del hotel y la red de casa. Rabochiy VPN te permite crear un túnel cifrado entre tu dispositivo Android y el servidor VPN sin configurar certificados ni archivos a mano.
+Tu conexión cambia entre los datos móviles, la wifi del hotel y la red de casa. Zapret VPN te permite crear un túnel cifrado entre tu dispositivo Android y el servidor VPN sin configurar certificados ni archivos a mano.
 
 Conecta con un toque y elige una ubicación disponible o la selección automática. La aplicación reúne acceso gratuito y opciones PRO.
 
@@ -170,13 +170,13 @@ La VPN complementa HTTPS, pero no sustituye las actualizaciones ni evita por sí
 
 **Страны / аудитория:** Италия.
 
-**Название:** Rabochiy VPN: connessione
+**Название:** Zapret VPN: connessione
 
 **Краткое описание:** VPN per Android e Wi-Fi pubblico, con scelta del server e split tunneling.
 
 **Полное описание:**
 
-Una VPN per usare il telefono in viaggio senza complicare le connessioni di tutti i giorni. Rabochiy VPN cifra il traffico tra il dispositivo Android e il server VPN, sulla rete mobile o sul Wi-Fi di casa, hotel e altri luoghi pubblici.
+Una VPN per usare il telefono in viaggio senza complicare le connessioni di tutti i giorni. Zapret VPN cifra il traffico tra il dispositivo Android e il server VPN, sulla rete mobile o sul Wi-Fi di casa, hotel e altri luoghi pubblici.
 
 Scegli una posizione disponibile oppure usa la selezione automatica del server. Nell'app trovi accesso gratuito e opzioni PRO.
 
@@ -206,13 +206,13 @@ La VPN affianca HTTPS: non sostituisce aggiornamenti, password sicure o attenzio
 
 **Страны / аудитория:** Польша.
 
-**Название:** Rabochiy VPN: prywatne łącze
+**Название:** Zapret VPN: prywatne łącze
 
 **Краткое описание:** VPN na Androida z wyborem serwera i osobnymi ustawieniami dla aplikacji.
 
 **Полное описание:**
 
-Chcesz korzystać z VPN, ale nie kierować przez niego każdej aplikacji? Rabochiy VPN tworzy szyfrowany tunel między urządzeniem z Androidem a serwerem VPN. Możesz używać go w sieci komórkowej i Wi-Fi, w domu lub w podróży.
+Chcesz korzystać z VPN, ale nie kierować przez niego każdej aplikacji? Zapret VPN tworzy szyfrowany tunel między urządzeniem z Androidem a serwerem VPN. Możesz używać go w sieci komórkowej i Wi-Fi, w domu lub w podróży.
 
 Wybierz dostępną lokalizację albo skorzystaj z automatycznego wyboru serwera. Dostęp bezpłatny i opcje PRO znajdziesz w jednej aplikacji.
 
@@ -242,13 +242,13 @@ Do działania potrzebne jest połączenie z internetem. Dostęp do każdej stron
 
 **Страны / аудитория:** Швеция; шведоязычная Финляндия.
 
-**Название:** Rabochiy VPN: privat surf
+**Название:** Zapret VPN: privat surf
 
 **Краткое описание:** VPN för Android med delad tunnling och serverval hemma och på resan.
 
 **Полное описание:**
 
-Ett VPN som låter dig välja vilka appar som ska använda tunneln. Rabochiy VPN krypterar trafiken mellan din Android-enhet och VPN-servern, både på mobilnätet och på wifi hemma eller på resan.
+Ett VPN som låter dig välja vilka appar som ska använda tunneln. Zapret VPN krypterar trafiken mellan din Android-enhet och VPN-servern, både på mobilnätet och på wifi hemma eller på resan.
 
 Välj en tillgänglig plats själv eller använd automatiskt serverval. Gratis åtkomst och PRO-alternativ finns i samma app.
 
@@ -278,13 +278,13 @@ VPN kompletterar HTTPS men ersätter inte säkerhetsuppdateringar eller försikt
 
 **Страны / аудитория:** Дания.
 
-**Название:** Rabochiy VPN: privat net
+**Название:** Zapret VPN: privat net
 
 **Краткое описание:** VPN til Android med servervalg og opdelt tunneling på wifi og mobilnet.
 
 **Полное описание:**
 
-På hotellets wifi eller på farten med mobilen? Rabochiy VPN opretter en krypteret tunnel mellem din Android-enhed og VPN-serveren. Du kan vælge forbindelsen uden at skulle ændre indstillinger i hver enkelt app.
+På hotellets wifi eller på farten med mobilen? Zapret VPN opretter en krypteret tunnel mellem din Android-enhed og VPN-serveren. Du kan vælge forbindelsen uden at skulle ændre indstillinger i hver enkelt app.
 
 Vælg en tilgængelig placering, eller lad appen vælge en server automatisk. Gratis adgang og PRO-muligheder er samlet i samme app.
 
@@ -314,13 +314,13 @@ VPN supplerer HTTPS, men erstatter ikke opdateringer eller opmærksomhed på phi
 
 **Страны / аудитория:** Финляндия.
 
-**Название:** Rabochiy VPN: yksityinen
+**Название:** Zapret VPN: yksityinen
 
 **Краткое описание:** VPN Androidille: palvelinvalinta ja sovelluskohtainen jaettu tunnelointi.
 
 **Полное описание:**
 
-VPN-yhteys matkalle ja arkeen ilman monimutkaisia asetuksia. Rabochiy VPN salaa liikenteen Android-laitteesi ja VPN-palvelimen välillä mobiiliverkossa sekä kodin, hotellin tai muun paikan wifi-verkossa.
+VPN-yhteys matkalle ja arkeen ilman monimutkaisia asetuksia. Zapret VPN salaa liikenteen Android-laitteesi ja VPN-palvelimen välillä mobiiliverkossa sekä kodin, hotellin tai muun paikan wifi-verkossa.
 
 Valitse saatavilla oleva sijainti tai käytä automaattista palvelinvalintaa. Ilmainen käyttö ja PRO-vaihtoehdot ovat samassa sovelluksessa.
 
@@ -350,13 +350,13 @@ VPN täydentää HTTPS-salausta, mutta ei korvaa päivityksiä eikä suojaa itse
 
 **Страны / аудитория:** Португалия, европейский португальский.
 
-**Название:** Rabochiy VPN: ligação privada
+**Название:** Zapret VPN: ligação privada
 
 **Краткое описание:** VPN para Android, Wi-Fi público e escolha das aplicações que usam o túnel.
 
 **Полное описание:**
 
-Uma ligação VPN para usar o telemóvel em viagem e no dia a dia. Rabochiy VPN cifra o tráfego entre o dispositivo Android e o servidor VPN, tanto nos dados móveis como no Wi-Fi de casa ou de um hotel.
+Uma ligação VPN para usar o telemóvel em viagem e no dia a dia. Zapret VPN cifra o tráfego entre o dispositivo Android e o servidor VPN, tanto nos dados móveis como no Wi-Fi de casa ou de um hotel.
 
 Escolha uma localização disponível ou use a seleção automática do servidor. O acesso gratuito e as opções PRO estão na mesma aplicação.
 
@@ -386,13 +386,13 @@ A VPN complementa o HTTPS, mas não substitui atualizações ou atenção ao phi
 
 **Страны / аудитория:** Румыния. Код Google Play — ro, не ro-RO.
 
-**Название:** Rabochiy VPN: acces privat
+**Название:** Zapret VPN: acces privat
 
 **Краткое описание:** VPN pentru Android, cu alegerea serverului și tunelare separată pe aplicații.
 
 **Полное описание:**
 
-Cauți un VPN ușor de folosit, cu control asupra aplicațiilor conectate? Rabochiy VPN creează un tunel criptat între dispozitivul Android și serverul VPN, pe date mobile sau Wi-Fi.
+Cauți un VPN ușor de folosit, cu control asupra aplicațiilor conectate? Zapret VPN creează un tunel criptat între dispozitivul Android și serverul VPN, pe date mobile sau Wi-Fi.
 
 Alege o locație disponibilă ori folosește selecția automată a serverului. Accesul gratuit și opțiunile PRO sunt în aceeași aplicație.
 
@@ -422,13 +422,13 @@ VPN-ul completează HTTPS, dar nu înlocuiește actualizările sau atenția la p
 
 **Страны / аудитория:** Чехия.
 
-**Название:** Rabochiy VPN: soukromé spojení
+**Название:** Zapret VPN: soukromé spojení
 
 **Краткое описание:** VPN pro Android s výběrem serveru a děleným tunelováním pro jednotlivé aplikace.
 
 **Полное описание:**
 
-VPN na cesty i pro běžné používání telefonu. Rabochiy VPN šifruje provoz mezi zařízením s Androidem a serverem VPN, v mobilní síti i na domácí nebo hotelové Wi-Fi.
+VPN na cesty i pro běžné používání telefonu. Zapret VPN šifruje provoz mezi zařízením s Androidem a serverem VPN, v mobilní síti i na domácí nebo hotelové Wi-Fi.
 
 Vyberte dostupné umístění sami nebo použijte automatický výběr serveru. Bezplatný přístup a možnosti PRO najdete v jedné aplikaci.
 

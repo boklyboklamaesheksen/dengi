@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 L10N = ROOT / "lib/l10n"
 LANGUAGES = ("fr", "nl", "de", "es", "it", "pl", "pt", "ro", "sv", "da", "fi", "cs")
 BRAND = {
-    "appTitle": "Rabochiy VPN", "tabHome": "VPN", "homeGetProAccent": "PRO",
+    "appTitle": "Zapret VPN", "tabHome": "VPN", "homeGetProAccent": "PRO",
     "homeGetProSuffix": "", "accountPlanPremium": "PRO", "premiumHeroAccent": "Pro",
 }
 EXTRA = {"serversCountOne", "serversCountOther", "errorGeneric", "reconnecting"}

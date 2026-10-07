@@ -1,10 +1,10 @@
-# Rabochiy VPN
+# Zapret VPN
 
 Premium Flutter VPN client with a **Stark Mono** UI (xAI-style dark theme:
 near-black `#1F2228` canvas, pure white accents, monospace display type).
 Tunnels run through AmneziaWG and the GW SSH/socks engine, with the
 server list pulled from the backend API. The Russian product name is
-**Рабочий VPN**; the English name remains **Rabochiy VPN**.
+**Запрет VPN**; the English name is **Zapret VPN**.
 
 ## Features
 
@@ -103,7 +103,7 @@ store descriptions supplied in `page.txt` are not replaced.
 ```
 lib/            Flutter app (screens, widgets, motion, services, l10n)
 android/        Android host and AmneziaWG/GW native modules
-assets/images/  Launcher icon art (logo_rabochiy*.png)
-tool/, tools/   Icon scripts, localisation generator and metadata checks
+assets/images/  Launcher icon art (logo_zapret.png, play_store_icon.png)
+tool/, tools/   Localisation generator and metadata checks
 docs/           Market research and release verification checklist
 ```

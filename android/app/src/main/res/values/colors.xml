@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Rabochiy VPN: near-black canvas (xAI-style #1F2228) used by the
+    <!-- Zapret VPN: near-black canvas (xAI-style #1F2228) used by the
          launch splash and the adaptive-icon background layer. -->
     <color name="ic_launcher_background">#07080A</color>
     <color name="ic_notification_accent">#FFFFFF</color>

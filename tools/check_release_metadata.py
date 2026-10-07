@@ -53,20 +53,20 @@ def main():
     require(set(re.findall(r"Locale\('([a-z]+)'", supported.group(1))) == LANGUAGES,
             "Flutter locale coverage differs from Android")
 
-    for directory, expected in (("values", "Rabochiy VPN"), ("values-ru", "Рабочий VPN")):
+    for directory, expected in (("values", "Zapret VPN"), ("values-ru", "Запрет VPN")):
         strings = ET.fromstring(text(f"android/app/src/main/res/{directory}/strings.xml"))
         require(strings.find("string[@name='app_name']").text == expected,
                 f"Incorrect launcher name in {directory}")
 
-    require(re.search(r"^version: 1\.0\.1\+3$", text("pubspec.yaml"), re.M),
-            "Expected release version 1.0.1+3")
+    require(re.search(r"^version: 26\.10\.4\+8$", text("pubspec.yaml"), re.M),
+            "Expected release version 26.10.4+8")
     gradle = text("android/app/build.gradle.kts")
     require("versionCode = flutter.versionCode" in gradle and
             "versionName = flutter.versionName" in gradle,
             "Android version must be derived from Flutter")
     example = json.loads(text("config/build-secrets.example.json"))
     require(example == {"RABOCHIY_SIGNING_SECRET": ""}, "Example must not contain credentials")
-    print("Validated 12 listings, 14 release-note blocks, locale coverage, branding and version 1.0.1+3.")
+    print("Validated 12 listings, 14 release-note blocks, locale coverage, branding and version 26.10.4+8.")
 
 
 if __name__ == "__main__":

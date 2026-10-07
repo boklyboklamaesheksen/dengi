@@ -147,7 +147,7 @@ class _SplitTunnelScreenState extends State<SplitTunnelScreen> {
   /// YouTube, Play Store, the device's own browser / messenger / store,
   /// etc.) on most retail devices. Filtering by that flag therefore hides
   /// almost every app the user recognises and leaves the split-tunnel
-  /// picker looking empty apart from Rabochiy VPN itself. Launcher-resolving
+  /// picker looking empty apart from Zapret VPN itself. Launcher-resolving
   /// packages are a much closer match for "apps the user cares about".
   static const MethodChannel _pkgChannel =
       MethodChannel('app.rabochiy.vpn/pkg_info');

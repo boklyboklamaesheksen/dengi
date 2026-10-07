@@ -1,8 +1,8 @@
-Datenschutzerklärung — Rabochiy VPN
+Datenschutzerklärung — Zapret VPN
 Stand: 1. September 2026
 
 Über dieses Dokument
-Diese Erklärung beschreibt die Erhebung, Verwendung und den Schutz von Informationen bei der Nutzung der App und des Dienstes. Mit der Nutzung stimmen Sie ihr zu; andernfalls stellen Sie die Nutzung bitte ein. Rabochiy VPN beruht auf minimaler Datenerhebung und protokolliert keine Internetaktivitäten. GW und AmneziaWG bezeichnen technische Standards und stellen keine Verbindung zu gleichnamigen Diensten her.
+Diese Erklärung beschreibt die Erhebung, Verwendung und den Schutz von Informationen bei der Nutzung der App und des Dienstes. Mit der Nutzung stimmen Sie ihr zu; andernfalls stellen Sie die Nutzung bitte ein. Zapret VPN beruht auf minimaler Datenerhebung und protokolliert keine Internetaktivitäten. GW und AmneziaWG bezeichnen technische Standards und stellen keine Verbindung zu gleichnamigen Diensten her.
 
 Was wir nicht speichern
 Wir erfassen keine GPS-Position und speichern weder besuchte Websites, DNS-Anfragen, Adressen der aufgerufenen Server, Ihre echte IP-Adresse noch Zeitpunkt und Dauer Ihrer Sitzungen. Die Server leiten Pakete weiter, ohne Nutzeraktivitäten zu protokollieren.
@@ -26,8 +26,8 @@ Werbung
 Werbenetzwerk-Code kann zur Finanzierung kostenloser Server eingesetzt werden. Statische Analysen können Werbe-Tracker-Signaturen erkennen. Partner können nach ihren eigenen Datenschutzregeln anonymisierte Daten wie Werbe-ID, Anzeigenklicks und -aufrufe erheben. Diese Daten werden nicht mit Ihrer Aktivität im VPN-Tunnel verknüpft. In Android können Sie die Werbe-ID zurücksetzen oder personalisierte Werbung deaktivieren.
 
 Zielgruppe und Änderungen
-Rabochiy VPN richtet sich nicht an Kinder unter 13 Jahren und erhebt deren Daten nicht absichtlich. Informieren Sie uns, wenn ein Kind unter 13 die App nutzt. Wir können diese Erklärung aktualisieren; das Datum kennzeichnet den aktuellen Stand. Wesentliche Änderungen kündigen wir im Telegram-Chat an.
+Zapret VPN richtet sich nicht an Kinder unter 13 Jahren und erhebt deren Daten nicht absichtlich. Informieren Sie uns, wenn ein Kind unter 13 die App nutzt. Wir können diese Erklärung aktualisieren; das Datum kennzeichnet den aktuellen Stand. Wesentliche Änderungen kündigen wir im Telegram-Chat an.
 
 Kontakt
-Telegram: https://t.me/rabochyvpn_chat
+Telegram: https://t.me/chatzapret
 E-Mail: support@vpnhub.ltd

@@ -147,6 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Text(
                           l10n.appTitle,
                           style: const TextStyle(
+                            fontFamily: AppFonts.brand,
                             fontSize: 22,
                             color: Colors.white,
                             fontWeight: FontWeight.w700,

@@ -13,8 +13,8 @@ import '../widgets/halo_field.dart';
 class SupportScreen extends StatelessWidget {
   const SupportScreen({super.key});
 
-  static const String _telegramChatUrl = 'tg://resolve?domain=rabochyvpn_chat';
-  static const String _telegramNewsUrl = 'tg://resolve?domain=rabochyvpn';
+  static const String _telegramChatUrl = 'tg://resolve?domain=chatzapret';
+  static const String _telegramNewsUrl = 'tg://resolve?domain=zapretvpnru';
   static const String _emailAddress = 'support@vpnhub.ltd';
   static const String _playStoreUrl =
       'https://play.google.com/store/apps/details?id=app.rabochiy.vpn';
@@ -42,7 +42,7 @@ class SupportScreen extends StatelessWidget {
         tint: AppColors.emerald,
         title: l10n.supportChannelTelegramChat,
         subtitle: l10n.supportChannelTelegramChatDesc,
-        target: 't.me/rabochyvpn_chat',
+        target: 't.me/chatzapret',
         url: Uri.parse(_telegramChatUrl),
       ),
       _Channel(
@@ -50,7 +50,7 @@ class SupportScreen extends StatelessWidget {
         tint: AppColors.cyan,
         title: l10n.supportChannelTelegramNews,
         subtitle: l10n.supportChannelTelegramNewsDesc,
-        target: 't.me/rabochyvpn',
+        target: 't.me/zapretvpnru',
         url: Uri.parse(_telegramNewsUrl),
       ),
       _Channel(
