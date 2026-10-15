@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../motion/press_feedback.dart';
 import '../providers/app_provider.dart';
 import '../services/api_service.dart';
+import '../services/remote_config_service.dart';
 
 /// Login screen: lets users restore their account by typing the BIP39
 /// recovery phrase. Legacy longer phrases are still accepted for older
@@ -52,6 +53,8 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
 
+    await RemoteConfigService.instance.ensureReady();
+    if (!mounted) return;
     final api = _apiOwned ??= ApiService();
     final result = await api.login(cleaned);
 

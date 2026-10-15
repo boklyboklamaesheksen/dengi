@@ -1,17 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/api_config.dart';
 import '../config/backend_signing.dart';
 import '../models/server_config_model.dart';
+import 'api_host_service.dart';
 
 /// Zapret VPN backend client.
 ///
-/// Talks to the FastAPI service hosted on `https://mc.yarik.app`. The
-/// backend exposes two flavours of routes that we mix-and-match:
+/// Talks to the FastAPI backend at [ApiConfig.baseUrl] (Remote Config,
+/// see [ApiHostService]). The backend exposes two flavours of routes that
+/// we mix-and-match:
 ///
 ///   * **`/vpn/api/v3/client/*`** — JSON-based, mnemonic accounts.
 ///     Used for: user create / login / get, server catalogue,
@@ -24,19 +27,6 @@ import '../models/server_config_model.dart';
 /// `bundleId` form fields. The shared secret and bundle whitelist are
 /// fixed by the backend middleware; [BackendSigning] owns this contract.
 class ApiService {
-  /// Default base URL of the production backend, kept for backward
-  /// compatibility. Override at build time with
-  /// `flutter run --dart-define=RABOCHIY_API_BASE=http://10.0.2.2:3002`
-  /// when pointing at a local FastAPI instance.
-  ///
-  /// NOTE: this value is frozen at compile time. The live domain lives in
-  /// [ApiConfig.baseUrl] and is refreshed from Firebase Remote Config at
-  /// every startup — [baseUrl] (the per-instance field) already follows it.
-  static String get defaultBaseUrl => const String.fromEnvironment(
-    'RABOCHIY_API_BASE',
-    defaultValue: 'https://mc.yarik.app',
-  );
-
   static const userIdPrefsKey = 'rabochiy_user_id';
   static const mnemonicPrefsKey = 'rabochiy_mnemonic';
   static const mnemonicConfirmedPrefsKey = 'rabochiy_mnemonic_confirmed';
@@ -53,9 +43,10 @@ class ApiService {
   static const loginNetworkError = 'network_error';
   static const loginServerError = 'server_error';
 
+  /// Explicit base URL (tests, local backend): bypasses Remote Config and
+  /// failover.
   final String? _baseUrlOverride;
-  String get baseUrl =>
-      (_baseUrlOverride ?? ApiConfig.baseUrl).replaceAll(RegExp(r'/+$'), '');
+  String get baseUrl => _trimSlashes(_baseUrlOverride ?? ApiConfig.baseUrl);
   final http.Client _client;
   final Duration _timeout;
   final BackendSigning _signing;
@@ -79,21 +70,25 @@ class ApiService {
     if (userId == null || userId.isEmpty || userId == 'pending') {
       return const [];
     }
+    // Captured before the request: failover may change the host mid-call.
+    final backend = _backendFingerprint(baseUrl);
     try {
-      final servers = await _fetchAwgServers(userId);
+      final servers = await _fetchAwgServers(userId, backend);
       servers.sort((a, b) => b.priority.compareTo(a.priority));
       return servers;
     } on BackendConfigurationException {
       rethrow;
     } catch (_) {
-      final cached = await _readMergedCache(userId);
+      final cached = await _readMergedCache(userId, backend);
       if (cached.isNotEmpty) return cached;
       rethrow;
     }
   }
 
-  Future<List<ServerConfig>> _fetchAwgServers(String userId) async {
-    final requestBase = baseUrl;
+  Future<List<ServerConfig>> _fetchAwgServers(
+    String userId,
+    String backend,
+  ) async {
     final res = await _signedPost(
       '/vpn/api/v1/user/server_awg',
       <String, String>{'userId': userId},
@@ -113,7 +108,7 @@ class ApiService {
     if (await getUserId() == userId) {
       await _writeCache(
         _kAwgCacheKey,
-        jsonEncode({'userId': userId, 'baseUrl': requestBase, 'data': raw}),
+        jsonEncode({'userId': userId, 'backend': backend, 'data': raw}),
       );
     }
     return servers;
@@ -125,8 +120,12 @@ class ApiService {
 
   Future<UserSession?> _createUser() async {
     try {
-      final uri = _buildUri('/vpn/api/v3/client/user/create', const {});
-      final res = await _client.post(uri).timeout(_timeout);
+      final res = await _send(
+        (base) => _client
+            .post(_buildUri(base, '/vpn/api/v3/client/user/create', const {}))
+            .timeout(_timeout),
+        idempotent: false,
+      );
       if (res.statusCode == 200) {
         final body = jsonDecode(res.body) as Map<String, dynamic>;
         final data = body['data'] as Map<String, dynamic>?;
@@ -226,8 +225,15 @@ class ApiService {
     final userId = prefs.getString(_kUserIdKey);
     if (userId == null || userId.isEmpty || userId == 'pending') return null;
     try {
-      final uri = _buildUri('/vpn/api/v3/client/user/get', {'user_id': userId});
-      final res = await _client.get(uri).timeout(_timeout);
+      final res = await _send(
+        (base) => _client
+            .get(
+              _buildUri(base, '/vpn/api/v3/client/user/get', {
+                'user_id': userId,
+              }),
+            )
+            .timeout(_timeout),
+      );
       if (res.statusCode != 200) return null;
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       final data = body['data'];
@@ -264,10 +270,15 @@ class ApiService {
     }
 
     try {
-      final uri = _buildUri('/vpn/api/v3/client/user/login', {
-        'mnemonic': cleaned,
-      });
-      final res = await _client.get(uri).timeout(_timeout);
+      final res = await _send(
+        (base) => _client
+            .get(
+              _buildUri(base, '/vpn/api/v3/client/user/login', {
+                'mnemonic': cleaned,
+              }),
+            )
+            .timeout(_timeout),
+      );
       Map<String, dynamic>? body;
       try {
         body = jsonDecode(res.body) as Map<String, dynamic>?;
@@ -351,10 +362,15 @@ class ApiService {
       return null;
     }
     try {
-      final uri = _buildUri('/vpn/api/v3/client/user/delete', <String, String>{
-        'user_id': userId,
-      });
-      final res = await _client.delete(uri).timeout(_timeout);
+      final res = await _send(
+        (base) => _client
+            .delete(
+              _buildUri(base, '/vpn/api/v3/client/user/delete', {
+                'user_id': userId,
+              }),
+            )
+            .timeout(_timeout),
+      );
       if (res.statusCode == 200) {
         await logout();
         return null;
@@ -381,8 +397,11 @@ class ApiService {
   /// tariffs" state instead of breaking.
   Future<List<TariffInfo>> fetchTariffs() async {
     try {
-      final uri = _buildUri('/vpn/api/v3/client/tariff/get', const {});
-      final res = await _client.get(uri).timeout(_timeout);
+      final res = await _send(
+        (base) => _client
+            .get(_buildUri(base, '/vpn/api/v3/client/tariff/get', const {}))
+            .timeout(_timeout),
+      );
       if (res.statusCode != 200) return const [];
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       final data = body['data'];
@@ -426,11 +445,17 @@ class ApiService {
       return codeActivateServer;
     }
     try {
-      final uri = _buildUri(
-        '/vpn/api/v3/client/user/activatecode',
-        <String, String>{'user_id': userId, 'code': cleaned},
+      final res = await _send(
+        (base) => _client
+            .put(
+              _buildUri(base, '/vpn/api/v3/client/user/activatecode', {
+                'user_id': userId,
+                'code': cleaned,
+              }),
+            )
+            .timeout(_timeout),
+        idempotent: false,
       );
-      final res = await _client.put(uri).timeout(_timeout);
       if (res.statusCode == 200) {
         // Refresh local premium state so the UI reflects the change
         // without an extra round-trip from the caller.
@@ -456,17 +481,20 @@ class ApiService {
     final userId = prefs.getString(_kUserIdKey);
     if (userId == null || userId.isEmpty || userId == 'pending') return null;
     try {
-      final uri = _buildUri('/vpn/api/v3/client/payments/initiate', const {});
-      final res = await _client
-          .post(
-            uri,
-            headers: const {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'user_id': userId,
-              'tariff_id': tariffTechnicalName,
-            }),
-          )
-          .timeout(_timeout);
+      final payload = jsonEncode({
+        'user_id': userId,
+        'tariff_id': tariffTechnicalName,
+      });
+      final res = await _send(
+        (base) => _client
+            .post(
+              _buildUri(base, '/vpn/api/v3/client/payments/initiate', const {}),
+              headers: const {'Content-Type': 'application/json'},
+              body: payload,
+            )
+            .timeout(_timeout),
+        idempotent: false,
+      );
       if (res.statusCode != 200) return null;
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       if (body['success'] != true) return null;
@@ -489,10 +517,15 @@ class ApiService {
   /// user's current premium flag.
   Future<PaymentStatusResult?> checkPaymentStatus(String paymentId) async {
     try {
-      final uri = _buildUri('/vpn/api/v3/client/payments/check', {
-        'payment_id': paymentId,
-      });
-      final res = await _client.get(uri).timeout(_timeout);
+      final res = await _send(
+        (base) => _client
+            .get(
+              _buildUri(base, '/vpn/api/v3/client/payments/check', {
+                'payment_id': paymentId,
+              }),
+            )
+            .timeout(_timeout),
+      );
       if (res.statusCode != 200) return null;
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       if (body['success'] != true) return null;
@@ -583,10 +616,31 @@ class ApiService {
   //  Internals
   // ──────────────────────────────────────────────────────────────────
 
-  Uri _buildUri(String path, Map<String, String> qs) {
+  static String _trimSlashes(String url) => url.replaceAll(RegExp(r'/+$'), '');
+
+  Uri _buildUri(String base, String path, Map<String, String> qs) {
     final cleanPath = path.startsWith('/') ? path : '/$path';
-    return Uri.parse('$baseUrl$cleanPath')
+    return Uri.parse('${_trimSlashes(base)}$cleanPath')
         .replace(queryParameters: qs.isEmpty ? null : qs);
+  }
+
+  /// Sends through [ApiHostService] failover unless an explicit base URL
+  /// was injected.
+  Future<http.Response> _send(
+    Future<http.Response> Function(String base) send, {
+    bool idempotent = true,
+  }) {
+    final override = _baseUrlOverride;
+    if (override != null) return send(override);
+    return ApiHostService.instance.withFailover(send, idempotent: idempotent);
+  }
+
+  /// Cache scope without storing the address itself in shared_prefs.
+  String _backendFingerprint(String base) {
+    final key = _baseUrlOverride != null
+        ? _trimSlashes(base)
+        : ApiHostService.instance.backendKey(base);
+    return sha256.convert(utf8.encode(key)).toString();
   }
 
   /// Performs a signed `application/x-www-form-urlencoded` POST against
@@ -599,16 +653,17 @@ class ApiService {
   ) async {
     final body = _signing.sign(fields);
 
-    final uri = _buildUri(path, const {});
-    return _client
-        .post(
-          uri,
-          headers: const {
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-          },
-          body: body,
-        )
-        .timeout(_timeout);
+    return _send(
+      (base) => _client
+          .post(
+            _buildUri(base, path, const {}),
+            headers: const {
+              'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            },
+            body: body,
+          )
+          .timeout(_timeout),
+    );
   }
 
   List<ServerConfig> _parseList(
@@ -644,10 +699,13 @@ class ApiService {
     }
   }
 
-  Future<List<ServerConfig>> _readMergedCache(String userId) async {
+  Future<List<ServerConfig>> _readMergedCache(
+    String userId,
+    String backend,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     final out = <ServerConfig>[];
-    out.addAll(await _readCache(prefs, _kAwgCacheKey, 'awg', userId));
+    out.addAll(await _readCache(prefs, _kAwgCacheKey, 'awg', userId, backend));
     out.sort((a, b) => b.priority.compareTo(a.priority));
     return out;
   }
@@ -657,12 +715,18 @@ class ApiService {
     String key,
     String defaultProtocol,
     String userId,
+    String backend,
   ) async {
     try {
       final raw = prefs.getString(key);
       if (raw == null || raw.isEmpty) return const [];
       final body = jsonDecode(raw) as Map<String, dynamic>;
-      if (body['userId'] != userId || body['baseUrl'] != baseUrl) {
+      // Older caches stored the API URL in plain text: drop them.
+      if (body.containsKey('baseUrl')) {
+        await prefs.remove(key);
+        return const [];
+      }
+      if (body['userId'] != userId || body['backend'] != backend) {
         return const [];
       }
       final list = body['data'];

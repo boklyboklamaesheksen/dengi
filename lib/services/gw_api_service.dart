@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'api_host_service.dart';
 import 'api_service.dart';
-import '../config/api_config.dart';
 import '../config/backend_signing.dart';
 import 'gw_identity.dart';
 import '../models/server_config_model.dart';
@@ -53,14 +53,19 @@ class GwApiService {
       'pubkey': identity.publicKeyXyHex,
     });
 
-    final base = (_baseUrl ?? ApiConfig.baseUrl).replaceAll(RegExp(r'/+$'), '');
-    final response = await _client
+    Future<http.Response> send(String base) => _client
         .post(
-          Uri.parse('$base/vpn/api/v1/user/server_vlee'),
+          Uri.parse(
+            '${base.replaceAll(RegExp(r'/+$'), '')}/vpn/api/v1/user/server_vlee',
+          ),
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
           body: body,
         )
         .timeout(_timeout);
+    final override = _baseUrl;
+    final response = override != null
+        ? await send(override)
+        : await ApiHostService.instance.withFailover(send);
 
     if (response.statusCode != 200) {
       throw Exception('GW servers HTTP ${response.statusCode}');

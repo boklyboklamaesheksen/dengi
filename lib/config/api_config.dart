@@ -1,36 +1,36 @@
+import 'secret_codec.dart';
+
 /// Central store for the backend domain.
 ///
-/// IMPORTANT: the value below is ONLY the default (fallback). On app start
-/// [RemoteConfigService] fetches the current domain from Firebase Remote
-/// Config and overwrites this field. If the domain ever gets blocked, change
-/// the value in the Firebase console — no Play Store release needed.
-///
-/// The field is intentionally NOT `const`/`final` so it can be reassigned at
-/// runtime (see RemoteConfigService._apply).
+/// No plain-text URL lives in the build: every baked-in address is gwenc1
+/// encoded (see [SecretCodec]) and decoded only right before use. The live
+/// value comes from Firebase Remote Config (`encrypted_api_url`) and is
+/// applied exclusively through `ApiHostService`, which also handles
+/// wildcard subdomains and failover.
 class ApiConfig {
-  /// Backend domain (auth, server catalogue, tariffs, payments, GW nodes).
-  /// Remote Config key: `api_base_url`
-  static const _override = String.fromEnvironment('RABOCHIY_API_BASE');
-  static String baseUrl = _override.isEmpty
-      ? 'https://mc.yarik.app'
-      : _override;
+  ApiConfig._();
 
-  static bool applyRemoteBaseUrl(String value) {
-    if (_override.isNotEmpty) return false;
-    final uri = Uri.tryParse(value.trim());
-    if (uri == null ||
-        uri.scheme != 'https' ||
-        uri.host.isEmpty ||
-        uri.userInfo.isNotEmpty ||
-        uri.hasQuery ||
-        uri.hasFragment) {
-      return false;
-    }
-    baseUrl = uri.toString().replaceAll(RegExp(r'/+$'), '');
-    return true;
-  }
+  /// Protective default used until Remote Config answers (first launch
+  /// without network, Firebase blocked). Remote Config always wins once
+  /// it delivers a valid `encrypted_api_url`.
+  static const String defaultBaseUrlEncrypted =
+      'gwenc1:u16Xdstdk81gb2K/1Gm0l7tijLw=';
 
-  // Local debugging (set manually when needed):
-  //   Android emulator:      'http://10.0.2.2:3004'
-  //   Real device on LAN:    'http://192.168.x.x:3004'
+  /// Local backend for development only, e.g.
+  /// `--dart-define=RABOCHIY_API_BASE=http://10.0.2.2:3002` (plain or
+  /// gwenc1). When set, Remote Config and failover are disabled.
+  static const String _devOverride = String.fromEnvironment(
+    'RABOCHIY_API_BASE',
+  );
+
+  static bool get hasDevOverride => _devOverride.trim().isNotEmpty;
+
+  static String get defaultBaseUrl =>
+      SecretCodec.decode(defaultBaseUrlEncrypted);
+
+  /// Current backend base URL without a trailing slash. Written only by
+  /// `ApiHostService` (and tests).
+  static String baseUrl = hasDevOverride
+      ? SecretCodec.decode(_devOverride).replaceAll(RegExp(r'/+$'), '')
+      : defaultBaseUrl;
 }

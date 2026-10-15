@@ -8,6 +8,7 @@ import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rabochiy_vpn/config/api_config.dart';
 import 'package:rabochiy_vpn/config/backend_signing.dart';
+import 'package:rabochiy_vpn/services/api_host_service.dart';
 import 'package:rabochiy_vpn/services/api_service.dart';
 import 'package:rabochiy_vpn/services/gw_api_service.dart';
 
@@ -24,6 +25,7 @@ http.Response catalogue([List<Object> data = const [record]]) =>
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() {
+    ApiHostService.instance.resetForTest();
     ApiConfig.baseUrl = 'https://example.test';
     SharedPreferences.setMockInitialValues({
       ApiService.userIdPrefsKey: 'qa-account',
@@ -88,7 +90,7 @@ void main() {
       addTearDown(api.close);
       await api.fetchServerConfigs();
       expect(
-        ApiConfig.applyRemoteBaseUrl('https://backup.example.test/'),
+        ApiHostService.instance.apply('https://backup.example.test/'),
         isTrue,
       );
       await api.fetchServerConfigs();
@@ -111,7 +113,7 @@ void main() {
         }),
       );
       addTearDown(api.close);
-      ApiConfig.applyRemoteBaseUrl('https://backup.example.test');
+      ApiHostService.instance.apply('https://backup.example.test');
       await api.fetchServerConfigs();
     },
   );
@@ -127,7 +129,7 @@ void main() {
         'https://example.test?token=bad',
         'https://example.test#fragment',
       ]) {
-        expect(ApiConfig.applyRemoteBaseUrl(value), isFalse, reason: value);
+        expect(ApiHostService.instance.apply(value), isFalse, reason: value);
       }
       expect(ApiConfig.baseUrl, 'https://example.test');
     },
@@ -218,6 +220,58 @@ void main() {
       );
     },
   );
+
+  test('server cache never stores the API address in plain text', () async {
+    final api = ApiService(
+      signing: signing,
+      client: MockClient((_) async => catalogue()),
+    );
+    addTearDown(api.close);
+    await api.fetchServerConfigs();
+    final prefs = await SharedPreferences.getInstance();
+    final cached = prefs.getString('rabochiy_servers_cache_awg_v1')!;
+    expect(cached, isNot(contains('example.test')));
+  });
+
+  test('legacy plain-text cache is dropped instead of reused', () async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      'rabochiy_servers_cache_awg_v1',
+      jsonEncode({
+        'userId': 'qa-account',
+        'baseUrl': 'https://example.test',
+        'data': [record],
+      }),
+    );
+    final api = ApiService(
+      signing: signing,
+      client: MockClient((_) async => throw http.ClientException('offline')),
+    );
+    addTearDown(api.close);
+    await expectLater(
+      api.fetchServerConfigs(),
+      throwsA(isA<http.ClientException>()),
+    );
+    expect(prefs.getString('rabochiy_servers_cache_awg_v1'), isNull);
+  });
+
+  test('catalogue request fails over to the next backend', () async {
+    ApiHostService.instance.apply('https://primary.example.test');
+    final hosts = <String>[];
+    final api = ApiService(
+      signing: signing,
+      client: MockClient((request) async {
+        hosts.add(request.url.host);
+        if (hosts.length == 1) throw http.ClientException('Failed host lookup');
+        return catalogue();
+      }),
+    );
+    addTearDown(api.close);
+    expect((await api.fetchServerConfigs()).single.id, 'qa-awg');
+    expect(hosts.first, 'primary.example.test');
+    expect(hosts, hasLength(2));
+    expect(hosts.last, isNot('primary.example.test'));
+  });
 
   test(
     'a response completing after logout cannot repopulate the cache',

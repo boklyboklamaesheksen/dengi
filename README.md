@@ -17,6 +17,8 @@ server list pulled from the backend API. The Russian product name is
   DA, FI, CS, including privacy documents and VPN notifications
 - Dark-mode design; Firebase Crashlytics, Analytics and Remote Config
   (see the in-app privacy policy and `FIREBASE_SETUP.md`)
+- Backend URL via Remote Config `encrypted_api_url` (gwenc1-encoded,
+  failover, wildcard subdomains): see `docs/REMOTE_CONFIG.md`
 
 ## Android build
 

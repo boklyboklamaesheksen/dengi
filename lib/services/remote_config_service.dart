@@ -4,105 +4,190 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 
 import '../config/api_config.dart';
+import '../config/secret_codec.dart';
+import 'api_host_service.dart';
 
-/// Dynamic backend-domain updates via Firebase Remote Config.
+/// Backend domain updates via Firebase Remote Config.
 ///
-/// Flow (same pattern as the vlees app):
-///   1. Register defaults (matching [ApiConfig]) as a fallback for the case
-///      when Firebase is unreachable on first launch (no network yet).
-///   2. Fetch + activate fresh values from Firebase.
-///   3. Copy them into [ApiConfig], which the rest of the code reads.
+/// Keys (Firebase Console → Remote Config), values in gwenc1 format
+/// (see [SecretCodec] and docs/REMOTE_CONFIG.md):
+///   - `encrypted_api_url` — backend URL or wildcard template
+///     `https://*.api.example.com`, applied through [ApiHostService];
+///   - `encrypted_api_fallback_url` — optional reserve address for
+///     automatic failover (empty = none).
 ///
-/// Remote Config keys (Firebase Console → Run → Remote Config):
-///   - `api_base_url` → [ApiConfig.baseUrl]
+/// The legacy plain-text `api_base_url` key is intentionally NOT read:
+/// the Remote Config JSON must not expose a URL used by new versions.
+/// Only values whose source is the server (`valueRemote`) are applied, so
+/// in-app defaults never overwrite an address received earlier.
 class RemoteConfigService {
   RemoteConfigService._();
   static final RemoteConfigService instance = RemoteConfigService._();
 
-  /// Key names kept in one place to avoid typos.
-  static const String kApiBaseUrl = 'api_base_url';
+  static const String kEncryptedApiUrl = 'encrypted_api_url';
+  static const String kEncryptedApiFallbackUrl = 'encrypted_api_fallback_url';
 
-  /// Hard timeout for the whole fetchAndActivate call. If Firebase hangs
-  /// (provider resets the connection) we must not stall startup longer
-  /// than this — otherwise we risk an ANR.
-  static const Duration _hardTimeout = Duration(seconds: 5);
+  /// Per fetchAndActivate call: the SDK occasionally hangs when the ISP
+  /// resets the connection, and an unbounded wait risks an ANR.
+  static const Duration _hardTimeout = Duration(seconds: 20);
+
+  /// Background re-fetch in a live process: a new domain reaches users who
+  /// keep the app (and the VPN) running for days.
+  static const Duration _steadyRefreshInterval = Duration(minutes: 10);
+
+  /// Startup attempts; the pause doubles: 3 s, 6 s, 12 s, 24 s.
+  static const int _maxBootRetries = 5;
+
+  /// Duration.zero on thousands of devices hits the hourly Firebase quota
+  /// (throttling). Console changes still arrive instantly through the
+  /// real-time listener, which bypasses this interval.
+  static const Duration _minFetchInterval = kDebugMode
+      ? Duration.zero
+      : Duration(minutes: 5);
 
   FirebaseRemoteConfig? _rc;
+  Timer? _steadyTimer;
+  StreamSubscription<RemoteConfigUpdate>? _realtimeSub;
+  Future<bool>? _inFlight;
+  bool _started = false;
+  final Completer<void> _firstFetch = Completer<void>();
 
-  /// Startup initialisation. Never rethrows — a Remote Config failure must
-  /// not crash app launch; defaults from [ApiConfig] stay in effect.
+  /// Startup initialisation. Never throws: a Remote Config failure must not
+  /// break app launch; the restored/default address stays in effect.
   Future<void> initialize() async {
+    if (_started) return;
+    _started = true;
+    if (ApiConfig.hasDevOverride) {
+      _completeFirstFetch();
+      return;
+    }
     try {
       final rc = FirebaseRemoteConfig.instance;
       _rc = rc;
 
-      // Defaults = the baked-in domain (fallback).
-      await rc.setDefaults(<String, dynamic>{kApiBaseUrl: ApiConfig.baseUrl});
-      _apply(rc);
-
+      await rc.setDefaults(<String, dynamic>{
+        kEncryptedApiUrl: ApiConfig.defaultBaseUrlEncrypted,
+        kEncryptedApiFallbackUrl: '',
+      });
       await rc.setConfigSettings(
         RemoteConfigSettings(
-          // How long we wait for Firebase before falling back to defaults.
-          fetchTimeout: const Duration(seconds: 10),
-          // How often the app is allowed to actually hit the network for
-          // fresh values. 15 minutes: a blocked domain is picked up quickly
-          // while the fetch spam stays minimal. Use Duration.zero to debug.
-          minimumFetchInterval: const Duration(minutes: 15),
+          fetchTimeout: const Duration(seconds: 30),
+          minimumFetchInterval: _minFetchInterval,
         ),
       );
 
-      // Fetch + activate with the hard timeout. Firebase.fetchAndActivate()
-      // occasionally hangs when the provider drops the connection
-      // (Connection closed by peer) — without this wrapper the app can
-      // freeze at startup and hit an ANR.
-      await rc.fetchAndActivate().timeout(
-        _hardTimeout,
-        onTimeout: () {
-          if (kDebugMode) {
-            debugPrint(
-              'RemoteConfigService: fetchAndActivate timed out '
-              'after $_hardTimeout',
-            );
+      // Values activated in an earlier session are usable right away.
+      _apply(rc);
+
+      await _realtimeSub?.cancel();
+      _realtimeSub = rc.onConfigUpdated.listen(
+        (_) async {
+          try {
+            await rc.activate();
+            _apply(rc);
+          } catch (e) {
+            _log('real-time activate failed: ${e.runtimeType}');
           }
-          return false;
         },
+        onError: (Object e) => _log('real-time stream error: ${e.runtimeType}'),
       );
 
-      // Copy into ApiConfig so all consumers read the live domain.
-      _apply(rc);
-    } catch (e, s) {
-      // No network / Firebase unreachable — keep running on ApiConfig defaults.
-      if (kDebugMode) {
-        debugPrint('RemoteConfigService.initialize failed: $e\n$s');
-      }
+      unawaited(_fetchLoop());
+    } catch (e) {
+      _log('initialize failed: ${e.runtimeType}');
+      _completeFirstFetch();
     }
   }
 
-  /// Force-refresh values while the app is running (e.g. a "refresh
-  /// servers" button). Returns true when new values were activated.
-  Future<bool> refresh() async {
+  /// Forces a fetch now. Returns true when the fetch succeeded.
+  Future<bool> refresh() => _inFlight ??= _fetchOnce().whenComplete(() {
+    _inFlight = null;
+  });
+
+  /// Waits (bounded) for the first Remote Config answer on a device that has
+  /// never received one, so account creation/login on a fresh install does
+  /// not hit a stale baked-in domain. Returns immediately otherwise.
+  Future<void> ensureReady({
+    Duration timeout = const Duration(seconds: 8),
+  }) async {
+    if (_rc == null || ApiHostService.instance.hasRemoteSource) return;
+    try {
+      await _firstFetch.future.timeout(timeout);
+    } on TimeoutException {
+      // Continue on the default; failover covers a blocked host.
+    }
+  }
+
+  Future<bool> _fetchOnce() async {
     final rc = _rc;
     if (rc == null) return false;
     try {
-      final activated = await rc.fetchAndActivate().timeout(
+      var timedOut = false;
+      await rc.fetchAndActivate().timeout(
         _hardTimeout,
-        onTimeout: () => false,
+        onTimeout: () {
+          timedOut = true;
+          return false;
+        },
       );
       _apply(rc);
-      return activated;
+      // Throttled still means Firebase answered: stop the boot retries.
+      final ok =
+          !timedOut &&
+          rc.lastFetchStatus != RemoteConfigFetchStatus.failure &&
+          rc.lastFetchStatus != RemoteConfigFetchStatus.noFetchYet;
+      if (ok) _completeFirstFetch();
+      return ok;
     } catch (e) {
-      if (kDebugMode) debugPrint('RemoteConfigService.refresh failed: $e');
+      _log('fetch failed: ${e.runtimeType}');
       return false;
     }
   }
 
-  void _apply(FirebaseRemoteConfig rc) {
-    final api = rc.getString(kApiBaseUrl);
-
-    ApiConfig.applyRemoteBaseUrl(api);
-
-    if (kDebugMode) {
-      debugPrint('RemoteConfig applied → api=${ApiConfig.baseUrl}');
+  Future<void> _fetchLoop() async {
+    var delay = const Duration(seconds: 3);
+    for (var attempt = 0; attempt < _maxBootRetries; attempt++) {
+      if (await refresh()) break;
+      if (attempt < _maxBootRetries - 1) {
+        await Future<void>.delayed(delay);
+        delay *= 2;
+      }
     }
+    _completeFirstFetch();
+    _steadyTimer ??= Timer.periodic(
+      _steadyRefreshInterval,
+      (_) => unawaited(refresh()),
+    );
+  }
+
+  void _apply(FirebaseRemoteConfig rc) {
+    try {
+      final api = rc.getValue(kEncryptedApiUrl);
+      if (api.source == ValueSource.valueRemote) {
+        final decoded = SecretCodec.tryDecode(api.asString());
+        if (decoded == null || !ApiHostService.instance.apply(decoded)) {
+          _log('ignored invalid $kEncryptedApiUrl');
+        }
+      }
+
+      final reserve = rc.getValue(kEncryptedApiFallbackUrl);
+      if (reserve.source == ValueSource.valueRemote) {
+        final decoded = SecretCodec.tryDecode(reserve.asString());
+        if (decoded == null || !ApiHostService.instance.applyReserve(decoded)) {
+          _log('ignored invalid $kEncryptedApiFallbackUrl');
+        }
+      }
+    } catch (e) {
+      _log('apply failed: ${e.runtimeType}');
+    }
+  }
+
+  void _completeFirstFetch() {
+    if (!_firstFetch.isCompleted) _firstFetch.complete();
+  }
+
+  // Never log addresses, not even in debug builds.
+  void _log(String message) {
+    if (kDebugMode) debugPrint('RemoteConfigService: $message');
   }
 }

@@ -12,6 +12,7 @@ import '../motion/motion_curves.dart';
 import '../motion/press_feedback.dart';
 import '../providers/app_provider.dart';
 import '../services/api_service.dart';
+import '../services/remote_config_service.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/halo_field.dart';
 
@@ -81,6 +82,10 @@ class _SplashScreenState extends State<SplashScreen>
       return;
     }
     try {
+      // Fresh install: wait (bounded) for the Remote Config domain so the
+      // account is not created against a stale baked-in default.
+      await RemoteConfigService.instance.ensureReady();
+      if (!mounted) return;
       final api = ApiService();
       // Mark as pending so other parallel initializers don't hammer the API.
       await prefs.setString(ApiService.userIdPrefsKey, 'pending');

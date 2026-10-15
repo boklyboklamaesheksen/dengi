@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'config/app_theme.dart';
 import 'widgets/app_viewport.dart';
 import 'firebase_options.dart';
+import 'services/api_host_service.dart';
 import 'services/remote_config_service.dart';
 import 'l10n/app_localizations.dart';
 import 'motion/device_tier.dart';
@@ -49,9 +50,13 @@ Future<void> main() async {
     debugPrint('$st');
   }
 
+  // Last Remote Config domain from disk (encoded) before any request:
+  // Firebase may answer late or not at all.
+  await ApiHostService.instance.restore();
+
   // Dynamic backend domain (Remote Config). Fired without awaiting so it
   // never blocks the first frame: until it completes (or if Firebase is
-  // unreachable) the app runs on the default domain from ApiConfig.
+  // unreachable) the app runs on the restored or encoded default domain.
   unawaited(RemoteConfigService.instance.initialize());
 
   // Ограничиваем ориентацию экрана только портретным режимом
