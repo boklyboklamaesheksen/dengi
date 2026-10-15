@@ -30,6 +30,7 @@ class AppProvider with ChangeNotifier {
   bool _disposed = false;
   Future<void>? _serverLoad;
   int _accountGeneration = 0;
+  int _reconnectGeneration = 0;
   String? _catalogError;
 
   VpnStatus _vpnStatus = VpnStatus.disconnected;
@@ -456,14 +457,27 @@ class AppProvider with ChangeNotifier {
     });
   }
 
+  /// Server switch / split-tunnel change: always ends in a reconnect.
+  ///
+  /// A newer switch supersedes an older one (rapid taps no longer race two
+  /// connects), and a failed start gets one automatic retry: the previous
+  /// engine often has not fully stopped yet. A user disconnect/cancel bumps
+  /// [_reconnectGeneration] and stops the retry.
   Future<void> _reconnect() async {
+    final generation = ++_reconnectGeneration;
+    bool stale() => _disposed || generation != _reconnectGeneration;
     await _vpnService.disconnect();
     await Future.delayed(const Duration(milliseconds: 500));
-    if (_disposed) return;
+    if (stale()) return;
+    await connectVpn();
+    if (stale() || _vpnService.status != VpnStatus.error) return;
+    await Future.delayed(const Duration(milliseconds: 1500));
+    if (stale() || _vpnService.status != VpnStatus.error) return;
     await connectVpn();
   }
 
   Future<void> _disconnectForPremiumGate() async {
+    _reconnectGeneration++;
     await _vpnService.disconnect();
     if (_disposed) return;
     _errorMessage = 'premium_required';
@@ -561,12 +575,14 @@ class AppProvider with ChangeNotifier {
   }
 
   Future<void> disconnectVpn() async {
+    _reconnectGeneration++;
     await _vpnService.disconnect();
   }
 
   /// User tapped the button again while a connection attempt was still
   /// in flight — cancel it instead of waiting for the handshake.
   Future<void> cancelConnect() async {
+    _reconnectGeneration++;
     await _vpnService.cancelConnect();
   }
 
@@ -583,6 +599,7 @@ class AppProvider with ChangeNotifier {
   /// killed mid-flow the next launch still lands on /welcome.
   Future<void> resetSession() async {
     _accountGeneration++;
+    _reconnectGeneration++;
     _serverLoad = null;
     _catalogError = null;
     _stopHeartbeat();
