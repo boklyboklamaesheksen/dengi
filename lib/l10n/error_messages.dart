@@ -1,4 +1,5 @@
 import 'app_localizations.dart';
+import '../services/error_sanitizer.dart';
 
 /// Translates an error code stored on `AppProvider.errorMessage` (or
 /// `VpnService.errorMessage`) into a user-facing localised string.
@@ -25,9 +26,12 @@ String localiseError(String? code, AppLocalizations l10n) {
     case 'awg_handshake_timeout':
       return l10n.errorServerUnreachable;
     default:
-      // Unknown code or a raw native error message — surface verbatim
-      // wrapped in the generic prefix so operators see what the
-      // backend reported.
-      return l10n.errorGeneric(code);
+      // Unknown code or a raw native error message. Raw text may carry the
+      // backend host or a node IP: network failures get the generic
+      // "unreachable" text, anything else is shown without addresses.
+      if (ErrorSanitizer.isNetworkError(code)) {
+        return l10n.errorServerUnreachable;
+      }
+      return l10n.errorGeneric(ErrorSanitizer.stripEndpoints(code));
   }
 }

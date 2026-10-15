@@ -389,8 +389,22 @@ public final class GoBackend implements Backend {
             final VpnService.Builder builder = service.getBuilder();
             builder.setSession(sessionName);
 
-            for (final String excludedApplication : config.getInterface().getExcludedApplications())
+            // Keep the app's own traffic (API, Firebase Remote Config) out of
+            // the tunnel unless an allow-list is used: otherwise the backend
+            // and Remote Config see the foreign node IP instead of the user's.
+            final String ownPackage = service.getPackageName();
+            if (config.getInterface().getIncludedApplications().isEmpty()) {
+                try {
+                    builder.addDisallowedApplication(ownPackage);
+                } catch (final Exception ignored) {
+                }
+            }
+
+            for (final String excludedApplication : config.getInterface().getExcludedApplications()) {
+                if (excludedApplication.equals(ownPackage))
+                    continue;
                 builder.addDisallowedApplication(excludedApplication);
+            }
 
             for (final String includedApplication : config.getInterface().getIncludedApplications())
                 builder.addAllowedApplication(includedApplication);
