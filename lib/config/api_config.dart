@@ -14,12 +14,12 @@ class ApiConfig {
   /// without network, Firebase blocked). Remote Config always wins once
   /// it delivers a valid `encrypted_api_url`.
   static const String defaultBaseUrlEncrypted =
-      'gwenc1:u16Xdstdk81gb2K/1Gm0l7tijLw=';
+      'gwenc1:aL2Yanp9uWGRq713iNqxr2ra1Gm0l7tijLw=';
 
   /// Built-in VLESS subscription list (gwenc1, whitespace/comma separated)
   /// used until Remote Config delivers `encrypted_vless_sub_urls`.
   static const String defaultVlessSubscriptionsEncrypted =
-      'gwenc1:rWzDu16Xdstdk81gb2K/1Gm0l7tijLw=';
+      'gwenc1:v3VwaL2Yanp9uWGRq713iNqxr2ra1Gm0l7tijLw=';
 
   /// Local backend for development only, e.g.
   /// `--dart-define=RABOCHIY_API_BASE=http://10.0.2.2:3002` (plain or
