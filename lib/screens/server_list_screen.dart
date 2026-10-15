@@ -41,7 +41,7 @@ class _ServerListScreenState extends State<ServerListScreen> {
     // Post-frame so Provider listeners aren't notified during build.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<AppProvider>().loadServers();
+      context.read<AppProvider>().loadServersIfNeeded();
     });
   }
 

@@ -65,13 +65,13 @@ class MainActivity : FlutterFragmentActivity() {
     private var isVpnConnected = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Enable edge-to-edge before super.onCreate as required by AndroidX;
-        // dark styles keep light icons on the always-dark UI.
+        super.onCreate(savedInstanceState)
+        // Call after super.onCreate so FlutterFragmentActivity switches from
+        // LaunchTheme to NormalTheme before DecorView is installed.
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
         )
-        super.onCreate(savedInstanceState)
     }
 
     override fun onResume() {

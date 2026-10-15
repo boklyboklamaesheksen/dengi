@@ -20,17 +20,38 @@ class VlessSubscriptionSources {
     parse(ApiConfig.defaultVlessSubscriptionsEncrypted),
   );
 
+  static const String _prefsKey = 'vless_subscription_sources_enc';
   static final RegExp _separators = RegExp(r'[\s,;]+');
+
+  /// Restores the last Remote Config subscription sources before first fetch.
+  Future<void> restore() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString(_prefsKey);
+      if (saved == null) return;
+      apply(saved, remember: false);
+    } catch (_) {}
+  }
 
   /// Applies a Remote Config value. An empty value disables VLESS
   /// subscriptions; a non-empty value without a single valid URL is
   /// rejected (returns false) and the current list stays.
-  bool apply(String raw) {
+  bool apply(String raw, {bool remember = true}) {
     final trimmed = raw.trim();
     final next = parse(trimmed);
     if (trimmed.isNotEmpty && next.isEmpty) return false;
     if (!listEquals(next, urls.value)) urls.value = next;
+    if (remember) {
+      unawaited(_store(trimmed));
+    }
     return true;
+  }
+
+  Future<void> _store(String value) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_prefsKey, value);
+    } catch (_) {}
   }
 
   /// Decodes every gwenc1 token; a decoded token may itself hold several
@@ -64,7 +85,7 @@ class VlessSubscriptionService {
   VlessSubscriptionService({
     http.Client? client,
     VlessSubscriptionSources? sources,
-    this.timeout = const Duration(seconds: 15),
+    this.timeout = const Duration(seconds: 6),
   }) : _client = client ?? http.Client(),
        _ownsClient = client == null,
        _sources = sources ?? VlessSubscriptionSources.instance;
@@ -81,6 +102,15 @@ class VlessSubscriptionService {
   final Duration timeout;
 
   VlessSubscriptionSources get sources => _sources;
+
+  /// Reads the last cached VLESS servers for the current sources without network I/O.
+  Future<List<ServerConfig>> readCachedServers() async {
+    final urls = List<String>.from(_sources.urls.value);
+    if (urls.isEmpty) return const <ServerConfig>[];
+    final cached = await _readCache(urls);
+    if (cached == null || cached.isEmpty) return const <ServerConfig>[];
+    return toServers(cached);
+  }
 
   /// Servers in subscription order. Falls back to the last good result when
   /// every source fails (blocked network, server down).

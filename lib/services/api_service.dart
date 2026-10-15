@@ -32,6 +32,7 @@ class ApiService {
   static const mnemonicConfirmedPrefsKey = 'rabochiy_mnemonic_confirmed';
 
   static const _kAwgCacheKey = 'rabochiy_servers_cache_awg_v1';
+  static const gwCachePrefsKey = 'rabochiy_servers_cache_gw_v1';
   static const _kUserIdKey = userIdPrefsKey;
   static const _kMnemonicKey = mnemonicPrefsKey;
   static const _kMnemonicConfirmedKey = mnemonicConfirmedPrefsKey;
@@ -58,11 +59,20 @@ class ApiService {
     this._signing = const BackendSigning(),
   }) : _baseUrlOverride = baseUrl,
        _client = client ?? http.Client(),
-       _timeout = timeout ?? const Duration(seconds: 15);
+       _timeout = timeout ?? const Duration(seconds: 6);
 
   // ──────────────────────────────────────────────────────────────────
   //  Servers catalogue
   // ──────────────────────────────────────────────────────────────────
+
+  /// Reads cached AWG servers for the active account/backend without hitting the network.
+  Future<List<ServerConfig>> readCachedServerConfigs() async {
+    final userId = await getUserId();
+    if (userId == null || userId.isEmpty || userId == 'pending') {
+      return const [];
+    }
+    return _readMergedCache(userId, _backendFingerprint(baseUrl));
+  }
 
   /// Loads AWG servers, falling back only to this account/backend's cache.
   Future<List<ServerConfig>> fetchServerConfigs() async {
@@ -164,6 +174,7 @@ class ApiService {
     }
     await prefs.setBool(_kMnemonicConfirmedKey, mnemonicConfirmed);
     await prefs.remove(_kAwgCacheKey);
+    await prefs.remove(gwCachePrefsKey);
   }
 
   /// Creates a new user via API, persists the credentials locally, and
@@ -308,6 +319,7 @@ class ApiService {
         // Force a fresh server-list fetch on next start so the new
         // account sees its own catalogue (premium gate, regional pool).
         await prefs.remove(_kAwgCacheKey);
+        await prefs.remove(gwCachePrefsKey);
 
         return LoginResult.success(
           userId: userId,

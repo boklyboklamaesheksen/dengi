@@ -50,7 +50,9 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _init() async {
-    await Future.delayed(const Duration(milliseconds: 1200));
+    // Yield a microtask so Localizations/InheritedWidgets are ready after initState
+    // without forcing a 1.2s artificial startup wait.
+    await Future<void>.delayed(Duration.zero);
     if (!mounted) return;
 
     final prefs = await SharedPreferences.getInstance();

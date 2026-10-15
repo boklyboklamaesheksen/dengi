@@ -5,6 +5,7 @@ import 'package:installed_apps/installed_apps.dart';
 
 import '../config/backend_signing.dart';
 import '../models/server_config_model.dart';
+import '../services/api_host_service.dart';
 import '../services/api_service.dart';
 import '../services/gw_api_service.dart';
 import '../services/split_tunnel_service.dart';
@@ -33,6 +34,8 @@ class AppProvider with ChangeNotifier {
   StreamSubscription<VpnStatus>? _statusSubscription;
   bool _disposed = false;
   Future<void>? _serverLoad;
+  bool _reloadQueued = false;
+  DateTime? _lastSuccessfulLoad;
   int _accountGeneration = 0;
   int _reconnectGeneration = 0;
   String? _catalogError;
@@ -130,12 +133,21 @@ class AppProvider with ChangeNotifier {
        _vlessService = vlessService ?? VlessSubscriptionService(),
        _vpnService = vpnService ?? VpnService() {
     _vlessService.sources.urls.addListener(_onVlessSourcesChanged);
+    ApiHostService.instance.remoteGeneration.addListener(_onRemoteHostChanged);
     if (autoInitialize) _initialize();
   }
 
   /// Remote Config delivered other subscription URLs: refresh the catalogue.
   void _onVlessSourcesChanged() {
     if (_disposed) return;
+    _reloadQueued = true;
+    unawaited(loadServers());
+  }
+
+  /// Remote Config updated the active backend domain: refresh the catalogue.
+  void _onRemoteHostChanged() {
+    if (_disposed) return;
+    _reloadQueued = true;
     unawaited(loadServers());
   }
 
@@ -144,6 +156,8 @@ class AppProvider with ChangeNotifier {
     notifyListeners();
     _bindVpnStreams();
     try {
+      // Kick off server loading in parallel with local service init so network
+      // requests do not wait for platform channel setup.
       await Future.wait<void>(<Future<void>>[
         _vpnService.initialize(),
         _trafficStats.load(),
@@ -151,12 +165,11 @@ class AppProvider with ChangeNotifier {
         _apiService.getIsPremium().then((value) {
           _isPremium = value;
         }),
+        loadServers(),
       ]);
       if (_disposed) return;
       _splitTunnel.addListener(_onSplitTunnelChanged);
-      await loadServers();
-      if (_disposed) return;
-      await _refreshUserState();
+      unawaited(_refreshUserState());
     } catch (_) {
       _errorMessage = 'load_servers_failed';
     } finally {
@@ -275,6 +288,22 @@ class AppProvider with ChangeNotifier {
     }
   }
 
+  /// Reloads the catalogue only when empty, in error state, or older than [maxAge].
+  Future<void> loadServersIfNeeded({
+    Duration maxAge = const Duration(seconds: 20),
+  }) {
+    if (_disposed) return Future.value();
+    if (_serverLoad != null) return _serverLoad!;
+    final last = _lastSuccessfulLoad;
+    if (_servers.isNotEmpty &&
+        _catalogError == null &&
+        last != null &&
+        DateTime.now().difference(last) < maxAge) {
+      return Future.value();
+    }
+    return loadServers();
+  }
+
   Future<void> loadServers() {
     if (_disposed) return Future.value();
     if (_serverLoad != null) return _serverLoad!;
@@ -293,89 +322,159 @@ class AppProvider with ChangeNotifier {
       _catalogError = null;
       notifyListeners();
 
-      Object? awgError;
-      Object? gwError;
-      Object? vlessError;
-      final futures = await Future.wait<Object>(<Future<Object>>[
-        _withFallback(
+      while (!_disposed && generation == _accountGeneration) {
+        _reloadQueued = false;
+        final initialUserIdFuture = _apiService.getUserId();
+
+        Object? awgError;
+        Object? gwError;
+        Object? vlessError;
+        var batchSettled = false;
+
+        void publishPartial(ServerProtocol protocol, List<ServerConfig> items) {
+          if (batchSettled ||
+              items.isEmpty ||
+              _disposed ||
+              generation != _accountGeneration) {
+            return;
+          }
+          final merged = <ServerConfig>[
+            if (protocol == ServerProtocol.awg)
+              ...items
+            else
+              ..._servers.where((s) => s.protocol == ServerProtocol.awg),
+            if (protocol == ServerProtocol.gw)
+              ...items
+            else
+              ..._servers.where((s) => s.protocol == ServerProtocol.gw),
+            if (protocol == ServerProtocol.vless)
+              ...items
+            else
+              ..._servers.where((s) => s.protocol == ServerProtocol.vless),
+          ];
+          _servers = merged;
+          if (_isAutoSelect || _selectedServer == null) {
+            unawaited(_autoSelectBestServer());
+          } else {
+            notifyListeners();
+          }
+        }
+
+        // Start all network requests synchronously before any await.
+        final awgFuture = _withFallback(
           _apiService.fetchServerConfigs,
           const <ServerConfig>[],
           (error) => awgError = error,
-        ),
-        _withFallback(
+        )..then((list) => publishPartial(ServerProtocol.awg, list));
+
+        final gwFuture = _withFallback(
           _gwApiService.fetchServers,
           const <ServerConfig>[],
           (error) => gwError = error,
-        ),
-        _withFallback(
+        )..then((list) => publishPartial(ServerProtocol.gw, list));
+
+        final loadFuture = _withFallback(
           _apiService.fetchServerLoads,
           const <String, int>{},
           (_) {},
-        ),
-        _withFallback(
+        );
+
+        final vlessFuture = _withFallback(
           _vlessService.fetchServers,
           const <ServerConfig>[],
           (error) => vlessError = error,
-        ),
-      ]);
-      if (_disposed || generation != _accountGeneration) return;
+        )..then((list) => publishPartial(ServerProtocol.vless, list));
 
-      final servers = futures[0] as List<ServerConfig>;
-      final gwServers = futures[1] as List<ServerConfig>;
-      final loadByIp = futures[2] as Map<String, int>;
-      final vlessServers = futures[3] as List<ServerConfig>;
-      _catalogError =
-          awgError is BackendConfigurationException ||
-              gwError is BackendConfigurationException
-          ? 'api_not_configured'
-          : awgError != null || gwError != null
-          ? 'load_servers_failed'
-          : null;
+        if (_servers.isEmpty) {
+          unawaited(_hydrateFromCache(generation, () => batchSettled));
+        }
 
-      _serverLoadByIp
-        ..clear()
-        ..addAll(loadByIp);
+        final futures = await Future.wait<Object>(<Future<Object>>[
+          awgFuture,
+          gwFuture,
+          loadFuture,
+          vlessFuture,
+        ]);
+        batchSettled = true;
+        if (_disposed || generation != _accountGeneration) return;
 
-      // Approximate total online users from the per-server load map.
-      int total = 0;
-      loadByIp.forEach((_, value) {
-        total += (value / 10).round();
-      });
-      _totalOnlineUsers = total;
+        final servers = futures[0] as List<ServerConfig>;
+        final gwServers = futures[1] as List<ServerConfig>;
+        final loadByIp = futures[2] as Map<String, int>;
+        final vlessServers = futures[3] as List<ServerConfig>;
+        _catalogError =
+            awgError is BackendConfigurationException ||
+                gwError is BackendConfigurationException
+            ? 'api_not_configured'
+            : awgError != null || gwError != null
+            ? 'load_servers_failed'
+            : null;
 
-      _servers = [
-        if (awgError == null)
-          ...servers
-        else
-          ..._servers.where((s) => s.protocol == ServerProtocol.awg),
-        if (gwError == null)
-          ...gwServers
-        else
-          ..._servers.where((s) => s.protocol == ServerProtocol.gw),
-        if (vlessError == null)
-          ...vlessServers
-        else
-          ..._servers.where((s) => s.protocol == ServerProtocol.vless),
-      ];
-      // A VLESS-only failure is reported just when nothing is left to show.
-      if (_catalogError == null && vlessError != null && _servers.isEmpty) {
-        _catalogError = 'load_servers_failed';
-      }
+        _serverLoadByIp
+          ..clear()
+          ..addAll(loadByIp);
 
-      // Keep the user's selection stable across reloads: re-point it at the
-      // fresh object with the same id, otherwise connects keep using the
-      // stale config blob captured before the refresh (personal AWG configs
-      // are re-issued by the backend).
-      final selected = _selectedServer;
-      if (selected != null) {
-        final match = _servers.where((s) => s.id == selected.id).toList();
-        _selectedServer = match.firstOrNull;
-      }
+        // Approximate total online users from the per-server load map.
+        int total = 0;
+        loadByIp.forEach((_, value) {
+          total += (value / 10).round();
+        });
+        _totalOnlineUsers = total;
 
-      notifyListeners();
+        _servers = [
+          if (awgError == null)
+            ...servers
+          else
+            ..._servers.where((s) => s.protocol == ServerProtocol.awg),
+          if (gwError == null)
+            ...gwServers
+          else
+            ..._servers.where((s) => s.protocol == ServerProtocol.gw),
+          if (vlessError == null)
+            ...vlessServers
+          else
+            ..._servers.where((s) => s.protocol == ServerProtocol.vless),
+        ];
+        // A VLESS-only failure is reported just when nothing is left to show.
+        if (_catalogError == null && vlessError != null && _servers.isEmpty) {
+          _catalogError = 'load_servers_failed';
+        }
 
-      if (_isAutoSelect || _selectedServer == null) {
-        await _autoSelectBestServer();
+        if (_catalogError == null && _servers.isNotEmpty) {
+          _lastSuccessfulLoad = DateTime.now();
+        }
+
+        // Keep the user's selection stable across reloads: re-point it at the
+        // fresh object with the same id, otherwise connects keep using the
+        // stale config blob captured before the refresh (personal AWG configs
+        // are re-issued by the backend).
+        final selected = _selectedServer;
+        if (selected != null) {
+          final match = _servers.where((s) => s.id == selected.id).toList();
+          _selectedServer = match.firstOrNull;
+        }
+
+        notifyListeners();
+
+        if (_isAutoSelect || _selectedServer == null) {
+          await _autoSelectBestServer();
+        }
+
+        // If userId transitioned from null/'pending' to a real account while
+        // the initial boot fetch was in flight, or Remote Config updated
+        // endpoints mid-flight, immediately run one more pass.
+        final initialUserId = await initialUserIdFuture;
+        final currentUserId = await _apiService.getUserId();
+        final userBecameReady =
+            (initialUserId == null ||
+                initialUserId.isEmpty ||
+                initialUserId == 'pending') &&
+            currentUserId != null &&
+            currentUserId.isNotEmpty &&
+            currentUserId != 'pending';
+        if (!userBecameReady && !_reloadQueued) {
+          break;
+        }
       }
     } catch (e) {
       if (!_disposed && generation == _accountGeneration) {
@@ -387,6 +486,37 @@ class AppProvider with ChangeNotifier {
         notifyListeners();
       }
     }
+  }
+
+  Future<void> _hydrateFromCache(
+    int generation,
+    bool Function() isBatchSettled,
+  ) async {
+    try {
+      final results = await Future.wait<List<ServerConfig>>(<Future<List<ServerConfig>>>[
+        _apiService.readCachedServerConfigs(),
+        _gwApiService.readCachedServers(),
+        _vlessService.readCachedServers(),
+      ]);
+      if (_disposed ||
+          generation != _accountGeneration ||
+          isBatchSettled() ||
+          _servers.isNotEmpty) {
+        return;
+      }
+      final cached = <ServerConfig>[
+        ...results[0],
+        ...results[1],
+        ...results[2],
+      ];
+      if (cached.isEmpty) return;
+      _servers = cached;
+      if (_isAutoSelect || _selectedServer == null) {
+        await _autoSelectBestServer();
+      } else {
+        notifyListeners();
+      }
+    } catch (_) {}
   }
 
   Future<T> _withFallback<T>(
@@ -629,6 +759,8 @@ class AppProvider with ChangeNotifier {
     _accountGeneration++;
     _reconnectGeneration++;
     _serverLoad = null;
+    _reloadQueued = false;
+    _lastSuccessfulLoad = null;
     _catalogError = null;
     _stopHeartbeat();
     _stopTimer();
@@ -735,6 +867,7 @@ class AppProvider with ChangeNotifier {
     _splitTunnelApplyTimer?.cancel();
     _splitTunnel.removeListener(_onSplitTunnelChanged);
     _vlessService.sources.urls.removeListener(_onVlessSourcesChanged);
+    ApiHostService.instance.remoteGeneration.removeListener(_onRemoteHostChanged);
     _vpnService.dispose();
     _trafficStats.dispose();
     _splitTunnel.dispose();

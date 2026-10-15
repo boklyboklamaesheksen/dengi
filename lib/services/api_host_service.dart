@@ -153,6 +153,9 @@ class ApiHostService {
   bool _hasRemoteSource = false;
   int _templateFailures = 0;
 
+  /// Increments when Remote Config updates the active base URL.
+  final ValueNotifier<int> remoteGeneration = ValueNotifier<int>(0);
+
   /// True once a Remote Config value was applied on this device (now or in
   /// an earlier launch).
   bool get hasRemoteSource => _hasRemoteSource;
@@ -201,7 +204,11 @@ class ApiHostService {
     // failover: the primary may still be blocked.
     if (!unchanged || !_isKnownBase(ApiConfig.baseUrl)) {
       _templateFailures = 0;
+      final prev = ApiConfig.baseUrl;
       ApiConfig.baseUrl = _resolve(endpoint);
+      if (ApiConfig.baseUrl != prev) {
+        remoteGeneration.value++;
+      }
     }
     if (remember) {
       unawaited(_store(_sourceKey, SecretCodec.encode(endpoint.canonical)));

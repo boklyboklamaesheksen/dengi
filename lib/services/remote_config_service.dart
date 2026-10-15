@@ -33,7 +33,7 @@ class RemoteConfigService {
 
   /// Per fetchAndActivate call: the SDK occasionally hangs when the ISP
   /// resets the connection, and an unbounded wait risks an ANR.
-  static const Duration _hardTimeout = Duration(seconds: 20);
+  static const Duration _hardTimeout = Duration(seconds: 6);
 
   /// Background re-fetch in a live process: a new domain reaches users who
   /// keep the app (and the VPN) running for days.
@@ -76,7 +76,7 @@ class RemoteConfigService {
       });
       await rc.setConfigSettings(
         RemoteConfigSettings(
-          fetchTimeout: const Duration(seconds: 30),
+          fetchTimeout: const Duration(seconds: 8),
           minimumFetchInterval: _minFetchInterval,
         ),
       );
@@ -113,7 +113,7 @@ class RemoteConfigService {
   /// never received one, so account creation/login on a fresh install does
   /// not hit a stale baked-in domain. Returns immediately otherwise.
   Future<void> ensureReady({
-    Duration timeout = const Duration(seconds: 8),
+    Duration timeout = const Duration(milliseconds: 1500),
   }) async {
     if (_rc == null || ApiHostService.instance.hasRemoteSource) return;
     try {
@@ -150,7 +150,7 @@ class RemoteConfigService {
   }
 
   Future<void> _fetchLoop() async {
-    var delay = const Duration(seconds: 3);
+    var delay = const Duration(milliseconds: 1500);
     for (var attempt = 0; attempt < _maxBootRetries; attempt++) {
       if (await refresh()) break;
       if (attempt < _maxBootRetries - 1) {
