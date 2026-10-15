@@ -63,14 +63,13 @@ class MainActivity : FlutterFragmentActivity() {
     private var isVpnConnected = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // Same edge-to-edge layout on every API level (Android 15 enforces it).
-        // Called after super.onCreate, which paints Flutter's translucent status
-        // bar; dark styles keep light icons on the always-dark UI.
+        // Enable edge-to-edge before super.onCreate as required by AndroidX;
+        // dark styles keep light icons on the always-dark UI.
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
         )
+        super.onCreate(savedInstanceState)
     }
 
     override fun onResume() {

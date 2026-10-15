@@ -60,6 +60,7 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   // Pick the entry route up-front so the user never sees the splash
   // screen flash before being routed away from it.
