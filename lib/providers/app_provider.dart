@@ -9,12 +9,15 @@ import '../services/api_service.dart';
 import '../services/gw_api_service.dart';
 import '../services/split_tunnel_service.dart';
 import '../services/traffic_stats_service.dart';
+import '../services/vless_subscription_service.dart';
 import '../services/vpn_service.dart';
 
 /// Central state container for Zapret VPN.
 ///
 /// Drives every reactive widget in the app. The provider owns:
-///   * [VpnService] — bridge to the native AmneziaWG / GW engines.
+///   * [VpnService] — bridge to the native AmneziaWG / GW / VLESS engines.
+///   * [VlessSubscriptionService] — VLESS servers from the encrypted
+///     subscription URLs delivered by Remote Config.
 ///   * [ApiService] — HTTPS client for the backend (server catalogue,
 ///     server load, connection heartbeats, payments, account state).
 ///   * [TrafficStatsService] — persistent hourly traffic buckets.
@@ -23,6 +26,7 @@ class AppProvider with ChangeNotifier {
   final VpnService _vpnService;
   final ApiService _apiService;
   final GwApiService _gwApiService;
+  final VlessSubscriptionService _vlessService;
   final TrafficStatsService _trafficStats = TrafficStatsService();
   final SplitTunnelService _splitTunnel = SplitTunnelService();
   StreamSubscription<EngineStatus>? _engineSubscription;
@@ -118,12 +122,21 @@ class AppProvider with ChangeNotifier {
   AppProvider({
     ApiService? apiService,
     GwApiService? gwApiService,
+    VlessSubscriptionService? vlessService,
     VpnService? vpnService,
     bool autoInitialize = true,
   }) : _apiService = apiService ?? ApiService(),
        _gwApiService = gwApiService ?? GwApiService(),
+       _vlessService = vlessService ?? VlessSubscriptionService(),
        _vpnService = vpnService ?? VpnService() {
+    _vlessService.sources.urls.addListener(_onVlessSourcesChanged);
     if (autoInitialize) _initialize();
+  }
+
+  /// Remote Config delivered other subscription URLs: refresh the catalogue.
+  void _onVlessSourcesChanged() {
+    if (_disposed) return;
+    unawaited(loadServers());
   }
 
   Future<void> _initialize() async {
@@ -282,6 +295,7 @@ class AppProvider with ChangeNotifier {
 
       Object? awgError;
       Object? gwError;
+      Object? vlessError;
       final futures = await Future.wait<Object>(<Future<Object>>[
         _withFallback(
           _apiService.fetchServerConfigs,
@@ -298,12 +312,18 @@ class AppProvider with ChangeNotifier {
           const <String, int>{},
           (_) {},
         ),
+        _withFallback(
+          _vlessService.fetchServers,
+          const <ServerConfig>[],
+          (error) => vlessError = error,
+        ),
       ]);
       if (_disposed || generation != _accountGeneration) return;
 
       final servers = futures[0] as List<ServerConfig>;
       final gwServers = futures[1] as List<ServerConfig>;
       final loadByIp = futures[2] as Map<String, int>;
+      final vlessServers = futures[3] as List<ServerConfig>;
       _catalogError =
           awgError is BackendConfigurationException ||
               gwError is BackendConfigurationException
@@ -332,7 +352,15 @@ class AppProvider with ChangeNotifier {
           ...gwServers
         else
           ..._servers.where((s) => s.protocol == ServerProtocol.gw),
+        if (vlessError == null)
+          ...vlessServers
+        else
+          ..._servers.where((s) => s.protocol == ServerProtocol.vless),
       ];
+      // A VLESS-only failure is reported just when nothing is left to show.
+      if (_catalogError == null && vlessError != null && _servers.isEmpty) {
+        _catalogError = 'load_servers_failed';
+      }
 
       // Keep the user's selection stable across reloads: re-point it at the
       // fresh object with the same id, otherwise connects keep using the
@@ -706,6 +734,7 @@ class AppProvider with ChangeNotifier {
     _statusSubscription?.cancel();
     _splitTunnelApplyTimer?.cancel();
     _splitTunnel.removeListener(_onSplitTunnelChanged);
+    _vlessService.sources.urls.removeListener(_onVlessSourcesChanged);
     _vpnService.dispose();
     _trafficStats.dispose();
     _splitTunnel.dispose();
@@ -713,6 +742,7 @@ class AppProvider with ChangeNotifier {
     _stopHeartbeat();
     _apiService.close();
     _gwApiService.close();
+    _vlessService.close();
     super.dispose();
   }
 }

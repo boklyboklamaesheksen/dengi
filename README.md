@@ -2,8 +2,9 @@
 
 Premium Flutter VPN client with a **Stark Mono** UI (xAI-style dark theme:
 near-black `#1F2228` canvas, pure white accents, monospace display type).
-Tunnels run through AmneziaWG and the GW SSH/socks engine, with the
-server list pulled from the backend API. The Russian product name is
+Tunnels run through AmneziaWG, the GW SSH/socks engine and VLESS
+(Xray-core), with the server list pulled from the backend API and from
+encrypted VLESS subscriptions (see [`docs/REMOTE_CONFIG.md`](docs/REMOTE_CONFIG.md)). The Russian product name is
 **Запрет VPN**; the English name is **Zapret VPN**.
 
 ## Features
@@ -104,7 +105,7 @@ store descriptions supplied in `page.txt` are not replaced.
 
 ```
 lib/            Flutter app (screens, widgets, motion, services, l10n)
-android/        Android host and AmneziaWG/GW native modules
+android/        Android host and AmneziaWG/GW/VLESS native modules
 assets/images/  Launcher icon art (logo_zapret.png, play_store_icon.png)
 tool/, tools/   Localisation generator and metadata checks
 docs/           Market research and release verification checklist

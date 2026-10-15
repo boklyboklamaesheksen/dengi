@@ -71,6 +71,18 @@
 
     <!-- GW (VLEE) SSH-tunnel VPN service — declared by the vlee_engine module -->
 
+    <!-- VLESS (Xray-core) VPN service -->
+    <service
+        android:name=".xray.XrayVpnService"
+        android:exported="false"
+        android:foregroundServiceType="specialUse"
+        android:permission="android.permission.BIND_VPN_SERVICE">
+        <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="vpn" />
+        <intent-filter>
+            <action android:name="android.net.VpnService" />
+        </intent-filter>
+    </service>
+
     <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

@@ -12,10 +12,11 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  AppProvider provider(FakeApi awg, FakeGwApi gw) {
+  AppProvider provider(FakeApi awg, FakeGwApi gw, [FakeVless? vless]) {
     final value = AppProvider(
       apiService: awg,
       gwApiService: gw,
+      vlessService: vless ?? FakeVless(),
       autoInitialize: false,
     );
     addTearDown(value.dispose);

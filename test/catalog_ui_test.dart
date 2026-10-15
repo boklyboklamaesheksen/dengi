@@ -48,6 +48,7 @@ void main() {
           fetch: () async => throw const BackendConfigurationException(),
         ),
         gwApiService: FakeGwApi(fetch: () async => []),
+        vlessService: FakeVless(),
         autoInitialize: false,
       );
       addTearDown(provider.dispose);
@@ -122,6 +123,7 @@ void main() {
     final provider = AppProvider(
       apiService: api,
       gwApiService: FakeGwApi(fetch: () async => [gwServer]),
+      vlessService: FakeVless(),
       autoInitialize: false,
     );
     addTearDown(provider.dispose);
@@ -191,6 +193,7 @@ void main() {
     final provider = AppProvider(
       apiService: FakeApi(fetch: () async => [awgServer]),
       gwApiService: FakeGwApi(fetch: () async => [gwServer]),
+      vlessService: FakeVless(),
       autoInitialize: false,
     );
     addTearDown(provider.dispose);
@@ -241,6 +244,7 @@ void main() {
     final provider = AppProvider(
       apiService: FakeApi(fetch: () async => [awgServer]),
       gwApiService: FakeGwApi(fetch: () async => [gwServer]),
+      vlessService: FakeVless(),
       autoInitialize: false,
     );
     addTearDown(provider.dispose);

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../config/api_config.dart';
 import '../config/secret_codec.dart';
 import 'api_host_service.dart';
+import 'vless_subscription_service.dart';
 
 /// Backend domain updates via Firebase Remote Config.
 ///
@@ -14,7 +15,9 @@ import 'api_host_service.dart';
 ///   - `encrypted_api_url` — backend URL or wildcard template
 ///     `https://*.api.example.com`, applied through [ApiHostService];
 ///   - `encrypted_api_fallback_url` — optional reserve address for
-///     automatic failover (empty = none).
+///     automatic failover (empty = none);
+///   - `encrypted_vless_sub_urls` — VLESS subscription URL(s), applied
+///     through [VlessSubscriptionSources] (empty = VLESS servers off).
 ///
 /// The legacy plain-text `api_base_url` key is intentionally NOT read:
 /// the Remote Config JSON must not expose a URL used by new versions.
@@ -26,6 +29,7 @@ class RemoteConfigService {
 
   static const String kEncryptedApiUrl = 'encrypted_api_url';
   static const String kEncryptedApiFallbackUrl = 'encrypted_api_fallback_url';
+  static const String kEncryptedVlessSubUrls = 'encrypted_vless_sub_urls';
 
   /// Per fetchAndActivate call: the SDK occasionally hangs when the ISP
   /// resets the connection, and an unbounded wait risks an ANR.
@@ -68,6 +72,7 @@ class RemoteConfigService {
       await rc.setDefaults(<String, dynamic>{
         kEncryptedApiUrl: ApiConfig.defaultBaseUrlEncrypted,
         kEncryptedApiFallbackUrl: '',
+        kEncryptedVlessSubUrls: ApiConfig.defaultVlessSubscriptionsEncrypted,
       });
       await rc.setConfigSettings(
         RemoteConfigSettings(
@@ -176,6 +181,12 @@ class RemoteConfigService {
         if (decoded == null || !ApiHostService.instance.applyReserve(decoded)) {
           _log('ignored invalid $kEncryptedApiFallbackUrl');
         }
+      }
+
+      final vless = rc.getValue(kEncryptedVlessSubUrls);
+      if (vless.source == ValueSource.valueRemote &&
+          !VlessSubscriptionSources.instance.apply(vless.asString())) {
+        _log('ignored invalid $kEncryptedVlessSubUrls');
       }
     } catch (e) {
       _log('apply failed: ${e.runtimeType}');

@@ -15,6 +15,8 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import com.witvpn.vlee.VleeManager
 import com.witvpn.vlee.model.VleeServerConfig
+import app.rabochiy.vpn.xray.XrayEngine
+import app.rabochiy.vpn.xray.XrayUnreachableException
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -88,6 +90,7 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onDestroy() {
         stopTrafficPolling()
+        XrayEngine.listener = null
         vleeListener?.let { VleeManager.unregisterListener(it) }
         vleeListener = null
         eventSink = null
@@ -216,6 +219,7 @@ class MainActivity : FlutterFragmentActivity() {
                 if (awgManager == null) {
                     awgManager = AwgManager(applicationContext) { state, stats -> emitStatus(state.name, stats) }
                 }
+                XrayEngine.listener = { state -> emitStatus(state.name, null) }
                 result.success(true)
             }
             "requestPermission" -> {
@@ -247,16 +251,26 @@ class MainActivity : FlutterFragmentActivity() {
                 val password = call.argument<String>("password") ?: ""
                 val caFile = call.argument<String>("caFile")
                 val awgConfig = call.argument<String>("awgConfig") ?: ""
+                val vlessUri = call.argument<String>("vlessUri") ?: ""
                 val blockedApps = call.argument<List<String>>("blockedApps")
 
                 scope.launch {
                     try {
                         val connectResult = when (protocol) {
-                            "awg" -> awgManager?.connect(remark, awgConfig, blockedApps)
+                            "awg" -> {
+                                XrayEngine.disconnect()
+                                awgManager?.connect(remark, awgConfig, blockedApps)
+                            }
+                            "vless" -> {
+                                // AwgManager.disconnect() emits DISCONNECTED even when idle,
+                                // which would flip the UI out of "connecting".
+                                awgManager?.takeIf { it.isTunnelActive() }?.disconnect()
+                                XrayEngine.connect(applicationContext, vlessUri, remark, blockedApps)
+                            }
                             else -> Result.failure(IllegalArgumentException("Unknown protocol: $protocol"))
                         }
                         val failure = connectResult?.exceptionOrNull()
-                        if (failure is java.net.SocketTimeoutException) {
+                        if (failure is java.net.SocketTimeoutException || failure is XrayUnreachableException) {
                             // Tunnel came up but the server never answered the
                             // handshake — surface a dedicated code so the UI can
                             // say "server unreachable" instead of "engine broken".
@@ -272,20 +286,25 @@ class MainActivity : FlutterFragmentActivity() {
             }
             "disconnect" -> {
                 scope.launch {
+                    val xrayWasRunning = XrayEngine.hasRunningService()
+                    val xrayResult = XrayEngine.disconnect()
                     val awg = awgManager
-                    val awgResult = if (awg != null) {
+                    val awgResult = if (awg != null && !(xrayWasRunning && !awg.isTunnelActive())) {
                         awg.disconnect()
                     } else {
                         Result.success(Unit)
                     }
-                    result.success(awgResult.isSuccess)
+                    result.success(awgResult.isSuccess && xrayResult.isSuccess)
                 }
             }
             "pingServer" -> {
                 val protocol = call.argument<String>("protocol") ?: "awg"
+                val address = call.argument<String>("address") ?: ""
+                val port = call.argument<Int>("port") ?: 0
                 scope.launch {
                     val ping = when (protocol) {
                         "awg" -> awgManager?.ping()
+                        "vless" -> XrayEngine.ping(address, port)
                         else -> null
                     }
                     result.success(ping)
@@ -329,12 +348,18 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     private suspend fun emitTrafficStats() {
-        val awgStats = withContext(Dispatchers.IO) { awgManager?.statistics() } ?: return
+        val totals = withContext(Dispatchers.IO) {
+            if (XrayEngine.state == XrayEngine.State.CONNECTED) {
+                XrayEngine.trafficTotals()
+            } else {
+                awgManager?.statistics()?.let { it.totalRx() to it.totalTx() }
+            }
+        } ?: return
         if (!isVpnConnected || !isAppInForeground) return
         val now = SystemClock.elapsedRealtime()
 
-        val rxTotal = awgStats.totalRx()
-        val txTotal = awgStats.totalTx()
+        val rxTotal = totals.first
+        val txTotal = totals.second
 
         val downloadSpeed: Long
         val uploadSpeed: Long
@@ -466,4 +491,7 @@ class MainActivity : FlutterFragmentActivity() {
         }
         return out.toList()
     }
+
+    private fun AwgManager.isTunnelActive(): Boolean =
+        currentState == AwgManager.State.CONNECTED || currentState == AwgManager.State.CONNECTING
 }

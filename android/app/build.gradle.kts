@@ -165,7 +165,10 @@ dependencies {
     implementation(project(":amneziawg-tunnel"))
     implementation(project(":vlee_engine"))
     implementation(project(":hysteria2_engine"))
-    // IKEv2 / StrongSwan was removed from the product; only AWG + GW
+    // VLESS engine: Xray-core v26.10.10 (AndroidLibXrayLite libv2ray.aar,
+    // repacked without geo*.dat assets and the unused x86 ABI).
+    implementation(files("libs/libv2ray.aar"))
+    // IKEv2 / StrongSwan was removed from the product; AWG, GW and VLESS
     // engines remain.
 
     // Coroutines used by the Kotlin VPN managers (AwgManager) glued
@@ -176,6 +179,10 @@ dependencies {
     // Java 8+ APIs used by the AmneziaWG sources on older devices
     // (we keep minSdk via Flutter, so desugaring is mandatory).
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
+    testImplementation("junit:junit:4.13.2")
+    // android.jar only ships org.json stubs; JVM tests need the real one.
+    testImplementation("org.json:json:20250517")
 }
 
 flutter {

@@ -157,6 +157,14 @@ class _ServerListScreenState extends State<ServerListScreen> {
                               ),
                               color: AppColors.teal,
                             ),
+                            _FilterChip(
+                              label: 'VLESS',
+                              selected: _protocolFilter == ServerProtocol.vless,
+                              onTap: () => setState(
+                                () => _protocolFilter = ServerProtocol.vless,
+                              ),
+                              color: AppColors.cyan,
+                            ),
                           ],
                         ),
                       ),
@@ -165,13 +173,21 @@ class _ServerListScreenState extends State<ServerListScreen> {
                     Expanded(
                       child: Consumer<AppProvider>(
                         builder: (context, provider, _) {
-                          final List<ServerConfig> allServers =
-                              provider.servers.toList()..sort((a, b) {
-                                if (a.protocol == b.protocol) return 0;
-                                return a.protocol == ServerProtocol.awg
-                                    ? -1
-                                    : 1;
-                              });
+                          // Group by protocol; List.sort is not stable, so
+                          // the catalogue index keeps subscription order.
+                          final List<ServerConfig> catalog = provider.servers;
+                          final List<int> order =
+                              List<int>.generate(catalog.length, (i) => i)
+                                ..sort((a, b) {
+                                  final byProtocol = catalog[a].protocol.index
+                                      .compareTo(catalog[b].protocol.index);
+                                  return byProtocol != 0
+                                      ? byProtocol
+                                      : a.compareTo(b);
+                                });
+                          final List<ServerConfig> allServers = [
+                            for (final i in order) catalog[i],
+                          ];
                           final List<ServerConfig> servers =
                               _protocolFilter == null
                               ? allServers
@@ -431,6 +447,7 @@ class _ServerTile extends StatelessWidget {
     return switch (server.protocol) {
       ServerProtocol.awg => AppColors.emerald,
       ServerProtocol.gw => AppColors.teal,
+      ServerProtocol.vless => AppColors.cyan,
     };
   }
 

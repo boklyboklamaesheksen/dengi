@@ -68,3 +68,8 @@
 -dontwarn com.google.android.play.core.splitcompat.**
 
 # JNI and reflective crypto rules live beside their native engine modules.
+
+# VLESS engine: gomobile (libv2ray.aar) binds Java classes by name over JNI.
+-keep class go.** { *; }
+-keep class libv2ray.** { *; }
+-keep class app.rabochiy.vpn.xray.** { *; }

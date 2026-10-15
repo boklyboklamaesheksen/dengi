@@ -61,7 +61,8 @@ class EngineStatus {
 ///
 /// On Android the native side hosts the AmneziaWG backend
 /// (`AwgManager` / `libwg-go.so`) for `ServerProtocol.awg`, plus the
-/// separate GW SSH-tunnel engine for `ServerProtocol.gw`.
+/// separate GW SSH-tunnel engine for `ServerProtocol.gw` and the Xray-core
+/// engine (`XrayVpnService`) for `ServerProtocol.vless`.
 ///
 /// Communication is done via two channels:
 ///  - **MethodChannel** `rabochiy_vpn/engine` — synchronous control
@@ -208,6 +209,8 @@ class VpnService {
         'password': config.password,
         'caFile': config.caFile,
         'awgConfig': config.awgConfig,
+        if (config.protocol == ServerProtocol.vless)
+          'vlessUri': config.originalUrl,
         'country': config.country,
         if (blockedApps != null && blockedApps.isNotEmpty)
           'blockedApps': blockedApps,

@@ -1,0 +1,204 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../config/api_config.dart';
+import '../config/secret_codec.dart';
+import '../models/server_config_model.dart';
+
+/// VLESS subscription URLs. Only gwenc1-encoded values are accepted (the
+/// same policy as `encrypted_api_url`): plain `https://…` strings never live
+/// in the APK or the Remote Config JSON.
+class VlessSubscriptionSources {
+  VlessSubscriptionSources._();
+  static final VlessSubscriptionSources instance = VlessSubscriptionSources._();
+
+  final ValueNotifier<List<String>> urls = ValueNotifier<List<String>>(
+    parse(ApiConfig.defaultVlessSubscriptionsEncrypted),
+  );
+
+  static final RegExp _separators = RegExp(r'[\s,;]+');
+
+  /// Applies a Remote Config value. An empty value disables VLESS
+  /// subscriptions; a non-empty value without a single valid URL is
+  /// rejected (returns false) and the current list stays.
+  bool apply(String raw) {
+    final trimmed = raw.trim();
+    final next = parse(trimmed);
+    if (trimmed.isNotEmpty && next.isEmpty) return false;
+    if (!listEquals(next, urls.value)) urls.value = next;
+    return true;
+  }
+
+  /// Decodes every gwenc1 token; a decoded token may itself hold several
+  /// URLs. Plain-text tokens are ignored. Only https URLs survive.
+  static List<String> parse(String raw) {
+    final out = <String>[];
+    for (final token in raw.split(_separators)) {
+      if (!SecretCodec.isEncoded(token)) continue;
+      final decoded = SecretCodec.tryDecode(token);
+      if (decoded == null) continue;
+      for (final candidate in decoded.split(_separators)) {
+        final uri = Uri.tryParse(candidate.trim());
+        if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) continue;
+        final url = uri.toString();
+        if (!out.contains(url)) out.add(url);
+      }
+    }
+    return out;
+  }
+}
+
+/// Raised when no subscription could be fetched and nothing is cached.
+class VlessSubscriptionException implements Exception {
+  const VlessSubscriptionException();
+  @override
+  String toString() => 'VlessSubscriptionException';
+}
+
+/// Downloads VLESS subscriptions and turns them into [ServerConfig]s.
+class VlessSubscriptionService {
+  VlessSubscriptionService({
+    http.Client? client,
+    VlessSubscriptionSources? sources,
+    this.timeout = const Duration(seconds: 15),
+  }) : _client = client ?? http.Client(),
+       _ownsClient = client == null,
+       _sources = sources ?? VlessSubscriptionSources.instance;
+
+  static const String _cacheKey = 'vless_subscription_cache_v1';
+  static const int _maxBodyBytes = 2 * 1024 * 1024;
+  static const int _maxServers = 500;
+
+  final http.Client _client;
+  final bool _ownsClient;
+  final VlessSubscriptionSources _sources;
+
+  /// Per-download limit.
+  final Duration timeout;
+
+  VlessSubscriptionSources get sources => _sources;
+
+  /// Servers in subscription order. Falls back to the last good result when
+  /// every source fails (blocked network, server down).
+  Future<List<ServerConfig>> fetchServers() async {
+    final urls = List<String>.from(_sources.urls.value);
+    if (urls.isEmpty) return const <ServerConfig>[];
+
+    final bodies = await Future.wait(urls.map(_download));
+    final fetched = bodies.whereType<String>().toList();
+    if (fetched.isEmpty) {
+      final cached = await _readCache(urls);
+      if (cached == null) throw const VlessSubscriptionException();
+      return toServers(cached);
+    }
+
+    final links = <String>[];
+    for (final body in fetched) {
+      links.addAll(extractLinks(body));
+    }
+    final servers = toServers(links);
+    if (servers.isNotEmpty) {
+      await _writeCache(urls, servers.map((s) => s.originalUrl).toList());
+    }
+    return servers;
+  }
+
+  Future<String?> _download(String url) async {
+    try {
+      final response = await _client
+          .get(
+            Uri.parse(url),
+            headers: const <String, String>{
+              // Panels pick the share-link format from the User-Agent.
+              'User-Agent': 'ZapretVPN v2rayNG/1.10',
+              'Accept': 'text/plain, */*',
+              'Cache-Control': 'no-cache',
+            },
+          )
+          .timeout(timeout);
+      if (response.statusCode != 200) return null;
+      if (response.bodyBytes.length > _maxBodyBytes) return null;
+      return utf8.decode(response.bodyBytes, allowMalformed: true);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Returns the `vless://` lines of a subscription body, plain or base64.
+  static List<String> extractLinks(String body) {
+    var text = body.trim();
+    if (!text.contains('://')) {
+      text = _tryBase64(text) ?? '';
+    }
+    return text
+        .split(RegExp(r'\r?\n'))
+        .map((line) => line.trim())
+        .where((line) => line.toLowerCase().startsWith('vless://'))
+        .toList();
+  }
+
+  /// Parses links, dropping malformed ones and duplicates (same link body).
+  static List<ServerConfig> toServers(Iterable<String> links) {
+    final out = <ServerConfig>[];
+    final seen = <String>{};
+    for (final link in links) {
+      final server = ServerConfig.fromVlessUri(link);
+      if (server == null || !seen.add(server.id)) continue;
+      out.add(server);
+      if (out.length >= _maxServers) break;
+    }
+    return out;
+  }
+
+  static String? _tryBase64(String text) {
+    try {
+      final compact = text.replaceAll(RegExp(r'\s+'), '');
+      final normalized = base64.normalize(
+        compact.replaceAll('-', '+').replaceAll('_', '/'),
+      );
+      return utf8.decode(base64.decode(normalized), allowMalformed: true);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<String>?> _readCache(List<String> urls) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_cacheKey);
+      if (raw == null) return null;
+      final data = jsonDecode(raw) as Map<String, dynamic>;
+      if (data['sources'] != _sourcesKey(urls)) return null;
+      return (data['links'] as List<dynamic>).cast<String>();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _writeCache(List<String> urls, List<String> links) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _cacheKey,
+        jsonEncode(<String, dynamic>{
+          'sources': _sourcesKey(urls),
+          'links': links,
+        }),
+      );
+    } catch (_) {
+      // Cache is best-effort.
+    }
+  }
+
+  // Cache is bound to the source set without storing the URLs in clear.
+  static String _sourcesKey(List<String> urls) =>
+      SecretCodec.encode(urls.join('\n'));
+
+  void close() {
+    if (_ownsClient) _client.close();
+  }
+}

@@ -2,23 +2,29 @@ library;
 
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
+
 /// The class deliberately keeps the **same public API** as the previous
 /// version (`id`, `serverName`, `address`, `port`, `country`, `flag`,
 /// `ping`, `cleanName`, `originalUrl`, `copyWith`) so existing screens
 /// (`server_list_screen.dart`, `home_screen.dart`, providers) keep
 /// compiling without changes. Protocol-specific data lives in
-/// `protocol`, `username`, `password`, `caFile`, `awgConfig`, `gwRawConfig`.
+/// `protocol`, `username`, `password`, `caFile`, `awgConfig`, `gwRawConfig`,
+/// `originalUrl` (the `vless://` link for VLESS servers).
 
 /// Supported VPN protocols. Driven by the backend `protocol` field.
 enum ServerProtocol {
   awg,
-  gw;
+  gw,
+  vless;
 
   static ServerProtocol fromString(String? raw) {
     switch ((raw ?? '').toLowerCase().trim()) {
       case 'gw':
       case 'vlee':
         return ServerProtocol.gw;
+      case 'vless':
+        return ServerProtocol.vless;
       default:
         // awg / amneziawg / wireguard / wg and any legacy value
         // (ikev2 etc.) fall back to the primary AWG protocol.
@@ -29,12 +35,14 @@ enum ServerProtocol {
   String get apiName => switch (this) {
     ServerProtocol.awg => 'awg',
     ServerProtocol.gw => 'gw',
+    ServerProtocol.vless => 'vless',
   };
 
   /// Human-readable label for the UI badge.
   String get displayName => switch (this) {
     ServerProtocol.awg => 'AmneziaWG 3.1',
     ServerProtocol.gw => 'GW',
+    ServerProtocol.vless => 'VLESS',
   };
 }
 
@@ -123,7 +131,84 @@ class ServerConfig {
   static int defaultPortFor(ServerProtocol p) => switch (p) {
     ServerProtocol.awg => 51820,
     ServerProtocol.gw => 22,
+    ServerProtocol.vless => 443,
   };
+
+  /// Builds a VLESS server from a subscription `vless://` link, or returns
+  /// null when the link is malformed. The display name is the link remark
+  /// without its leading flag (the flag becomes [flag]); the id is derived
+  /// from the link minus the remark, so renames keep the selection.
+  static ServerConfig? fromVlessUri(String raw) {
+    final link = raw.trim();
+    if (!link.toLowerCase().startsWith('vless://')) return null;
+    final hashAt = link.indexOf('#');
+    final body = hashAt >= 0 ? link.substring(0, hashAt) : link;
+    final remark = hashAt >= 0
+        ? _decodeComponent(link.substring(hashAt + 1))
+        : '';
+
+    final rest = body.substring('vless://'.length);
+    final authority = rest.split('?').first.replaceAll(RegExp(r'/+$'), '');
+    final at = authority.lastIndexOf('@');
+    if (at <= 0) return null;
+    final hostPort = authority.substring(at + 1);
+    String host;
+    String portText;
+    if (hostPort.startsWith('[')) {
+      final end = hostPort.indexOf(']');
+      if (end <= 1) return null;
+      host = hostPort.substring(1, end);
+      portText = hostPort.substring(end + 1).replaceFirst(':', '');
+    } else {
+      final colon = hostPort.lastIndexOf(':');
+      if (colon <= 0) return null;
+      host = hostPort.substring(0, colon);
+      portText = hostPort.substring(colon + 1);
+    }
+    final port = int.tryParse(portText);
+    if (host.isEmpty || port == null || port < 1 || port > 65535) return null;
+
+    final flagMatch = _flagPattern.firstMatch(remark);
+    final countryCode = flagMatch == null
+        ? ''
+        : String.fromCharCodes(
+            flagMatch.group(0)!.runes.map((r) => r - 0x1F1E6 + 0x41),
+          );
+    final name = remark
+        .replaceAll(_flagPattern, '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    final display = name.isNotEmpty ? name : host;
+
+    return ServerConfig(
+      id: 'vless_${_shortDigest(body)}',
+      serverName: display,
+      address: host,
+      port: port,
+      // Tiles render `country`; for VLESS it carries the remark.
+      country: display,
+      countryCode: countryCode,
+      flag: countryCode.isEmpty ? '🌐' : _flagFromCountryCode(countryCode),
+      originalUrl: link,
+      protocol: ServerProtocol.vless,
+    );
+  }
+
+  static final RegExp _flagPattern = RegExp(
+    '[\u{1F1E6}-\u{1F1FF}]{2}',
+    unicode: true,
+  );
+
+  static String _decodeComponent(String value) {
+    try {
+      return Uri.decodeComponent(value);
+    } catch (_) {
+      return value;
+    }
+  }
+
+  static String _shortDigest(String input) =>
+      sha1.convert(utf8.encode(input)).toString().substring(0, 16);
 
   /// Builds a [ServerConfig] from a decrypted GW server envelope.
   ///
