@@ -290,6 +290,11 @@ abstract class AppLocalizations {
   String get comingSoon;
   String get appearance;
   String get advanced;
+
+  // Google Play in-app update: flexible update downloaded
+  String get updateReadyMessage;
+  String get updateReadyVpnMessage;
+  String get updateRestartAction;
 }
 
 class _AppLocalizationsDelegate

@@ -8,6 +8,7 @@ import '../models/server_config_model.dart';
 import '../services/api_host_service.dart';
 import '../services/api_service.dart';
 import '../services/gw_api_service.dart';
+import '../services/in_app_review_service.dart';
 import '../services/split_tunnel_service.dart';
 import '../services/traffic_stats_service.dart';
 import '../services/vless_subscription_service.dart';
@@ -23,11 +24,13 @@ import '../services/vpn_service.dart';
 ///     server load, connection heartbeats, payments, account state).
 ///   * [TrafficStatsService] — persistent hourly traffic buckets.
 ///   * [SplitTunnelService] — per-app include / exclude masks.
+///   * [InAppReviewService] — when to ask Google Play for a review.
 class AppProvider with ChangeNotifier {
   final VpnService _vpnService;
   final ApiService _apiService;
   final GwApiService _gwApiService;
   final VlessSubscriptionService _vlessService;
+  final InAppReviewService _reviewPrompt;
   final TrafficStatsService _trafficStats = TrafficStatsService();
   final SplitTunnelService _splitTunnel = SplitTunnelService();
   StreamSubscription<EngineStatus>? _engineSubscription;
@@ -100,6 +103,7 @@ class AppProvider with ChangeNotifier {
   int get totalOnlineUsers => _totalOnlineUsers;
   TrafficStatsService get trafficStats => _trafficStats;
   SplitTunnelService get splitTunnel => _splitTunnel;
+  InAppReviewService get reviewPrompt => _reviewPrompt;
   ApiService get apiService => _apiService;
 
   /// Backend-derived load → derived online-user count.
@@ -127,11 +131,13 @@ class AppProvider with ChangeNotifier {
     GwApiService? gwApiService,
     VlessSubscriptionService? vlessService,
     VpnService? vpnService,
+    InAppReviewService? reviewService,
     bool autoInitialize = true,
   }) : _apiService = apiService ?? ApiService(),
        _gwApiService = gwApiService ?? GwApiService(),
        _vlessService = vlessService ?? VlessSubscriptionService(),
-       _vpnService = vpnService ?? VpnService() {
+       _vpnService = vpnService ?? VpnService(),
+       _reviewPrompt = reviewService ?? InAppReviewService() {
     _vlessService.sources.urls.addListener(_onVlessSourcesChanged);
     ApiHostService.instance.remoteGeneration.addListener(_onRemoteHostChanged);
     if (autoInitialize) _initialize();
@@ -162,6 +168,7 @@ class AppProvider with ChangeNotifier {
         _vpnService.initialize(),
         _trafficStats.load(),
         _splitTunnel.load(),
+        _reviewPrompt.load(),
         _apiService.getIsPremium().then((value) {
           _isPremium = value;
         }),
@@ -207,6 +214,7 @@ class AppProvider with ChangeNotifier {
         totalRxBytes: _cumulativeRxBytes,
         totalTxBytes: _cumulativeTxBytes,
       );
+      _reviewPrompt.onSessionTraffic(_cumulativeRxBytes + _cumulativeTxBytes);
 
       notifyListeners();
     });
@@ -214,6 +222,7 @@ class AppProvider with ChangeNotifier {
     _statusSubscription = _vpnService.statusStream.listen((status) {
       if (_disposed) return;
       _vpnStatus = status;
+      _reviewPrompt.onVpnStatus(status);
 
       if (status == VpnStatus.connected) {
         _cumulativeRxBytes = 0;
@@ -795,6 +804,7 @@ class AppProvider with ChangeNotifier {
     _lastEngineTx = 0;
     _activeServerIp = null;
     _activeProtocol = null;
+    _reviewPrompt.forgetSession();
     notifyListeners();
   }
 
@@ -871,6 +881,7 @@ class AppProvider with ChangeNotifier {
     _vpnService.dispose();
     _trafficStats.dispose();
     _splitTunnel.dispose();
+    _reviewPrompt.dispose();
     _stopTimer();
     _stopHeartbeat();
     _apiService.close();

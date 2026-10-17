@@ -657,6 +657,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get advanced => 'Advanced';
+
+  // ── Google Play in-app update ────────────────────────────────────────
+  @override
+  String get updateReadyMessage =>
+      'Update downloaded. Restart the app to install it.';
+
+  @override
+  String get updateReadyVpnMessage =>
+      'Update downloaded. Restarting to install it will disconnect the VPN.';
+
+  @override
+  String get updateRestartAction => 'Restart';
 }
 
 const String _privacyPolicyEn = '''

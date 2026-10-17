@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../motion/glass.dart';
 import '../motion/motion_curves.dart';
 import '../motion/press_feedback.dart';
+import '../widgets/play_prompts_host.dart';
 import 'account_screen.dart';
 import 'home_screen.dart';
 import 'settings_screen.dart';
@@ -78,24 +79,29 @@ class _NavShellState extends State<NavShell> {
       ),
     ];
 
-    return Scaffold(
-      backgroundColor: AppColors.base,
-      extendBody: true,
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        onPageChanged: (int i) {
-          if (_index != i) setState(() => _index = i);
-        },
-        children: _pages.map((Widget p) => _KeepAlivePage(child: p)).toList(),
-      ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        minimum: const EdgeInsets.fromLTRB(14, 0, 14, 10),
-        child: _NavBar(
-          items: items,
-          selected: _index,
-          onSelect: _onSelect,
+    return PlayPromptsHost(
+      homeTabActive: _index == 0,
+      child: Scaffold(
+        backgroundColor: AppColors.base,
+        extendBody: true,
+        body: PageView(
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(),
+          onPageChanged: (int i) {
+            if (_index != i) setState(() => _index = i);
+          },
+          children: _pages
+              .map((Widget p) => _KeepAlivePage(child: p))
+              .toList(),
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          minimum: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+          child: _NavBar(
+            items: items,
+            selected: _index,
+            onSelect: _onSelect,
+          ),
         ),
       ),
     );

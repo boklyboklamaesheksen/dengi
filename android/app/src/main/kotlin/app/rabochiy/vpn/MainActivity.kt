@@ -15,6 +15,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import com.witvpn.vlee.VleeManager
 import com.witvpn.vlee.model.VleeServerConfig
+import app.rabochiy.vpn.play.PlayStoreBridge
 import app.rabochiy.vpn.xray.XrayEngine
 import app.rabochiy.vpn.xray.XrayUnreachableException
 import io.flutter.embedding.android.FlutterFragmentActivity
@@ -46,6 +47,10 @@ class MainActivity : FlutterFragmentActivity() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val mainHandler = Handler(Looper.getMainLooper())
+    // Google Play review / update flows. Must stay a property initializer:
+    // it registers an ActivityResultLauncher, which is only allowed before
+    // the activity is STARTED.
+    private val playStore = PlayStoreBridge(this)
     private var statsJob: Job? = null
     private var lastRxBytes: Long = 0
     private var lastTxBytes: Long = 0
@@ -101,6 +106,7 @@ class MainActivity : FlutterFragmentActivity() {
             Log.w("MainActivity", "Permission channel already closed", e)
         }
         pendingPermissionResult = null
+        playStore.dispose()
         mainHandler.removeCallbacksAndMessages(null)
         scope.cancel()
         super.onDestroy()
@@ -118,6 +124,9 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        // Google Play In-App Review / In-App Updates
+        playStore.attach(flutterEngine.dartExecutor.binaryMessenger)
 
         // Package-info channel (split-tunnel support)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PKG_CHANNEL)

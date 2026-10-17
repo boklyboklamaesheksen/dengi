@@ -176,6 +176,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     // enableEdgeToEdge() in MainActivity (Play's Android 15 edge-to-edge check).
     implementation("androidx.activity:activity:1.12.4")
+    // Google Play In-App Review and In-App Updates (play/PlayStoreBridge.kt).
+    implementation("com.google.android.play:review:2.0.2")
+    implementation("com.google.android.play:app-update:2.1.0")
     // Java 8+ APIs used by the AmneziaWG sources on older devices
     // (we keep minSdk via Flutter, so desugaring is mandatory).
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")

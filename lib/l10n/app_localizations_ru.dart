@@ -665,6 +665,18 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get advanced => 'Дополнительно';
+
+  // ── Обновление через Google Play ─────────────────────────────────────
+  @override
+  String get updateReadyMessage =>
+      'Обновление загружено. Перезапустите приложение, чтобы установить его.';
+
+  @override
+  String get updateReadyVpnMessage =>
+      'Обновление загружено. Перезапуск для установки отключит VPN.';
+
+  @override
+  String get updateRestartAction => 'Перезапустить';
 }
 
 const String _privacyPolicyRu = '''
