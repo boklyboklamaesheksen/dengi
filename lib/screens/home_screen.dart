@@ -17,7 +17,7 @@ import '../widgets/primary_action.dart';
 import '../widgets/pulse_badge.dart';
 import '../widgets/shield_dial.dart';
 import '../widgets/signal_meter.dart';
-import 'premium_screen.dart';
+import 'premium_gate.dart';
 
 /// VPN tab: status badge, session timer, central shield dial, server
 /// selector, up/down meters and the primary CTA. No more top-right gear —
@@ -30,22 +30,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _premiumRouteOpen = false;
-
   Future<void> _openPremiumScreen() async {
-    if (_premiumRouteOpen || !mounted) return;
-    _premiumRouteOpen = true;
-    try {
-      await Navigator.of(context).push<void>(
-        MaterialPageRoute<void>(builder: (_) => const PremiumScreen()),
-      );
-    } finally {
-      _premiumRouteOpen = false;
-    }
+    if (!mounted) return;
+    await PremiumGate.open(Navigator.of(context));
   }
 
   Future<void> _toggleVpn(AppProvider provider, bool isConnected) async {
     final VpnStatus status = provider.vpnStatus;
+
+    // The tunnel is going down: a tap now would start a connect mid-teardown.
+    if (status == VpnStatus.disconnecting) return;
 
     // Second tap while a connection attempt is in flight cancels it.
     if (status == VpnStatus.connecting) {
@@ -251,6 +245,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               PrimaryAction(
                                 isConnected: isConnected,
                                 isBusy: isBusy,
+                                isConnecting:
+                                    status == VpnStatus.connecting,
                                 onTap: () => _toggleVpn(provider, isConnected),
                                 connectLabel: l10n.connectNow,
                                 disconnectLabel: l10n.disconnectUpper,

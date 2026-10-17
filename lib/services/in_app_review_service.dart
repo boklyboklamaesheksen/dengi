@@ -69,6 +69,7 @@ class InAppReviewService {
   // Live or last VPN session, fed by AppProvider.
   bool _sessionActive = false;
   bool _sessionGood = false;
+  bool _sessionCountable = true;
   bool _sessionFailed = false;
   int _sessionBytes = 0;
   DateTime? _sessionEndedAt;
@@ -94,12 +95,15 @@ class InAppReviewService {
     _loaded = true;
   }
 
-  /// Every VPN status change, in order.
-  void onVpnStatus(VpnStatus status) {
+  /// Every VPN status change, in order. [restored]: a session that was
+  /// already running before this app instance started (the previous one
+  /// may have counted it, so it never counts again).
+  void onVpnStatus(VpnStatus status, {bool restored = false}) {
     switch (status) {
       case VpnStatus.connected:
         _sessionActive = true;
         _sessionGood = false;
+        _sessionCountable = !restored;
         _sessionFailed = false;
         _sessionBytes = 0;
         _sessionEndedAt = null;
@@ -129,6 +133,7 @@ class InAppReviewService {
       return;
     }
     _sessionGood = true;
+    if (!_sessionCountable) return;
     _goodSessions++;
     unawaited(_saveInt(_goodSessionsKey, _goodSessions));
   }

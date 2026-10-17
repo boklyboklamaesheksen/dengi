@@ -19,15 +19,25 @@ import java.io.ByteArrayInputStream
  * Kotlin manager that wraps the vendored [GoBackend] (AmneziaWG) and exposes
  * suspend-friendly methods for the Flutter [VpnService] bridge.
  *
+ * One per process ([get]): the tunnel outlives MainActivity (swiped from
+ * recents, recreated by the system), and a per-activity manager forgot the
+ * running tunnel, so the reopened app showed "disconnected" and a new
+ * connect leaked a second engine.
+ *
  * Loads the Go runtime lazily on an IO worker. Java loading exceptions can
  * be reported to Flutter; a native SIGSEGV cannot be caught here.
  */
-class AwgManager(
-    private val context: Context,
-    private val onStateChange: (State, Statistics?) -> Unit
-) {
+class AwgManager private constructor(private val context: Context) {
     companion object {
         private const val TAG = "RabochiyAwgManager"
+
+        @Volatile
+        private var instance: AwgManager? = null
+
+        fun get(context: Context): AwgManager =
+            instance ?: synchronized(this) {
+                instance ?: AwgManager(context.applicationContext).also { instance = it }
+            }
 
         /**
          * How long we wait for the first WireGuard handshake before
@@ -56,6 +66,18 @@ class AwgManager(
         CONNECTED,
         DISCONNECTING,
         ERROR
+    }
+
+    /** State callback of the current MainActivity; null while none is attached. */
+    @Volatile
+    var listener: ((State, Statistics?) -> Unit)? = null
+
+    private fun onStateChange(state: State, stats: Statistics?) {
+        try {
+            listener?.invoke(state, stats)
+        } catch (e: Exception) {
+            Log.w(TAG, "state listener failed", e)
+        }
     }
 
     @Volatile
@@ -342,6 +364,19 @@ class AwgManager(
             override fun getName(): String = name
             override fun onStateChange(newState: Tunnel.State) {
                 Log.d(TAG, "Tunnel state -> $newState")
+                // Our own connect/disconnect hold the mutex and report state
+                // themselves; outside of them DOWN means the system revoked
+                // the VPN (another VPN app, settings, killed service). It was
+                // only logged, so the UI kept "connected" with no tunnel.
+                if (newState != Tunnel.State.DOWN || operationMutex.isLocked) return
+                if (currentTunnel !== this) return
+                currentTunnel = null
+                currentConfig = null
+                if (currentState == State.CONNECTED || currentState == State.CONNECTING) {
+                    Log.w(TAG, "Tunnel torn down outside the app")
+                    currentState = State.DISCONNECTED
+                    onStateChange(State.DISCONNECTED, null)
+                }
             }
         }
     }

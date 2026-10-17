@@ -13,6 +13,7 @@ class PrimaryAction extends StatelessWidget {
     super.key,
     required this.isConnected,
     required this.isBusy,
+    required this.isConnecting,
     required this.onTap,
     required this.connectLabel,
     required this.disconnectLabel,
@@ -23,6 +24,10 @@ class PrimaryAction extends StatelessWidget {
 
   final bool isConnected;
   final bool isBusy;
+
+  /// Busy because a connection attempt is in flight (otherwise the tunnel is
+  /// going down; `isConnected` is false in both cases).
+  final bool isConnecting;
   final VoidCallback onTap;
   final String connectLabel;
   final String disconnectLabel;
@@ -33,12 +38,15 @@ class PrimaryAction extends StatelessWidget {
   /// cancels the attempt.
   final String? cancelLabel;
 
-  bool get _isConnecting => !isConnected && isBusy;
+  bool get _isConnecting => isBusy && isConnecting;
+
+  /// Disconnecting never takes taps; connecting does only to cancel.
+  bool get _tappable => !isBusy || (_isConnecting && cancelLabel != null);
 
   String get _label {
     if (isBusy) {
-      if (_isConnecting && cancelLabel != null) return cancelLabel!;
-      return isConnected ? busyDisconnectLabel : busyConnectLabel;
+      if (_isConnecting) return cancelLabel ?? busyConnectLabel;
+      return busyDisconnectLabel;
     }
     return isConnected ? disconnectLabel : connectLabel;
   }
@@ -89,8 +97,8 @@ class PrimaryAction extends StatelessWidget {
     );
 
     return PressScale(
-      enabled: !_isConnecting || cancelLabel != null,
-      onTap: (isBusy && !_isConnecting) ? () {} : onTap,
+      enabled: _tappable,
+      onTap: _tappable ? onTap : () {},
       child: SizedBox(
         height: 58,
         width: double.infinity,

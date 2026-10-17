@@ -9,12 +9,19 @@ import android.content.pm.ServiceInfo
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.os.SystemClock
 import android.util.Log
 import libv2ray.CoreCallbackHandler
 import libv2ray.CoreController
 import libv2ray.Libv2ray
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.Socket
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import com.witvpn.vlee.R as VleeR
 
@@ -44,6 +51,15 @@ class XrayVpnService : VpnService() {
             "https://cp.cloudflare.com/generate_204",
         )
 
+        /** Go's MeasureDelay gives up after 12 s; the probes run in parallel. */
+        private const val PROBE_BUDGET_MS = 13_000L
+
+        /** TCP handshake to the server itself: blocked IPs fail here in seconds. */
+        private const val PRECHECK_TIMEOUT_MS = 5_000
+        private const val WAIT_STEP_MS = 100L
+        private val IPV4_LITERAL = Regex("^\\d{1,3}(\\.\\d{1,3}){3}$")
+        private val TCP_NETWORKS = setOf("raw", "ws", "grpc", "httpupgrade", "xhttp")
+
         @Volatile
         internal var instance: XrayVpnService? = null
             private set
@@ -62,6 +78,33 @@ class XrayVpnService : VpnService() {
 
     /** Written by the worker, read by [abortInFlight] from other threads. */
     @Volatile private var core: CoreController? = null
+
+    /** The START the worker is serving; [abortInFlight] cancels its waits. */
+    @Volatile private var attempt: Attempt? = null
+
+    /** stopLoop() can block on the core mutex, so it never runs on the main thread. */
+    private val aborter: ExecutorService = Executors.newSingleThreadExecutor { r ->
+        Thread(r, "xray-abort")
+    }
+
+    /** Pre-check and probes; the worker waits for them without blocking an abort. */
+    private val probes: ExecutorService = Executors.newCachedThreadPool { r ->
+        Thread(r, "xray-probe")
+    }
+
+    private class Attempt {
+        private val aborted = CountDownLatch(1)
+        @Volatile var socket: Socket? = null
+
+        val isAborted: Boolean
+            get() = aborted.count == 0L
+
+        fun abort() {
+            aborted.countDown()
+            // Interrupts a TCP pre-check stuck in connect().
+            socket?.let { runCatching { it.close() } }
+        }
+    }
 
     private val coreCallback = object : CoreCallbackHandler {
         override fun startup(): Long = 0
@@ -96,14 +139,24 @@ class XrayVpnService : VpnService() {
     private fun startTunnel(uri: String, remark: String, blocked: List<String>) {
         val myEpoch = epoch.incrementAndGet()
         abortInFlight()
+        val myAttempt = Attempt().also { attempt = it }
         XrayEngine.onState(XrayEngine.State.CONNECTING)
         worker.execute {
             fun stale() = epoch.get() != myEpoch
             if (stale()) return@execute
             stopCore()
             try {
-                val config = XrayConfigBuilder.build(VlessLink.parse(uri))
+                val link = VlessLink.parse(uri)
+                val config = XrayConfigBuilder.build(link)
                 XrayEngine.ensureCoreEnv(applicationContext)
+
+                // A banned server IP usually just drops the SYN: report it
+                // before raising a TUN that would cut the device off meanwhile.
+                if (precheckApplies(link) && !tcpReachable(link.host, link.port, myAttempt)) {
+                    if (stale()) return@execute
+                    throw XrayUnreachableException("vless server unreachable (tcp)")
+                }
+                if (stale()) return@execute
 
                 val pfd = establishTun(remark, blocked)
                     ?: throw IllegalStateException("vpn_permission_denied")
@@ -121,20 +174,7 @@ class XrayVpnService : VpnService() {
 
                 // Honest connect: report CONNECTED only after a real request
                 // went through the server.
-                var reachable = false
-                for (url in PROBE_URLS) {
-                    if (stale()) break
-                    val delay = try {
-                        controller.measureDelay(url)
-                    } catch (e: Exception) {
-                        Log.w(TAG, "probe failed: ${e.javaClass.simpleName}")
-                        -1L
-                    }
-                    if (delay >= 0) {
-                        reachable = true
-                        break
-                    }
-                }
+                val reachable = anyProbeSucceeds(controller, myAttempt)
                 if (stale()) {
                     stopCore()
                     return@execute
@@ -192,12 +232,87 @@ class XrayVpnService : VpnService() {
     }
 
     /**
-     * Stops a core that the worker may still be probing, so the 12 s
-     * connectivity check fails at once instead of delaying the next action.
-     * The worker still owns the cleanup (TUN fd, state).
+     * Releases the worker from the attempt it is serving (pre-check, probes)
+     * and stops its core, so a cancel or a new START never waits for a dead
+     * server. The worker still owns the cleanup (TUN fd, state).
      */
     private fun abortInFlight() {
-        core?.let { controller -> runCatching { controller.stopLoop() } }
+        attempt?.abort()
+        val controller = core ?: return
+        runCatching { aborter.execute { runCatching { controller.stopLoop() } } }
+    }
+
+    /**
+     * Only IP literals over TCP transports: resolving a domain here could
+     * disagree with Xray's own lookup, and xhttp over h3 is QUIC (UDP).
+     */
+    private fun precheckApplies(link: VlessLink): Boolean {
+        val host = link.host
+        val literal = IPV4_LITERAL.matches(host) || host.contains(':')
+        val quic = link.param("alpn").split(',').any { it.trim().equals("h3", ignoreCase = true) }
+        return literal && !quic && link.network in TCP_NETWORKS
+    }
+
+    private fun tcpReachable(host: String, port: Int, attempt: Attempt): Boolean {
+        val results = LinkedBlockingQueue<Boolean>()
+        probes.execute {
+            val socket = Socket()
+            attempt.socket = socket
+            val ok = try {
+                if (attempt.isAborted) {
+                    false
+                } else {
+                    socket.connect(InetSocketAddress(InetAddress.getByName(host), port), PRECHECK_TIMEOUT_MS)
+                    true
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "tcp pre-check failed: ${e.javaClass.simpleName}")
+                false
+            } finally {
+                attempt.socket = null
+                runCatching { socket.close() }
+            }
+            results.offer(ok)
+        }
+        return anySuccess(results, 1, PRECHECK_TIMEOUT_MS + 1_000L, attempt)
+    }
+
+    private fun anyProbeSucceeds(controller: CoreController, attempt: Attempt): Boolean {
+        val results = LinkedBlockingQueue<Boolean>()
+        for (url in PROBE_URLS) {
+            probes.execute {
+                val ok = try {
+                    controller.measureDelay(url) >= 0
+                } catch (e: Exception) {
+                    Log.w(TAG, "probe failed: ${e.javaClass.simpleName}")
+                    false
+                }
+                results.offer(ok)
+            }
+        }
+        return anySuccess(results, PROBE_URLS.size, PROBE_BUDGET_MS, attempt)
+    }
+
+    /**
+     * True on the first successful result; false once all [expected] results
+     * failed, the budget ran out or the attempt was aborted.
+     */
+    private fun anySuccess(
+        results: LinkedBlockingQueue<Boolean>,
+        expected: Int,
+        budgetMs: Long,
+        attempt: Attempt,
+    ): Boolean {
+        val deadline = SystemClock.elapsedRealtime() + budgetMs
+        var pending = expected
+        while (pending > 0 && !attempt.isAborted) {
+            val left = deadline - SystemClock.elapsedRealtime()
+            if (left <= 0) return false
+            val ok = results.poll(minOf(left, WAIT_STEP_MS), TimeUnit.MILLISECONDS) ?: continue
+            if (ok) return true
+            pending--
+        }
+        return false
     }
 
     private fun stopCore() {
@@ -298,6 +413,7 @@ class XrayVpnService : VpnService() {
 
     override fun onDestroy() {
         epoch.incrementAndGet()
+        attempt?.abort()
         if (instance === this) instance = null
         // Never block the main thread on a core that is still starting.
         runCatching {
@@ -310,6 +426,8 @@ class XrayVpnService : VpnService() {
             }
         }
         worker.shutdown()
+        aborter.shutdown()
+        probes.shutdown()
         super.onDestroy()
     }
 }

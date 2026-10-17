@@ -56,6 +56,12 @@ class MainActivity : FlutterFragmentActivity() {
     private var lastTxBytes: Long = 0
     private var lastStatsTime: Long = 0
     private var awgManager: AwgManager? = null
+
+    // Kept as fields: onDestroy detaches only its own listeners, a recreated
+    // activity may already have attached new ones.
+    private val awgListener: (AwgManager.State, org.amnezia.awg.backend.Statistics?) -> Unit =
+        { state, stats -> emitStatus(state.name, stats) }
+    private val xrayListener: (XrayEngine.State) -> Unit = { state -> emitStatus(state.name, null) }
     private var eventSink: EventChannel.EventSink? = null
 
     // VLEE (GW protocol) engine state
@@ -95,7 +101,8 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onDestroy() {
         stopTrafficPolling()
-        XrayEngine.listener = null
+        if (XrayEngine.listener === xrayListener) XrayEngine.listener = null
+        awgManager?.let { if (it.listener === awgListener) it.listener = null }
         vleeListener?.let { VleeManager.unregisterListener(it) }
         vleeListener = null
         eventSink = null
@@ -225,11 +232,17 @@ class MainActivity : FlutterFragmentActivity() {
     private fun handleEngineCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "initialize" -> {
-                if (awgManager == null) {
-                    awgManager = AwgManager(applicationContext) { state, stats -> emitStatus(state.name, stats) }
+                val awg = AwgManager.get(applicationContext)
+                awg.listener = awgListener
+                awgManager = awg
+                XrayEngine.listener = xrayListener
+                // Tunnels outlive the activity: tell a fresh UI what runs.
+                val snapshot = tunnelSnapshot()
+                if (snapshot["state"] == "CONNECTED" && snapshot["protocol"] != "gw") {
+                    isVpnConnected = true
+                    startTrafficPolling()
                 }
-                XrayEngine.listener = { state -> emitStatus(state.name, null) }
-                result.success(true)
+                result.success(snapshot)
             }
             "requestPermission" -> {
                 val intent = VpnService.prepare(this)
@@ -499,6 +512,22 @@ class MainActivity : FlutterFragmentActivity() {
             if (pkg.isNotEmpty()) out.add(pkg)
         }
         return out.toList()
+    }
+
+    private fun tunnelSnapshot(): Map<String, String> {
+        val awg = awgManager
+        val (protocol, state) = when {
+            XrayEngine.state == XrayEngine.State.CONNECTED ||
+                XrayEngine.state == XrayEngine.State.CONNECTING ->
+                "vless" to XrayEngine.state.name
+            // An AWG connect runs in the activity scope and dies with it.
+            awg != null && awg.currentState == AwgManager.State.CONNECTED -> "awg" to "CONNECTED"
+            VleeManager.state == VleeManager.State.CONNECTED ||
+                VleeManager.state == VleeManager.State.CONNECTING ->
+                "gw" to VleeManager.state.name
+            else -> "" to "DISCONNECTED"
+        }
+        return mapOf("protocol" to protocol, "state" to state)
     }
 
     private fun AwgManager.isTunnelActive(): Boolean =

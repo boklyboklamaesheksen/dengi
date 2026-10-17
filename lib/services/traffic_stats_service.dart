@@ -202,6 +202,15 @@ class TrafficStatsService extends ChangeNotifier {
     _bump(rx: rxDelta, tx: txDelta, sessionsDelta: 0, onlineDelta: onlineDelta);
   }
 
+  /// Continues a session that an earlier UI already recorded: the given
+  /// totals become the baseline instead of being counted again.
+  void resumeSession({required int totalRxBytes, required int totalTxBytes}) {
+    if (_disposed) return;
+    _lastSampleRx = totalRxBytes;
+    _lastSampleTx = totalTxBytes;
+    _lastTickMs = _now().millisecondsSinceEpoch;
+  }
+
   /// Forgets the "last seen" counters so the next sample won't contribute
   /// a huge bogus delta. Call on disconnect.
   void resetSession() {

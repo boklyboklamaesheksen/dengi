@@ -126,6 +126,10 @@ class ServerConfig {
   String get ipAddress => address;
   bool get isPremium => premium;
 
+  /// A PRO VLESS server listed for a free account: the backend withholds
+  /// its link, so it can only lead to the paywall.
+  bool get isLocked => protocol == ServerProtocol.vless && originalUrl.isEmpty;
+
   /// Default port when the backend doesn't supply one. Reflects the
   /// canonical port for each transport.
   static int defaultPortFor(ServerProtocol p) => switch (p) {
@@ -168,16 +172,7 @@ class ServerConfig {
     final port = int.tryParse(portText);
     if (host.isEmpty || port == null || port < 1 || port > 65535) return null;
 
-    final flagMatch = _flagPattern.firstMatch(remark);
-    final countryCode = flagMatch == null
-        ? ''
-        : String.fromCharCodes(
-            flagMatch.group(0)!.runes.map((r) => r - 0x1F1E6 + 0x41),
-          );
-    final name = remark
-        .replaceAll(_flagPattern, '')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
+    final (:countryCode, :name) = _splitRemark(remark);
     final display = name.isNotEmpty ? name : host;
 
     return ServerConfig(
@@ -192,6 +187,43 @@ class ServerConfig {
       originalUrl: link,
       protocol: ServerProtocol.vless,
     );
+  }
+
+  /// Locked PRO entry of the VLESS catalogue. [digest] is the backend's
+  /// sha1 prefix of the link body, so the id equals the one [fromVlessUri]
+  /// gives the same server once its link is delivered.
+  static ServerConfig? lockedVless({
+    required String digest,
+    required String remark,
+  }) {
+    if (!RegExp(r'^[0-9a-f]{16}$').hasMatch(digest)) return null;
+    final (:countryCode, :name) = _splitRemark(remark);
+    if (name.isEmpty) return null;
+    return ServerConfig(
+      id: 'vless_$digest',
+      serverName: name,
+      address: '',
+      port: defaultPortFor(ServerProtocol.vless),
+      country: name,
+      countryCode: countryCode,
+      flag: countryCode.isEmpty ? '🌐' : _flagFromCountryCode(countryCode),
+      protocol: ServerProtocol.vless,
+      premium: true,
+    );
+  }
+
+  static ({String countryCode, String name}) _splitRemark(String remark) {
+    final flagMatch = _flagPattern.firstMatch(remark);
+    final countryCode = flagMatch == null
+        ? ''
+        : String.fromCharCodes(
+            flagMatch.group(0)!.runes.map((r) => r - 0x1F1E6 + 0x41),
+          );
+    final name = remark
+        .replaceAll(_flagPattern, '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    return (countryCode: countryCode, name: name);
   }
 
   static final RegExp _flagPattern = RegExp(

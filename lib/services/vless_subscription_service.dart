@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_config.dart';
 import '../config/secret_codec.dart';
 import '../models/server_config_model.dart';
+import 'vless_catalogue_client.dart';
 
 /// VLESS subscription URLs. Only gwenc1-encoded values are accepted (the
 /// same policy as `encrypted_api_url`): plain `https://…` strings never live
@@ -81,22 +82,41 @@ class VlessSubscriptionException implements Exception {
 }
 
 /// Downloads VLESS subscriptions and turns them into [ServerConfig]s.
+///
+/// Our own subscription (`…/bs`) is public and lists free servers only.
+/// While it is configured, the service reads the same servers from the
+/// API catalogue instead, which also lists PRO servers ([catalogue]); the
+/// public list remains the fallback when the API cannot be reached.
 class VlessSubscriptionService {
   VlessSubscriptionService({
     http.Client? client,
     VlessSubscriptionSources? sources,
+    VlessCatalogueClient? catalogue,
     this.timeout = const Duration(seconds: 6),
   }) : _client = client ?? http.Client(),
        _ownsClient = client == null,
-       _sources = sources ?? VlessSubscriptionSources.instance;
+       _sources = sources ?? VlessSubscriptionSources.instance,
+       // A test that injects its HTTP client opts out of the real backend.
+       _catalogue =
+           catalogue ?? (client == null ? VlessCatalogueClient() : null),
+       _ownsCatalogue = catalogue == null && client == null;
 
   static const String _cacheKey = 'vless_subscription_cache_v1';
+  static const String _catalogueCacheKey = 'vless_catalogue_cache_v1';
   static const int _maxBodyBytes = 2 * 1024 * 1024;
   static const int _maxServers = 500;
 
   final http.Client _client;
   final bool _ownsClient;
   final VlessSubscriptionSources _sources;
+  final VlessCatalogueClient? _catalogue;
+  final bool _ownsCatalogue;
+
+  /// Our public free-only subscription, superseded by the API catalogue.
+  static bool isOwnSubscription(String url) {
+    final path = Uri.tryParse(url)?.path ?? '';
+    return path == '/bs' || path == '/bs/';
+  }
 
   /// Per-download limit.
   final Duration timeout;
@@ -107,9 +127,12 @@ class VlessSubscriptionService {
   Future<List<ServerConfig>> readCachedServers() async {
     final urls = List<String>.from(_sources.urls.value);
     if (urls.isEmpty) return const <ServerConfig>[];
+    final catalogue = await _readCatalogueCache(urls);
     final cached = await _readCache(urls);
-    if (cached == null || cached.isEmpty) return const <ServerConfig>[];
-    return toServers(cached);
+    return merge(
+      catalogue ?? const <ServerConfig>[],
+      toServers(cached ?? const []),
+    );
   }
 
   /// Servers in subscription order. Falls back to the last good result when
@@ -118,12 +141,29 @@ class VlessSubscriptionService {
     final urls = List<String>.from(_sources.urls.value);
     if (urls.isEmpty) return const <ServerConfig>[];
 
-    final bodies = await Future.wait(urls.map(_download));
+    final catalogue = urls.any(isOwnSubscription)
+        ? await _fetchCatalogue(urls)
+        : null;
+    // With the catalogue in hand our public list would only repeat it.
+    final downloads = catalogue == null
+        ? urls
+        : urls.where((url) => !isOwnSubscription(url)).toList();
+
+    final bodies = await Future.wait(downloads.map(_download));
     final fetched = bodies.whereType<String>().toList();
-    if (fetched.isEmpty) {
+    if (downloads.isNotEmpty && fetched.isEmpty) {
       final cached = await _readCache(urls);
-      if (cached == null) throw const VlessSubscriptionException();
-      return toServers(cached);
+      if (catalogue != null) {
+        return merge(catalogue, toServers(cached ?? const []));
+      }
+      final cachedCatalogue = await _readCatalogueCache(urls);
+      if (cached == null && cachedCatalogue == null) {
+        throw const VlessSubscriptionException();
+      }
+      return merge(
+        cachedCatalogue ?? const <ServerConfig>[],
+        toServers(cached ?? const []),
+      );
     }
 
     final links = <String>[];
@@ -134,8 +174,80 @@ class VlessSubscriptionService {
     if (servers.isNotEmpty) {
       await _writeCache(urls, servers.map((s) => s.originalUrl).toList());
     }
-    return servers;
+    return catalogue == null ? servers : merge(catalogue, servers);
   }
+
+  /// Catalogue entries first (they carry the PRO flags), then other
+  /// subscriptions; duplicates keep their first occurrence.
+  static List<ServerConfig> merge(
+    List<ServerConfig> first,
+    List<ServerConfig> second,
+  ) {
+    final out = <ServerConfig>[];
+    final seen = <String>{};
+    for (final server in <ServerConfig>[...first, ...second]) {
+      if (!seen.add(server.id)) continue;
+      out.add(server);
+      if (out.length >= _maxServers) break;
+    }
+    return out;
+  }
+
+  /// Null when the API cannot answer: the caller falls back to `/bs`.
+  Future<List<ServerConfig>?> _fetchCatalogue(List<String> urls) async {
+    final client = _catalogue;
+    if (client == null) return null;
+    try {
+      final userId = await client.currentUserId();
+      final raw = await client.fetchRaw(userId);
+      final servers = VlessCatalogueClient.parse(raw);
+      if (raw.isNotEmpty && servers.isEmpty) return null;
+      await _writeCatalogueCache(urls, userId, raw);
+      return servers;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<ServerConfig>?> _readCatalogueCache(List<String> urls) async {
+    final client = _catalogue;
+    if (client == null) return null;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_catalogueCacheKey);
+      if (raw == null) return null;
+      final data = jsonDecode(raw) as Map<String, dynamic>;
+      if (data['sources'] != _sourcesKey(urls) ||
+          data['user'] != _userKey(await client.currentUserId())) {
+        return null;
+      }
+      return VlessCatalogueClient.parse(data['servers'] as List<dynamic>);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _writeCatalogueCache(
+    List<String> urls,
+    String userId,
+    List<dynamic> servers,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _catalogueCacheKey,
+        jsonEncode(<String, dynamic>{
+          'sources': _sourcesKey(urls),
+          'user': _userKey(userId),
+          'servers': servers,
+        }),
+      );
+    } catch (_) {
+      // Cache is best-effort.
+    }
+  }
+
+  static String _userKey(String userId) => SecretCodec.encode('u:$userId');
 
   Future<String?> _download(String url) async {
     try {
@@ -230,5 +342,6 @@ class VlessSubscriptionService {
 
   void close() {
     if (_ownsClient) _client.close();
+    if (_ownsCatalogue) _catalogue?.close();
   }
 }

@@ -72,8 +72,18 @@ class EngineStatus {
 class VpnService {
   /// [platformSupported] overrides the `Platform.isAndroid` probe so the
   /// bridge logic can be exercised from `flutter test` on any host.
-  VpnService({bool? platformSupported})
-      : _platformSupportedOverride = platformSupported;
+  VpnService({
+    bool? platformSupported,
+    this.gwConnectTimeout = const Duration(seconds: 120),
+    this.gwStopTimeout = const Duration(seconds: 5),
+  }) : _platformSupportedOverride = platformSupported;
+
+  /// Upper bound for a GW connect; the engine's own four SSH attempts take
+  /// about 105 s against a dead node.
+  final Duration gwConnectTimeout;
+
+  /// How long a GW disconnect waits for the engine's DISCONNECTED.
+  final Duration gwStopTimeout;
 
   static const MethodChannel _control = MethodChannel('rabochiy_vpn/engine');
   static const EventChannel _events = EventChannel('rabochiy_vpn/engine/status');
@@ -89,6 +99,25 @@ class VpnService {
 
   VpnStatus _status = VpnStatus.disconnected;
   ServerConfig? _currentConfig;
+
+  /// Engine whose events drive [status]. Unlike [_currentConfig] it stays
+  /// set while a GW tunnel is still stopping: the GW engine reports
+  /// DISCONNECTED from a worker thread after `disconnect` has returned, and
+  /// dropping that event left the UI on "Disconnecting…" forever.
+  ServerProtocol? _engine;
+
+  /// Pending GW connect: true on the engine's CONNECTED, false on its
+  /// DISCONNECTED/ERROR once it has started this attempt.
+  Completer<bool>? _gwOutcome;
+  bool _gwAttemptStarted = false;
+
+  /// Completed by the GW engine's DISCONNECTED/ERROR while stopping.
+  Completer<void>? _gwStopped;
+
+  /// Engine found running by [initialize]: the UI was recreated (app swiped
+  /// from recents, activity destroyed) while the tunnel stayed up.
+  ServerProtocol? _restoredEngine;
+  ServerProtocol? get restoredEngine => _restoredEngine;
   String? _errorMessage;
   StreamSubscription<dynamic>? _eventsSub;
   StreamSubscription<String>? _gwEventsSub;
@@ -125,9 +154,12 @@ class VpnService {
       return false;
     }
     try {
-      await _control.invokeMethod<void>('initialize');
+      final Object? snapshot = await _control.invokeMethod<Object?>(
+        'initialize',
+      );
       if (_disposed) return false;
       _bindEventStream();
+      _restoreFrom(snapshot);
       return true;
     } on MissingPluginException {
       // Native bridge not yet registered (build still in progress); the
@@ -144,6 +176,31 @@ class VpnService {
       _errorMessage = e.toString();
       return false;
     }
+  }
+
+  void _restoreFrom(Object? snapshot) {
+    if (snapshot is! Map || _status != VpnStatus.disconnected) return;
+    final ServerProtocol? protocol = switch (snapshot['protocol']) {
+      'awg' => ServerProtocol.awg,
+      'vless' => ServerProtocol.vless,
+      'gw' => ServerProtocol.gw,
+      _ => null,
+    };
+    final VpnStatus? status = switch (snapshot['state']) {
+      'CONNECTED' => VpnStatus.connected,
+      'CONNECTING' => VpnStatus.connecting,
+      _ => null,
+    };
+    if (protocol == null || status == null) return;
+    _restoredEngine = protocol;
+    _engine = protocol;
+    if (protocol == ServerProtocol.gw) {
+      GwEngineService.instance.bind();
+      _gwEventsSub ??= GwEngineService.instance.statusStream.listen(
+        _handleGwEvent,
+      );
+    }
+    _updateStatus(status);
   }
 
   Future<bool> connect(
@@ -169,29 +226,8 @@ class VpnService {
       _errorMessage = null;
       _currentConfig = config;
 
-      // GW (SSH-tunnel) servers run on their own native engine with its
-      // own channels; it handles VpnService.prepare() internally.
-      if (config.protocol == ServerProtocol.gw) {
-        GwEngineService.instance.bind();
-        _gwLastRx = 0;
-        _gwLastTx = 0;
-        _gwLastTrafficTime = null;
-        _gwEventsSub ??= GwEngineService.instance.statusStream.listen(
-          (event) => _handleGwEvent(event, config),
-        );
-        final ok = await GwEngineService.instance.connect(
-          config,
-          excludedApps: excludedApps,
-          allowedApps: allowedApps,
-        );
-        if (stale()) return false;
-        if (!ok) {
-          _errorMessage = 'engine_not_ready';
-          _updateStatus(VpnStatus.error);
-        }
-        return ok;
-      }
-
+      // One permission flow for every engine: the GW engine used to ask on
+      // its own and never reported a refusal, leaving "connecting" forever.
       final granted = await _requestPermission();
       if (stale()) return false;
       if (!granted) {
@@ -200,6 +236,16 @@ class VpnService {
         return false;
       }
 
+      if (config.protocol == ServerProtocol.gw) {
+        return await _connectGw(
+          config,
+          excludedApps: excludedApps,
+          allowedApps: allowedApps,
+          stale: stale,
+        );
+      }
+
+      _engine = config.protocol;
       final connected = await _control.invokeMethod<bool>('connect', <String, dynamic>{
         'protocol': config.protocol.apiName,
         'remark': config.cleanName,
@@ -245,16 +291,83 @@ class VpnService {
     }
   }
 
+  /// GW engine: starts the tunnel and waits for its verdict, like the AWG
+  /// and VLESS paths, so a dead node ends in an error instead of silently
+  /// falling back to "not connected".
+  Future<bool> _connectGw(
+    ServerConfig config, {
+    List<String>? excludedApps,
+    List<String>? allowedApps,
+    required bool Function() stale,
+  }) async {
+    _engine = ServerProtocol.gw;
+    _gwLastRx = 0;
+    _gwLastTx = 0;
+    _gwLastTrafficTime = null;
+    final outcome = Completer<bool>();
+    _gwOutcome = outcome;
+    _gwAttemptStarted = false;
+    GwEngineService.instance.bind();
+    _gwEventsSub ??= GwEngineService.instance.statusStream.listen(
+      _handleGwEvent,
+    );
+    final ok = await GwEngineService.instance.connect(
+      config,
+      excludedApps: excludedApps,
+      allowedApps: allowedApps,
+    );
+    if (stale()) return false;
+    if (!ok) {
+      _abandonGwConnect();
+      _engine = null;
+      _errorMessage = 'engine_not_ready';
+      _updateStatus(VpnStatus.error);
+      return false;
+    }
+    var timedOut = false;
+    final connected = await outcome.future.timeout(
+      gwConnectTimeout,
+      onTimeout: () {
+        timedOut = true;
+        return false;
+      },
+    );
+    if (identical(_gwOutcome, outcome)) _gwOutcome = null;
+    if (stale()) return false;
+    if (connected) return true;
+    // The engine already stopped unless our own limit fired first.
+    if (timedOut) unawaited(GwEngineService.instance.disconnect());
+    _engine = null;
+    _errorMessage = 'awg_handshake_timeout';
+    _updateStatus(VpnStatus.error);
+    return false;
+  }
+
+  void _abandonGwConnect() {
+    final pending = _gwOutcome;
+    _gwOutcome = null;
+    if (pending != null && !pending.isCompleted) pending.complete(false);
+  }
+
+  bool get _gwInvolved =>
+      _engine == ServerProtocol.gw ||
+      _currentConfig?.protocol == ServerProtocol.gw;
+
   /// Cancels an in-flight connection attempt. Safe to call in any
   /// state: it simply tears the tunnel down (native side rolls back a
   /// half-raised handshake) and parks the UI in `disconnected`.
   Future<void> cancelConnect() async {
-    _connectGeneration++;
+    final int gen = ++_connectGeneration;
+    _abandonGwConnect();
     if (!_isPlatformSupported) {
       _updateStatus(VpnStatus.disconnected);
       return;
     }
-    if (_currentConfig?.protocol == ServerProtocol.gw) {
+    final bool gw = _gwInvolved;
+    // Immediate feedback; the button ignores taps while disconnecting.
+    _updateStatus(VpnStatus.disconnecting);
+    if (gw) {
+      // No tunnel exists before CONNECTED; the engine stops in the background.
       await GwEngineService.instance.disconnect();
     } else {
       try {
@@ -265,21 +378,39 @@ class VpnService {
         // Native engines tolerate a disconnect in any state.
       }
     }
+    if (_disposed || gen != _connectGeneration) return;
+    if (gw) _engine = null;
     _currentConfig = null;
     _errorMessage = null;
     _updateStatus(VpnStatus.disconnected);
   }
 
   Future<bool> disconnect() async {
-    _connectGeneration++;
+    final int gen = ++_connectGeneration;
+    _abandonGwConnect();
     if (!_isPlatformSupported) return true;
+    final bool engineActive =
+        _status == VpnStatus.connected ||
+        _status == VpnStatus.connecting ||
+        _status == VpnStatus.disconnecting;
     try {
       _updateStatus(VpnStatus.disconnecting);
-      if (_currentConfig?.protocol == ServerProtocol.gw) {
+      if (_gwInvolved) {
+        final stopped = Completer<void>();
+        _gwStopped = stopped;
         await GwEngineService.instance.disconnect();
-      } else {
-        await _control.invokeMethod<void>('disconnect');
+        if (engineActive) {
+          await stopped.future.timeout(gwStopTimeout, onTimeout: () {});
+        }
+        if (identical(_gwStopped, stopped)) _gwStopped = null;
+        // A newer connect/disconnect owns the state now.
+        if (_disposed || gen != _connectGeneration) return true;
+        _engine = null;
+        _currentConfig = null;
+        _updateStatus(VpnStatus.disconnected);
+        return true;
       }
+      await _control.invokeMethod<void>('disconnect');
       _currentConfig = null;
       return true;
     } on MissingPluginException {
@@ -330,8 +461,7 @@ class VpnService {
     _eventsSub?.cancel();
     _eventsSub = _events.receiveBroadcastStream().listen(
       (dynamic raw) {
-        if (_disposed || raw is! Map ||
-            _currentConfig?.protocol == ServerProtocol.gw) {
+        if (_disposed || raw is! Map || _engine == ServerProtocol.gw) {
           return;
         }
         final status = EngineStatus.fromMap(raw);
@@ -365,10 +495,32 @@ class VpnService {
 
   /// GW engine events (STATE:/TRAFFIC:) are folded into the same
   /// status/engine pipelines the AWG path uses.
-  void _handleGwEvent(String event, ServerConfig config) {
-    if (_disposed || _currentConfig?.protocol != ServerProtocol.gw) return;
+  void _handleGwEvent(String event) {
+    if (_disposed || _engine != ServerProtocol.gw) return;
     final status = GwEngineService.statusFromEvent(event);
     if (status != null) {
+      final bool down =
+          status == VpnStatus.disconnected || status == VpnStatus.error;
+      final stopped = _gwStopped;
+      if (down && stopped != null && !stopped.isCompleted) stopped.complete();
+      final pending = _gwOutcome;
+      if (pending != null && !pending.isCompleted) {
+        switch (status) {
+          case VpnStatus.connected:
+            pending.complete(true);
+          case VpnStatus.connecting:
+            _gwAttemptStarted = true;
+            return;
+          case VpnStatus.disconnected:
+          case VpnStatus.error:
+            // Before CONNECTING this is the engine's previous state, replayed
+            // on subscribe, not the outcome of this attempt.
+            if (_gwAttemptStarted) pending.complete(false);
+            return;
+          case VpnStatus.disconnecting:
+            return;
+        }
+      }
       _updateStatus(status);
       if (status == VpnStatus.connected) {
         _engineStatusController.add(const EngineStatus(
@@ -427,6 +579,9 @@ class VpnService {
 
   void dispose() {
     _disposed = true;
+    _abandonGwConnect();
+    final stopped = _gwStopped;
+    if (stopped != null && !stopped.isCompleted) stopped.complete();
     _eventsSub?.cancel();
     _gwEventsSub?.cancel();
     GwEngineService.instance.unbind();

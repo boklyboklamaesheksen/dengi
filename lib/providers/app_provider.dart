@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:installed_apps/installed_apps.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/backend_signing.dart';
 import '../models/server_config_model.dart';
@@ -82,6 +85,16 @@ class AppProvider with ChangeNotifier {
   Timer? _heartbeatTimer;
   String? _activeServerIp;
   String? _activeProtocol;
+
+  /// Live session survives a UI restart: server, auto flag, start time.
+  static const String _sessionPrefsKey = 'rabochiy_vpn_session_v1';
+
+  /// Server of a tunnel found running at start, applied once it is loaded.
+  String? _restoredServerId;
+
+  /// The first traffic sample of a restored tunnel is its whole session so
+  /// far, already counted by the previous UI.
+  bool _resumingTraffic = false;
 
   VpnStatus get vpnStatus => _vpnStatus;
   List<ServerConfig> get servers => _servers;
@@ -210,10 +223,18 @@ class AppProvider with ChangeNotifier {
       _cumulativeRxBytes += rxDelta;
       _cumulativeTxBytes += txDelta;
 
-      _trafficStats.recordSample(
-        totalRxBytes: _cumulativeRxBytes,
-        totalTxBytes: _cumulativeTxBytes,
-      );
+      if (_resumingTraffic) {
+        _resumingTraffic = false;
+        _trafficStats.resumeSession(
+          totalRxBytes: _cumulativeRxBytes,
+          totalTxBytes: _cumulativeTxBytes,
+        );
+      } else {
+        _trafficStats.recordSample(
+          totalRxBytes: _cumulativeRxBytes,
+          totalTxBytes: _cumulativeTxBytes,
+        );
+      }
       _reviewPrompt.onSessionTraffic(_cumulativeRxBytes + _cumulativeTxBytes);
 
       notifyListeners();
@@ -221,17 +242,31 @@ class AppProvider with ChangeNotifier {
 
     _statusSubscription = _vpnService.statusStream.listen((status) {
       if (_disposed) return;
+      final bool restored =
+          status == VpnStatus.connected &&
+          _vpnStatus == VpnStatus.disconnected &&
+          _vpnService.restoredEngine != null &&
+          !_restoreHandled;
       _vpnStatus = status;
-      _reviewPrompt.onVpnStatus(status);
+      _reviewPrompt.onVpnStatus(status, restored: restored);
 
       if (status == VpnStatus.connected) {
         _cumulativeRxBytes = 0;
         _cumulativeTxBytes = 0;
         _lastEngineRx = 0;
         _lastEngineTx = 0;
-        _startTimer();
-        _trafficStats.recordSessionStart();
-        _startHeartbeat();
+        if (restored) {
+          _restoreHandled = true;
+          _resumingTraffic = true;
+          _startTimer();
+          _startHeartbeat();
+          unawaited(_restoreSession());
+        } else {
+          _startTimer();
+          _trafficStats.recordSessionStart();
+          _startHeartbeat();
+          unawaited(_saveSession());
+        }
       } else if (status == VpnStatus.disconnected) {
         _stopTimer();
         _connectionDuration = Duration.zero;
@@ -241,15 +276,90 @@ class AppProvider with ChangeNotifier {
         _lastEngineTx = 0;
         _trafficStats.resetSession();
         _stopHeartbeat(reportDisconnect: true);
+        _resumingTraffic = false;
+        unawaited(_clearSession());
       } else if (status == VpnStatus.error) {
         _errorMessage = _vpnService.errorMessage;
         _stopTimer();
         _stopHeartbeat(reportDisconnect: true);
+        _resumingTraffic = false;
+        unawaited(_clearSession());
       }
 
       notifyListeners();
     });
   }
+
+  bool _restoreHandled = false;
+
+  Future<void> _saveSession() async {
+    final server = _selectedServer ?? _vpnService.currentConfig;
+    if (server == null) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _sessionPrefsKey,
+        jsonEncode(<String, Object>{
+          'server': server.id,
+          'auto': _isAutoSelect,
+          'since': DateTime.now().millisecondsSinceEpoch,
+        }),
+      );
+    } catch (_) {}
+  }
+
+  Future<void> _clearSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_sessionPrefsKey);
+    } catch (_) {}
+  }
+
+  /// A tunnel kept running while the UI was gone: show its server and
+  /// elapsed time instead of whatever auto-select would pick now.
+  Future<void> _restoreSession() async {
+    Map<String, dynamic>? session;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_sessionPrefsKey);
+      if (raw != null) session = jsonDecode(raw) as Map<String, dynamic>;
+    } catch (_) {}
+    if (_disposed || session == null || _vpnStatus != VpnStatus.connected) {
+      return;
+    }
+    final since = session['since'];
+    if (since is int) {
+      final elapsed = DateTime.now().difference(
+        DateTime.fromMillisecondsSinceEpoch(since),
+      );
+      if (!elapsed.isNegative && elapsed < const Duration(days: 30)) {
+        _connectionDuration = Duration(seconds: elapsed.inSeconds);
+      }
+    }
+    final server = session['server'];
+    if (server is String) {
+      _isAutoSelect = session['auto'] == true;
+      _restoredServerId = server;
+      _applyRestoredServer();
+    }
+    notifyListeners();
+  }
+
+  void _applyRestoredServer() {
+    final id = _restoredServerId;
+    if (id == null) return;
+    for (final server in _servers) {
+      if (server.id != id) continue;
+      _restoredServerId = null;
+      _selectedServer = server;
+      _activeServerIp = server.address;
+      _activeProtocol = server.protocol.apiName;
+      return;
+    }
+  }
+
+  bool get _tunnelUp =>
+      _vpnStatus == VpnStatus.connected || _vpnStatus == VpnStatus.connecting;
 
   /// Caches the package names of every installed Android app. Rebuilt on
   /// demand because the universe changes rarely (install/uninstall) and
@@ -562,8 +672,19 @@ class AppProvider with ChangeNotifier {
   /// payment URL).
   Future<void> refreshUserState() => _refreshUserState();
 
-  Future<void> _autoSelectBestServer() async {
+  /// Picks the best server. While a tunnel is up a catalogue reload keeps
+  /// the server it actually uses ([force] is the user's explicit "Auto").
+  Future<void> _autoSelectBestServer({bool force = false}) async {
     if (_disposed || _servers.isEmpty) return;
+    _applyRestoredServer();
+    final current = _selectedServer;
+    if (!force &&
+        _tunnelUp &&
+        current != null &&
+        _servers.any((s) => s.id == current.id)) {
+      notifyListeners();
+      return;
+    }
 
     ServerConfig? best;
     try {
@@ -593,22 +714,32 @@ class AppProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Whether [server] needs PRO this account does not have. The picker
+  /// opens the paywall for such servers instead of selecting them.
+  bool isLockedForUser(ServerConfig server) => server.premium && !_isPremium;
+
+  /// The catalogue's current object for [server] (a picker may hold one
+  /// from before a reload, e.g. a locked PRO entry that got its link).
+  ServerConfig _current(ServerConfig server) {
+    for (final candidate in _servers) {
+      if (candidate.id == server.id) return candidate;
+    }
+    return server;
+  }
+
   void selectServer(ServerConfig server) {
+    final target = _current(server);
+    // Never drop a working tunnel for a server this account cannot use.
+    if (isLockedForUser(target)) return;
     final wasConnected =
         _vpnStatus == VpnStatus.connected || _vpnStatus == VpnStatus.connecting;
-    final isSameServer = _selectedServer?.id == server.id;
+    final isSameServer = _selectedServer?.id == target.id;
 
-    _selectedServer = server;
+    _selectedServer = target;
     _isAutoSelect = false;
     notifyListeners();
 
-    if (wasConnected && !isSameServer) {
-      if (server.premium && !_isPremium) {
-        unawaited(_disconnectForPremiumGate());
-      } else {
-        unawaited(_reconnect());
-      }
-    }
+    if (wasConnected && !isSameServer) unawaited(_reconnect());
   }
 
   void toggleAutoSelect() {
@@ -617,10 +748,11 @@ class AppProvider with ChangeNotifier {
     final previous = _selectedServer;
 
     _isAutoSelect = true;
-    _autoSelectBestServer().then((_) {
-      if (wasConnected && _selectedServer?.id != previous?.id) {
-        unawaited(_reconnect());
-      }
+    _autoSelectBestServer(force: true).then((_) {
+      final next = _selectedServer;
+      if (!wasConnected || next == null || next.id == previous?.id) return;
+      if (isLockedForUser(next)) return;
+      unawaited(_reconnect());
     });
   }
 
@@ -636,19 +768,17 @@ class AppProvider with ChangeNotifier {
     await _vpnService.disconnect();
     await Future.delayed(const Duration(milliseconds: 500));
     if (stale()) return;
+    final started = DateTime.now();
     await connectVpn();
     if (stale() || _vpnService.status != VpnStatus.error) return;
+    // Only a quick failure means the old engine was still stopping; a
+    // server that timed out would just make the user wait twice as long.
+    if (DateTime.now().difference(started) > const Duration(seconds: 4)) {
+      return;
+    }
     await Future.delayed(const Duration(milliseconds: 1500));
     if (stale() || _vpnService.status != VpnStatus.error) return;
     await connectVpn();
-  }
-
-  Future<void> _disconnectForPremiumGate() async {
-    _reconnectGeneration++;
-    await _vpnService.disconnect();
-    if (_disposed) return;
-    _errorMessage = 'premium_required';
-    notifyListeners();
   }
 
   /// Called whenever [SplitTunnelService] fires a change. Two jobs:
@@ -708,6 +838,21 @@ class AppProvider with ChangeNotifier {
       _errorMessage = 'premium_required';
       notifyListeners();
       return;
+    }
+
+    // A PRO VLESS entry fetched while the account was free has no link yet;
+    // right after an upgrade the catalogue must be reloaded first.
+    if (target.isLocked) {
+      await loadServers();
+      if (_disposed) return;
+      final fresh = _current(target);
+      if (fresh.isLocked) {
+        _errorMessage = 'load_servers_failed';
+        notifyListeners();
+        return;
+      }
+      target = fresh;
+      if (_selectedServer?.id == fresh.id) _selectedServer = fresh;
     }
 
     // Per-app VPN mask. `blocked` drives the AWG path (injected as
@@ -804,7 +949,10 @@ class AppProvider with ChangeNotifier {
     _lastEngineTx = 0;
     _activeServerIp = null;
     _activeProtocol = null;
+    _restoredServerId = null;
+    _resumingTraffic = false;
     _reviewPrompt.forgetSession();
+    unawaited(_clearSession());
     notifyListeners();
   }
 

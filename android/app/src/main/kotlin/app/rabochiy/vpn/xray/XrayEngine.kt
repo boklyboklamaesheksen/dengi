@@ -25,8 +25,8 @@ class XrayUnreachableException(message: String) : IOException(message)
 object XrayEngine {
     private const val TAG = "XrayEngine"
 
-    /** Covers TUN setup plus two 12 s connectivity probes inside the service. */
-    private const val CONNECT_TIMEOUT_MS = 45_000L
+    /** Safety net over the service's own limits: 6 s TCP pre-check + 13 s probes. */
+    private const val CONNECT_TIMEOUT_MS = 30_000L
     private const val STOP_TIMEOUT_MS = 5_000L
     private const val PING_TIMEOUT_MS = 3_000
 

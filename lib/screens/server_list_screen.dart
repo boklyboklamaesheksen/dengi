@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -8,6 +10,7 @@ import '../motion/glass.dart';
 import '../motion/press_feedback.dart';
 import '../providers/app_provider.dart';
 import '../widgets/glass_card.dart';
+import 'premium_gate.dart';
 
 /// Bottom-sheet style server picker with a frosted surface and glass tiles.
 class ServerListScreen extends StatefulWidget {
@@ -285,8 +288,23 @@ class _ServerListScreenState extends State<ServerListScreen> {
                                 server: server,
                                 selected: selected,
                                 onTap: () {
+                                  final NavigatorState navigator = Navigator.of(
+                                    context,
+                                  );
+                                  navigator.pop();
+                                  if (provider.isLockedForUser(server)) {
+                                    // Paywall right away; the working
+                                    // tunnel and selection stay untouched.
+                                    unawaited(
+                                      PremiumGate.unlockServer(
+                                        navigator,
+                                        provider,
+                                        server,
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   provider.selectServer(server);
-                                  Navigator.pop(context);
                                 },
                               );
                             },
@@ -506,6 +524,15 @@ class _ServerTile extends StatelessWidget {
                 children: <Widget>[
                   Row(
                     children: [
+                      if (server.premium) ...<Widget>[
+                        const Icon(
+                          Icons.star_rounded,
+                          key: ValueKey<String>('premium-star'),
+                          color: AppColors.warning,
+                          size: 17,
+                        ),
+                        const SizedBox(width: 4),
+                      ],
                       Expanded(
                         child: Text(
                           server.country == 'Unknown'
