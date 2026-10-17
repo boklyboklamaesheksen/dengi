@@ -4,7 +4,7 @@ description: "Zapret VPN — premium privacy tunnel with a stark monochrome xAI-
 publish_to: 'none'
 
 # Version follows semantic versioning: MAJOR.MINOR.PATCH+BUILD
-version: 26.10.15+9
+version: 26.10.17+10
 
 environment:
   sdk: ^3.13.3
