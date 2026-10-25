@@ -205,7 +205,11 @@ void main() {
 
       await provider.disconnectVpn();
       await provider.loadServers();
-      expect(provider.selectedServer?.id, 'free-b');
+      expect(
+        provider.selectedServer?.id,
+        'free-a',
+        reason: 'auto-pick starts with the last server that worked',
+      );
     },
   );
 

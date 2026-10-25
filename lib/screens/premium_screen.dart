@@ -1,14 +1,19 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../config/app_theme.dart';
 import '../motion/glass.dart';
 import '../l10n/app_localizations.dart';
+import '../motion/lite_mode.dart';
 import '../motion/press_feedback.dart';
 import '../providers/app_provider.dart';
 import '../services/api_service.dart';
 import 'pay_web_screen.dart';
-import '../widgets/glass_card.dart';
+import 'support_screen.dart';
+import '../widgets/brand_logos.dart';
+import '../widgets/feature_glyphs.dart';
 import '../widgets/halo_field.dart';
 
 /// Premium tariffs picker.
@@ -295,7 +300,7 @@ class _PremiumScreenState extends State<PremiumScreen> with WidgetsBindingObserv
     return Stack(
       children: <Widget>[
         ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 140),
           children: <Widget>[
             const SizedBox(height: 36),
             _Hero(
@@ -323,6 +328,8 @@ class _PremiumScreenState extends State<PremiumScreen> with WidgetsBindingObserv
                 bestValue: i == _bestValueIndex,
                 bestValueLabel: l10n.premiumBadgeBest,
                 priceTbdLabel: l10n.premiumPriceTbd,
+                perMonthLabel: _perMonthLabel(_tariffs[i], l10n),
+                savingsPercent: _savingsPercent(i),
                 onTap: () {
                   if (_selectedIndex != i) {
                     setState(() => _selectedIndex = i);
@@ -331,11 +338,36 @@ class _PremiumScreenState extends State<PremiumScreen> with WidgetsBindingObserv
               ),
               const SizedBox(height: 10),
             ],
-            const SizedBox(height: 28),
-            _FeatureList(l10n: l10n),
+            const SizedBox(height: 6),
+            _TrustRow(l10n: l10n),
+            const SizedBox(height: 30),
+            _FeatureGrid(l10n: l10n),
           ],
         ),
         const _CloseButton(),
+        // Fade so the scrolling list never collides with the button.
+        const Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 116,
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: <Color>[
+                    Color(0x0007080A),
+                    Color(0xE607080A),
+                    AppColors.base,
+                  ],
+                  stops: <double>[0, 0.45, 1],
+                ),
+              ),
+            ),
+          ),
+        ),
         Align(
           alignment: Alignment.bottomCenter,
           child: _BottomCta(
@@ -351,11 +383,38 @@ class _PremiumScreenState extends State<PremiumScreen> with WidgetsBindingObserv
 
   String _formatPrice(TariffInfo tariff, AppLocalizations l10n) {
     if (tariff.price <= 0) return l10n.premiumPriceTbd;
-    final rounded = tariff.price.toStringAsFixed(
-      tariff.price == tariff.price.roundToDouble() ? 0 : 2,
-    );
-    return '$rounded ₽';
+    return _formatRub(tariff.price);
   }
+
+  static const int _dayMs = 24 * 60 * 60 * 1000;
+
+  double? _ratePerDay(TariffInfo tariff) =>
+      tariff.price > 0 && tariff.durationMs > 0
+      ? tariff.price / (tariff.durationMs / _dayMs)
+      : null;
+
+  /// "≈ 83 ₽/мес" for plans of about two months and longer.
+  String? _perMonthLabel(TariffInfo tariff, AppLocalizations l10n) {
+    final rate = _ratePerDay(tariff);
+    if (rate == null || tariff.durationMs / _dayMs < 45) return null;
+    final perMonth = rate * 30;
+    return '≈ ${_formatRub(perMonth >= 10 ? perMonth.roundToDouble() : perMonth)}'
+        '/${l10n.monthShort}';
+  }
+
+  /// Saving against the priciest plan per day, when it is worth showing.
+  int? _savingsPercent(int index) {
+    final rate = _ratePerDay(_tariffs[index]);
+    final rates = _tariffs.map(_ratePerDay).whereType<double>().toList();
+    if (rate == null || rates.length < 2) return null;
+    final percent = ((1 - rate / rates.reduce(math.max)) * 100).round();
+    return percent >= 5 ? percent : null;
+  }
+}
+
+String _formatRub(double value) {
+  final rounded = value.toStringAsFixed(value == value.roundToDouble() ? 0 : 2);
+  return '$rounded ₽';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -377,28 +436,8 @@ class _Hero extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: AppColors.signalSoft,
-            border: Border.all(color: AppColors.borderStrong),
-            boxShadow: const <BoxShadow>[
-              BoxShadow(
-                color: Color(0x40FFFFFF),
-                blurRadius: 28,
-                spreadRadius: -4,
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.workspace_premium_rounded,
-            color: AppColors.emerald,
-            size: 28,
-          ),
-        ),
-        const SizedBox(height: 18),
+        const PremiumEmblem(size: 64),
+        const SizedBox(height: 16),
         Text(
           title,
           style: const TextStyle(
@@ -410,28 +449,7 @@ class _Hero extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        ShaderMask(
-          shaderCallback: (Rect bounds) => const LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: <Color>[
-              Color(0xFFE0115C), // cherry
-              Color(0xFFFF4D2E), // vermilion
-              Color(0xFFFFA01E), // orange
-            ],
-          ).createShader(bounds),
-          blendMode: BlendMode.srcIn,
-          child: Text(
-            accent,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 34,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -1.0,
-              height: 1.05,
-            ),
-          ),
-        ),
+        _PlatinumAccent(text: accent),
         const SizedBox(height: 14),
         Text(
           subtitle,
@@ -447,85 +465,268 @@ class _Hero extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Feature list
+/// "Pro" in the app's platinum ramp with a slow glint sweeping across.
+class _PlatinumAccent extends StatefulWidget {
+  const _PlatinumAccent({required this.text});
 
-class _FeatureList extends StatelessWidget {
-  const _FeatureList({required this.l10n});
+  final String text;
+
+  @override
+  State<_PlatinumAccent> createState() => _PlatinumAccentState();
+}
+
+class _PlatinumAccentState extends State<_PlatinumAccent>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _glint = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 3600),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    LiteMode.instance.addListener(_sync);
+    _sync();
+  }
+
+  void _sync() {
+    if (LiteMode.instance.isEnabled(RabochiyEffect.dialParticles)) {
+      if (!_glint.isAnimating) _glint.repeat();
+    } else {
+      _glint
+        ..stop()
+        ..value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    LiteMode.instance.removeListener(_sync);
+    _glint.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _glint,
+      builder: (context, child) => ShaderMask(
+        blendMode: BlendMode.srcIn,
+        shaderCallback: (Rect bounds) => LinearGradient(
+          colors: const <Color>[
+            Color(0xFFC9CED6),
+            Color(0xFFE9ECF0),
+            Colors.white,
+            Color(0xFFE9ECF0),
+            Color(0xFFC9CED6),
+          ],
+          stops: const <double>[0, 0.4, 0.5, 0.6, 1],
+          // The glint crosses during the first half, then rests off-text.
+          transform: _SlideGradient(_glint.value * 4 - 1.5),
+        ).createShader(bounds),
+        child: child,
+      ),
+      child: Text(
+        widget.text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 34,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -1.0,
+          height: 1.05,
+        ),
+      ),
+    );
+  }
+}
+
+class _SlideGradient extends GradientTransform {
+  const _SlideGradient(this.shift);
+
+  /// Offset in widths of the painted bounds.
+  final double shift;
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) =>
+      Matrix4.translationValues(bounds.width * shift, 0, 0);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Trust row
+
+class _TrustRow extends StatelessWidget {
+  const _TrustRow({required this.l10n});
 
   final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    final List<_FeatureSpec> items = <_FeatureSpec>[
-      _FeatureSpec(Icons.public_rounded, l10n.premiumFeatureUnblock),
-      _FeatureSpec(Icons.bolt_rounded, l10n.premiumFeatureSpeed),
-      _FeatureSpec(Icons.visibility_off_rounded, l10n.premiumFeatureAnonymous),
-      _FeatureSpec(Icons.high_quality_rounded, l10n.premiumFeatureHd),
-      _FeatureSpec(Icons.shield_rounded, l10n.premiumFeatureNoLogs),
-      _FeatureSpec(Icons.block_rounded, l10n.premiumFeatureNoAds),
-    ];
-    return GlassCard(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      child: Column(
+    return LiquidTile(
+      padding: const EdgeInsets.fromLTRB(8, 14, 8, 12),
+      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      elevated: false,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          for (int i = 0; i < items.length; i++) ...<Widget>[
-            _FeatureRow(spec: items[i]),
-            if (i != items.length - 1)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: Divider(
-                  color: AppColors.border,
-                  height: 1,
-                  thickness: 1,
-                ),
+          Expanded(
+            child: _TrustItem(
+              mark: const FeatureGlyphTile(
+                glyph: FeatureGlyph.instant,
+                size: 34,
               ),
-          ],
+              label: l10n.premiumTrustInstant,
+            ),
+          ),
+          Expanded(
+            child: _TrustItem(
+              mark: const FeatureGlyphTile(
+                glyph: FeatureGlyph.secure,
+                size: 34,
+              ),
+              label: l10n.premiumTrustSecure,
+            ),
+          ),
+          Expanded(
+            child: PressScale(
+              onTap: () =>
+                  SupportScreen.openTelegram(SupportScreen.telegramChatHandle),
+              pressedScale: 0.95,
+              child: _TrustItem(
+                mark: const TelegramLogo(size: 34),
+                label: l10n.premiumTrustSupport,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _FeatureSpec {
-  const _FeatureSpec(this.icon, this.label);
-  final IconData icon;
+class _TrustItem extends StatelessWidget {
+  const _TrustItem({required this.mark, required this.label});
+
+  final Widget mark;
   final String label;
-}
-
-class _FeatureRow extends StatelessWidget {
-  const _FeatureRow({required this.spec});
-
-  final _FeatureSpec spec;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(11),
-            gradient: AppColors.signalSoft,
-            border: Border.all(color: AppColors.borderStrong),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        children: <Widget>[
+          mark,
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+              height: 1.3,
+            ),
           ),
-          child: Icon(spec.icon, color: AppColors.emerald, size: 18),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// What PRO includes
+
+class _FeatureGrid extends StatelessWidget {
+  const _FeatureGrid({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<(FeatureGlyph, String)> items = <(FeatureGlyph, String)>[
+      (FeatureGlyph.unblock, l10n.premiumFeatureUnblock),
+      (FeatureGlyph.speed, l10n.premiumFeatureSpeed),
+      (FeatureGlyph.anonymous, l10n.premiumFeatureAnonymous),
+      (FeatureGlyph.hd, l10n.premiumFeatureHd),
+      (FeatureGlyph.noLogs, l10n.premiumFeatureNoLogs),
+      (FeatureGlyph.noAds, l10n.premiumFeatureNoAds),
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 12),
           child: Text(
-            spec.label,
+            l10n.premiumIncluded,
             style: const TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 14,
-              height: 1.35,
-              fontWeight: FontWeight.w500,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.2,
             ),
           ),
         ),
+        for (int i = 0; i < items.length; i += 2) ...<Widget>[
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Expanded(
+                  child: _FeatureCard(glyph: items[i].$1, label: items[i].$2),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: i + 1 < items.length
+                      ? _FeatureCard(
+                          glyph: items[i + 1].$1,
+                          label: items[i + 1].$2,
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+          if (i + 2 < items.length) const SizedBox(height: 10),
+        ],
       ],
+    );
+  }
+}
+
+class _FeatureCard extends StatelessWidget {
+  const _FeatureCard({required this.glyph, required this.label});
+
+  final FeatureGlyph glyph;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return LiquidTile(
+      padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      elevated: false,
+      // Full width: the tile's fill only spans its child.
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            FeatureGlyphTile(glyph: glyph, size: 38),
+            const SizedBox(height: 12),
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 13,
+                height: 1.3,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -541,6 +742,8 @@ class _TariffRadioCard extends StatelessWidget {
     required this.bestValueLabel,
     required this.priceTbdLabel,
     required this.onTap,
+    this.perMonthLabel,
+    this.savingsPercent,
   });
 
   final TariffInfo tariff;
@@ -549,6 +752,12 @@ class _TariffRadioCard extends StatelessWidget {
   final String bestValueLabel;
   final String priceTbdLabel;
   final VoidCallback onTap;
+
+  /// "≈ 83 ₽/мес" for longer plans.
+  final String? perMonthLabel;
+
+  /// Discount against the priciest plan per day.
+  final int? savingsPercent;
 
   String _formatDuration(AppLocalizations l10n) {
     if (tariff.durationMs <= 0) return '';
@@ -565,15 +774,15 @@ class _TariffRadioCard extends StatelessWidget {
 
   String _formatPrice() {
     if (tariff.price <= 0) return priceTbdLabel;
-    final rounded = tariff.price.toStringAsFixed(
-      tariff.price == tariff.price.roundToDouble() ? 0 : 2,
-    );
-    return '$rounded ₽';
+    return _formatRub(tariff.price);
   }
 
   @override
   Widget build(BuildContext context) {
-    final dur = _formatDuration(AppLocalizations.of(context)!);
+    final dur = <String>[
+      _formatDuration(AppLocalizations.of(context)!),
+      ?perMonthLabel,
+    ].where((part) => part.isNotEmpty).join(' · ');
     final price = _formatPrice();
 
     return PressScale(
@@ -717,16 +926,42 @@ class _TariffRadioCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Text(
-              price,
-              style: TextStyle(
-                color: selected
-                    ? AppColors.emerald
-                    : AppColors.textPrimary,
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.4,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  price,
+                  style: TextStyle(
+                    color: selected ? AppColors.emerald : AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.4,
+                  ),
+                ),
+                if (savingsPercent != null) ...<Widget>[
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      '−$savingsPercent%',
+                      style: const TextStyle(
+                        color: AppColors.success,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ],
         ),

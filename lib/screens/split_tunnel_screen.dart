@@ -28,29 +28,61 @@ class SplitTunnelScreen extends StatefulWidget {
   State<SplitTunnelScreen> createState() => _SplitTunnelScreenState();
 }
 
-class _SplitTunnelScreenState extends State<SplitTunnelScreen> {
+class _SplitTunnelScreenState extends State<SplitTunnelScreen>
+    with WidgetsBindingObserver {
+  static const String _disclosurePrefsKey = 'split_tunnel_disclosure_shown';
+
   Future<List<AppInfo>>? _appsFuture;
   String _query = '';
   bool _lastShowSystemFlag = false;
   Timer? _searchDebounce;
 
+  /// The user postponed the in-app disclosure: nothing is read until they
+  /// allow it from the access card.
+  bool _disclosureDeclined = false;
+
+  /// The system app-list permission (MIUI/HyperOS) is refused.
+  bool _accessDenied = false;
+
+  /// The system can ask for that permission (false elsewhere).
+  bool _accessAskable = false;
+
+  /// The OS returned nothing but this app, whatever the reason.
+  bool _onlySelfVisible = false;
+
+  /// "Allow" on the access card is being handled (one dialog at a time).
+  bool _askingAgain = false;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     final AppProvider provider = context.read<AppProvider>();
     _lastShowSystemFlag = provider.splitTunnel.config.showSystemApps;
     WidgetsBinding.instance.addPostFrameCallback((_) => _showDisclosureIfNeeded());
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Back from the system settings: pick up a permission granted there.
+    // The permission dialog pauses the app too; [_askAgain] reloads then.
+    if (state == AppLifecycleState.resumed &&
+        !_askingAgain &&
+        !_disclosureDeclined &&
+        (_accessDenied || _onlySelfVisible)) {
+      unawaited(_startLoading(ask: false));
+    }
+  }
+
   Future<void> _showDisclosureIfNeeded() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
-    final shown = prefs.getBool('split_tunnel_disclosure_shown') ?? false;
-    if (shown) {
-      if (mounted) setState(() => _appsFuture = _loadApps(_lastShowSystemFlag));
+    if (prefs.getBool(_disclosurePrefsKey) ?? false) {
+      await _startLoading();
       return;
     }
     final l10n = AppLocalizations.of(context)!;
+    // Back button or "Not now" both mean "later", never a dead end.
     final ok = await showDialog<bool>(
           context: context,
           barrierDismissible: false,
@@ -102,26 +134,15 @@ class _SplitTunnelScreenState extends State<SplitTunnelScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  PressScale(
+                  _DialogButton(
+                    label: l10n.splitTunnelAccessAllow,
+                    primary: true,
                     onTap: () => Navigator.of(ctx).pop(true),
-                    pressedScale: 0.97,
-                    child: SizedBox(
-                      height: 44,
-                      child: LiquidTile(
-                        borderRadius: AppRadii.tile,
-                        child: Center(
-                          child: Text(
-                            l10n.splitTunnelDisclosureButton,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _DialogButton(
+                    label: l10n.splitTunnelDisclosureLater,
+                    onTap: () => Navigator.of(ctx).pop(false),
                   ),
                 ],
               ),
@@ -129,14 +150,86 @@ class _SplitTunnelScreenState extends State<SplitTunnelScreen> {
           ),
         ) ??
         false;
-    if (ok == true) {
-      await prefs.setBool('split_tunnel_disclosure_shown', true);
-      if (mounted) setState(() => _appsFuture = _loadApps(_lastShowSystemFlag));
+    if (!mounted) return;
+    if (ok) {
+      await _acceptDisclosure();
+    } else {
+      setState(() => _disclosureDeclined = true);
+    }
+  }
+
+  Future<void> _acceptDisclosure() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_disclosurePrefsKey, true);
+    if (!mounted) return;
+    setState(() => _disclosureDeclined = false);
+    await _startLoading();
+  }
+
+  /// Checks (and with [ask], requests) the system app-list permission, then
+  /// loads whatever the OS lets us see.
+  Future<void> _startLoading({bool ask = true}) async {
+    var access = await _readAccess();
+    if (ask && !access.granted && access.supported) {
+      access = (supported: true, granted: await _requestAccess());
+    }
+    if (!mounted) return;
+    setState(() {
+      _accessDenied = !access.granted;
+      _accessAskable = access.supported;
+      _appsFuture = _loadApps(_lastShowSystemFlag);
+    });
+  }
+
+  Future<({bool supported, bool granted})> _readAccess() async {
+    try {
+      final raw = await _pkgChannel.invokeMapMethod<String, Object?>(
+        'appListAccess',
+      );
+      return (
+        supported: raw?['supported'] == true,
+        granted: raw?['granted'] != false,
+      );
+    } catch (_) {
+      return (supported: false, granted: true);
+    }
+  }
+
+  Future<bool> _requestAccess() async {
+    try {
+      return await _pkgChannel.invokeMethod<bool>('requestAppListAccess') ??
+          false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _openAccessSettings() async {
+    try {
+      await _pkgChannel.invokeMethod<bool>('openAppListSettings');
+    } catch (_) {}
+  }
+
+  Future<void> _askAgain() async {
+    if (_askingAgain) return;
+    _askingAgain = true;
+    try {
+      final granted = await _requestAccess();
+      if (!mounted) return;
+      if (granted) {
+        await _startLoading(ask: false);
+      } else {
+        // The system no longer shows its dialog: settings are the way.
+        await _openAccessSettings();
+      }
+    } finally {
+      _askingAgain = false;
     }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchDebounce?.cancel();
     super.dispose();
   }
@@ -177,6 +270,10 @@ class _SplitTunnelScreenState extends State<SplitTunnelScreen> {
         false,
         true,
       );
+      final bool onlySelf = apps.length <= 1;
+      if (mounted && onlySelf != _onlySelfVisible) {
+        setState(() => _onlySelfVisible = onlySelf);
+      }
 
       List<AppInfo> filtered;
       if (includeSystem) {
@@ -205,7 +302,8 @@ class _SplitTunnelScreenState extends State<SplitTunnelScreen> {
   void _maybeReloadApps(SplitTunnelService st) {
     if (st.config.showSystemApps != _lastShowSystemFlag) {
       _lastShowSystemFlag = st.config.showSystemApps;
-      _appsFuture = _loadApps(_lastShowSystemFlag);
+      // Nothing is read before the user allowed it.
+      if (_appsFuture != null) _appsFuture = _loadApps(_lastShowSystemFlag);
     }
   }
 
@@ -318,6 +416,34 @@ class _SplitTunnelScreenState extends State<SplitTunnelScreen> {
                           const SizedBox(height: 10),
                           _SystemToggleRow(service: st, l10n: l10n),
                           const SizedBox(height: 12),
+                          if (_disclosureDeclined)
+                            _AccessCard(
+                              title: l10n.splitTunnelDisclosureTitle,
+                              body: l10n.splitTunnelDisclosureBody,
+                              primaryLabel: l10n.splitTunnelAccessAllow,
+                              onPrimary: _acceptDisclosure,
+                            )
+                          else if (_accessDenied || _onlySelfVisible)
+                            _AccessCard(
+                              title: l10n.splitTunnelAccessTitle,
+                              body:
+                                  '${l10n.splitTunnelAccessBody}\n\n'
+                                  '${l10n.splitTunnelAccessSettingsHint}',
+                              primaryLabel: _accessAskable && _accessDenied
+                                  ? l10n.splitTunnelAccessAllow
+                                  : l10n.splitTunnelAccessSettings,
+                              onPrimary: _accessAskable && _accessDenied
+                                  ? _askAgain
+                                  : _openAccessSettings,
+                              secondaryLabel: _accessAskable && _accessDenied
+                                  ? l10n.splitTunnelAccessSettings
+                                  : null,
+                              onSecondary: _openAccessSettings,
+                            ),
+                          if (_disclosureDeclined ||
+                              _accessDenied ||
+                              _onlySelfVisible)
+                            const SizedBox(height: 12),
                         ]),
                       ),
                     ),
@@ -325,6 +451,12 @@ class _SplitTunnelScreenState extends State<SplitTunnelScreen> {
                       future: _appsFuture,
                       builder: (BuildContext context,
                           AsyncSnapshot<List<AppInfo>> snap) {
+                        // Postponed consent: the access card says why.
+                        if (_disclosureDeclined) {
+                          return const SliverToBoxAdapter(
+                            child: SizedBox.shrink(),
+                          );
+                        }
                         if (!snap.hasData) {
                           return SliverToBoxAdapter(
                             child: Padding(
@@ -797,6 +929,127 @@ class _AppRow extends StatelessWidget {
           ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DialogButton extends StatelessWidget {
+  const _DialogButton({
+    required this.label,
+    required this.onTap,
+    this.primary = false,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final bool primary;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressScale(
+      onTap: onTap,
+      pressedScale: 0.97,
+      child: SizedBox(
+        height: 44,
+        child: primary
+            ? LiquidTile(
+                borderRadius: AppRadii.tile,
+                selected: true,
+                accent: AppColors.emerald,
+                child: Center(child: _label(Colors.white)),
+              )
+            : Center(child: _label(AppColors.textSecondary)),
+      ),
+    );
+  }
+
+  Widget _label(Color color) => Text(
+    label,
+    textAlign: TextAlign.center,
+    style: TextStyle(
+      color: color,
+      fontSize: 13,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.2,
+    ),
+  );
+}
+
+/// Shown instead of a silent, endless "loading" when the app list cannot be
+/// read: says why and offers the way out.
+class _AccessCard extends StatelessWidget {
+  const _AccessCard({
+    required this.title,
+    required this.body,
+    required this.primaryLabel,
+    required this.onPrimary,
+    this.secondaryLabel,
+    this.onSecondary,
+  });
+
+  final String title;
+  final String body;
+  final String primaryLabel;
+  final VoidCallback onPrimary;
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
+
+  @override
+  Widget build(BuildContext context) {
+    return LiquidTile(
+      key: const ValueKey<String>('split-tunnel-access'),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+      borderRadius: AppRadii.card,
+      selected: true,
+      accent: AppColors.warning,
+      elevated: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.lock_open_rounded,
+                  color: AppColors.warning,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            body,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12.5,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 14),
+          _DialogButton(label: primaryLabel, primary: true, onTap: onPrimary),
+          if (secondaryLabel != null && onSecondary != null) ...<Widget>[
+            const SizedBox(height: 4),
+            _DialogButton(label: secondaryLabel!, onTap: onSecondary!),
+          ],
+        ],
       ),
     );
   }

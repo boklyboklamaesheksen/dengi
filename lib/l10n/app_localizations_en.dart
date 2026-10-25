@@ -54,13 +54,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clickToSelect => 'Tap to select';
 
   @override
-  String get autoSelectBest => 'Auto · best server';
+  String get autoPickTitle => 'Auto server pick';
 
   @override
   String get autoSelect => 'Auto select';
 
   @override
-  String get optimized => 'Optimized for speed';
+  String get autoPickSubtitle => 'Finds a working server for you';
+
+  @override
+  String get autoPickDescription =>
+      'Tries every GW, VLESS and AmneziaWG server and connects to one that works';
+
+  @override
+  String get autoPickChecking => 'Checking';
+
+  @override
+  String get autoPickWorking => 'Working server';
+
+  @override
+  String get autoPickLastWorking => 'Last working';
+
+  @override
+  String get autoPickSearchingUpper => 'FINDING A SERVER…';
 
   @override
   String get manualSelection => 'Manual selection';
@@ -180,6 +196,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportOpen => 'Open';
+
+  @override
+  String get supportChatAction => 'Message the chat';
+
+  @override
+  String get supportNewsAction => 'Subscribe';
 
   // ── Traffic stats ────────────────────────────────────────────────────
   @override
@@ -305,6 +327,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get splitTunnelDisclosureButton => 'Got it';
 
+  @override
+  String get splitTunnelDisclosureLater => 'Not now';
+
+  @override
+  String get splitTunnelAccessTitle => 'No access to your app list';
+
+  @override
+  String get splitTunnelAccessBody =>
+      'Without this permission the system shows only our own app, so there is nothing to choose from. The list never leaves your device.';
+
+  @override
+  String get splitTunnelAccessAllow => 'Allow access';
+
+  @override
+  String get splitTunnelAccessSettings => 'Open settings';
+
+  @override
+  String get splitTunnelAccessSettingsHint =>
+      'In settings, open Permissions, allow access to the list of installed apps and come back here.';
+
   // ── Splash / Onboarding ──────────────────────────────────────────────
   @override
   String get splashSaveRecoveryPhrase => 'Save Your Recovery Phrase';
@@ -366,6 +408,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorServerUnreachable =>
       'Server did not respond. Try another server or check your connection.';
+
+  @override
+  String get errorAutoPickFailed =>
+      'No working server found. Check your internet connection and try again.';
+
+  @override
+  String get errorNoInternet =>
+      'No internet connection. Turn on Wi-Fi or mobile data and try again.';
 
   @override
   String errorGeneric(String details) => 'Error: $details';
@@ -598,6 +648,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get premiumBadgeBest => 'Best value';
+
+  @override
+  String get premiumIncluded => 'What PRO includes';
+
+  @override
+  String get premiumTrustInstant => 'Instant activation';
+
+  @override
+  String get premiumTrustSecure => 'Secure checkout';
+
+  @override
+  String get premiumTrustSupport => 'Help in Telegram';
 
   @override
   String get accountPaymentOpenError =>

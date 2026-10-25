@@ -218,7 +218,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               PulseBadge(
                                 state: tunnelState,
                                 idleLabel: l10n.notConnected,
-                                connectingLabel: l10n.connectingUpper,
+                                connectingLabel: provider.autoPick != null
+                                    ? l10n.autoPickSearchingUpper
+                                    : l10n.connectingUpper,
                                 connectedLabel: l10n.securelyConnected,
                                 disconnectingLabel: l10n.disconnectingUpper,
                               ),

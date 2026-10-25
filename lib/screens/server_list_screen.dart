@@ -9,6 +9,7 @@ import '../models/server_config_model.dart';
 import '../motion/glass.dart';
 import '../motion/press_feedback.dart';
 import '../providers/app_provider.dart';
+import '../services/auto_pick.dart';
 import '../widgets/glass_card.dart';
 import 'premium_gate.dart';
 
@@ -273,6 +274,7 @@ class _ServerListScreenState extends State<ServerListScreen> {
                               if (index == headerCount - 1) {
                                 return _AutoTile(
                                   selected: provider.isAutoSelect,
+                                  progress: provider.autoPick,
                                   onTap: () {
                                     provider.toggleAutoSelect();
                                     Navigator.pop(context);
@@ -287,6 +289,8 @@ class _ServerListScreenState extends State<ServerListScreen> {
                               return _ServerTile(
                                 server: server,
                                 selected: selected,
+                                testing:
+                                    provider.autoPick?.server?.id == server.id,
                                 onTap: () {
                                   final NavigatorState navigator = Navigator.of(
                                     context,
@@ -372,13 +376,16 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-/// Glass tile for the "Auto · best server" pseudo-entry at the top of the
+/// Glass tile for the "Auto server pick" pseudo-entry at the top of the
 /// list.
 class _AutoTile extends StatelessWidget {
-  const _AutoTile({required this.selected, required this.onTap});
+  const _AutoTile({required this.selected, required this.onTap, this.progress});
 
   final bool selected;
   final VoidCallback onTap;
+
+  /// Running search, shown instead of the description.
+  final AutoPickProgress? progress;
 
   @override
   Widget build(BuildContext context) {
@@ -406,7 +413,7 @@ class _AutoTile extends StatelessWidget {
                 ],
               ),
               child: const Icon(
-                Icons.auto_awesome_rounded,
+                Icons.travel_explore_rounded,
                 // Glyph sits on the white→slate gradient: flip to dark.
                 color: AppColors.base,
                 size: 22,
@@ -418,7 +425,7 @@ class _AutoTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    l10n.autoSelectBest,
+                    l10n.autoPickTitle,
                     style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 15,
@@ -427,10 +434,13 @@ class _AutoTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    l10n.optimized,
+                    _description(l10n),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 12,
+                      height: 1.3,
                     ),
                   ),
                 ],
@@ -447,6 +457,16 @@ class _AutoTile extends StatelessWidget {
       ),
     );
   }
+
+  String _description(AppLocalizations l10n) {
+    final pick = progress;
+    final server = pick?.server;
+    if (pick == null || server == null) return l10n.autoPickDescription;
+    final place = server.country != 'Unknown'
+        ? server.country
+        : server.cleanName;
+    return '${l10n.autoPickChecking} ${pick.current}/${pick.total} · $place';
+  }
 }
 
 /// Single server row inside the picker.
@@ -455,11 +475,15 @@ class _ServerTile extends StatelessWidget {
     required this.server,
     required this.selected,
     required this.onTap,
+    this.testing = false,
   });
 
   final ServerConfig server;
   final bool selected;
   final VoidCallback onTap;
+
+  /// Auto-pick is connecting to this server right now.
+  final bool testing;
 
   Color get _protocolColor {
     return switch (server.protocol) {
@@ -572,7 +596,15 @@ class _ServerTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            if (selected)
+            if (testing)
+              const SizedBox.square(
+                dimension: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.emerald,
+                ),
+              )
+            else if (selected)
               const Icon(
                 Icons.check_circle_rounded,
                 color: AppColors.emerald,

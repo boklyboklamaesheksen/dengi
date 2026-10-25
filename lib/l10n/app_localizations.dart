@@ -78,9 +78,14 @@ abstract class AppLocalizations {
   // Server picker
   String get selectServer;
   String get clickToSelect;
-  String get autoSelectBest;
+  String get autoPickTitle;
   String get autoSelect;
-  String get optimized;
+  String get autoPickSubtitle;
+  String get autoPickDescription;
+  String get autoPickChecking;
+  String get autoPickWorking;
+  String get autoPickLastWorking;
+  String get autoPickSearchingUpper;
   String get manualSelection;
   String get optimalServer;
   String get selectLocation;
@@ -121,6 +126,8 @@ abstract class AppLocalizations {
   String get supportChannelRate;
   String get supportChannelRateDesc;
   String get supportOpen;
+  String get supportChatAction;
+  String get supportNewsAction;
 
   // Traffic stats screen
   String get statsTitle;
@@ -163,6 +170,12 @@ abstract class AppLocalizations {
   String get splitTunnelDisclosureTitle;
   String get splitTunnelDisclosureBody;
   String get splitTunnelDisclosureButton;
+  String get splitTunnelDisclosureLater;
+  String get splitTunnelAccessTitle;
+  String get splitTunnelAccessBody;
+  String get splitTunnelAccessAllow;
+  String get splitTunnelAccessSettings;
+  String get splitTunnelAccessSettingsHint;
 
   // Server list filter chips
   String get filterAll;
@@ -175,6 +188,8 @@ abstract class AppLocalizations {
   String get errorEngineNotReady;
   String get errorPlatformUnsupported;
   String get errorServerUnreachable;
+  String get errorAutoPickFailed;
+  String get errorNoInternet;
   String errorGeneric(String details);
 
   // Login / Restore screen
@@ -256,6 +271,10 @@ abstract class AppLocalizations {
   String get premiumFeatureNoLogs;
   String get premiumFeatureNoAds;
   String get premiumBadgeBest;
+  String get premiumIncluded;
+  String get premiumTrustInstant;
+  String get premiumTrustSecure;
+  String get premiumTrustSupport;
   String get accountPaymentOpenError;
   String get premiumPaymentTitle;
 

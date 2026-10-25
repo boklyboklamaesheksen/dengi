@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'dart:convert';
+import 'dart:io' show InternetAddress, Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:installed_apps/installed_apps.dart';
@@ -10,6 +11,7 @@ import '../config/backend_signing.dart';
 import '../models/server_config_model.dart';
 import '../services/api_host_service.dart';
 import '../services/api_service.dart';
+import '../services/auto_pick.dart';
 import '../services/gw_api_service.dart';
 import '../services/in_app_review_service.dart';
 import '../services/split_tunnel_service.dart';
@@ -96,10 +98,31 @@ class AppProvider with ChangeNotifier {
   /// far, already counted by the previous UI.
   bool _resumingTraffic = false;
 
+  /// Server of the last tunnel that came up; auto-pick tries it first.
+  static const String _lastWorkingPrefsKey = 'rabochiy_auto_last_working_v1';
+  String? _lastWorkingServerId;
+
+  /// Running "Auto server pick" search, null otherwise. While set, the
+  /// engine's per-server failures are not the user's connection state.
+  AutoPickProgress? _autoPick;
+
+  /// Per-server budget of auto-pick. AWG gives up after a 20 s handshake
+  /// wait and VLESS after 30 s on their own; GW would retry for ~2 min.
+  final Duration _autoPickAttemptTimeout;
+
+  /// Pause between two auto-pick attempts so the failed engine settles.
+  final Duration _autoPickSettle;
+
+  /// Whether the device is online at all: without a network every server
+  /// would fail one by one for minutes.
+  final Future<bool> Function() _internetProbe;
+
   VpnStatus get vpnStatus => _vpnStatus;
   List<ServerConfig> get servers => _servers;
   ServerConfig? get selectedServer => _selectedServer;
   bool get isAutoSelect => _isAutoSelect;
+  AutoPickProgress? get autoPick => _autoPick;
+  String? get lastWorkingServerId => _lastWorkingServerId;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
   String? get catalogError => _catalogError;
@@ -146,14 +169,43 @@ class AppProvider with ChangeNotifier {
     VpnService? vpnService,
     InAppReviewService? reviewService,
     bool autoInitialize = true,
+    this._autoPickAttemptTimeout = const Duration(seconds: 35),
+    this._autoPickSettle = const Duration(milliseconds: 700),
+    Future<bool> Function()? internetProbe,
   }) : _apiService = apiService ?? ApiService(),
        _gwApiService = gwApiService ?? GwApiService(),
        _vlessService = vlessService ?? VlessSubscriptionService(),
        _vpnService = vpnService ?? VpnService(),
-       _reviewPrompt = reviewService ?? InAppReviewService() {
+       _reviewPrompt = reviewService ?? InAppReviewService(),
+       _internetProbe = internetProbe ?? _deviceIsOnline {
     _vlessService.sources.urls.addListener(_onVlessSourcesChanged);
     ApiHostService.instance.remoteGeneration.addListener(_onRemoteHostChanged);
     if (autoInitialize) _initialize();
+  }
+
+  /// True when any well-known name resolves. Only Android runs the engines;
+  /// elsewhere (tests, desktop) there is nothing to protect against.
+  static Future<bool> _deviceIsOnline() async {
+    if (!Platform.isAndroid) return true;
+    const hosts = <String>['ya.ru', 'google.com', 'cloudflare.com'];
+    final online = Completer<bool>();
+    var pending = hosts.length;
+    for (final host in hosts) {
+      unawaited(
+        InternetAddress.lookup(host)
+            .timeout(const Duration(seconds: 4))
+            .then<void>((addresses) {
+              if (addresses.isNotEmpty && !online.isCompleted) {
+                online.complete(true);
+              }
+            }, onError: (Object _) {})
+            .whenComplete(() {
+              pending--;
+              if (pending == 0 && !online.isCompleted) online.complete(false);
+            }),
+      );
+    }
+    return online.future;
   }
 
   /// Remote Config delivered other subscription URLs: refresh the catalogue.
@@ -185,6 +237,7 @@ class AppProvider with ChangeNotifier {
         _apiService.getIsPremium().then((value) {
           _isPremium = value;
         }),
+        _loadLastWorkingServer(),
         loadServers(),
       ]);
       if (_disposed) return;
@@ -240,54 +293,67 @@ class AppProvider with ChangeNotifier {
       notifyListeners();
     });
 
-    _statusSubscription = _vpnService.statusStream.listen((status) {
-      if (_disposed) return;
-      final bool restored =
-          status == VpnStatus.connected &&
-          _vpnStatus == VpnStatus.disconnected &&
-          _vpnService.restoredEngine != null &&
-          !_restoreHandled;
-      _vpnStatus = status;
-      _reviewPrompt.onVpnStatus(status, restored: restored);
+    _statusSubscription = _vpnService.statusStream.listen(_onVpnStatus);
+  }
 
-      if (status == VpnStatus.connected) {
-        _cumulativeRxBytes = 0;
-        _cumulativeTxBytes = 0;
-        _lastEngineRx = 0;
-        _lastEngineTx = 0;
-        if (restored) {
-          _restoreHandled = true;
-          _resumingTraffic = true;
-          _startTimer();
-          _startHeartbeat();
-          unawaited(_restoreSession());
-        } else {
-          _startTimer();
-          _trafficStats.recordSessionStart();
-          _startHeartbeat();
-          unawaited(_saveSession());
-        }
-      } else if (status == VpnStatus.disconnected) {
-        _stopTimer();
-        _connectionDuration = Duration.zero;
-        _downloadSpeedBytes = 0;
-        _uploadSpeedBytes = 0;
-        _lastEngineRx = 0;
-        _lastEngineTx = 0;
-        _trafficStats.resetSession();
-        _stopHeartbeat(reportDisconnect: true);
-        _resumingTraffic = false;
-        unawaited(_clearSession());
-      } else if (status == VpnStatus.error) {
-        _errorMessage = _vpnService.errorMessage;
-        _stopTimer();
-        _stopHeartbeat(reportDisconnect: true);
-        _resumingTraffic = false;
-        unawaited(_clearSession());
+  void _onVpnStatus(VpnStatus status) {
+    if (_disposed) return;
+    // Auto-pick publishes its own verdict; a failed candidate or the
+    // teardown between two attempts is not a state change for the user.
+    if (_autoPick != null) return;
+    // Auto-pick already applied the tunnel the engine reports now.
+    if (status == VpnStatus.connected && _vpnStatus == VpnStatus.connected) {
+      return;
+    }
+    final bool restored =
+        status == VpnStatus.connected &&
+        _vpnStatus == VpnStatus.disconnected &&
+        _vpnService.restoredEngine != null &&
+        !_restoreHandled;
+    _vpnStatus = status;
+    _reviewPrompt.onVpnStatus(status, restored: restored);
+
+    if (status == VpnStatus.connected) {
+      _cumulativeRxBytes = 0;
+      _cumulativeTxBytes = 0;
+      _lastEngineRx = 0;
+      _lastEngineTx = 0;
+      if (restored) {
+        _restoreHandled = true;
+        _resumingTraffic = true;
+        _startTimer();
+        _startHeartbeat();
+        unawaited(_restoreSession());
+      } else {
+        _startTimer();
+        _trafficStats.recordSessionStart();
+        _startHeartbeat();
+        unawaited(_saveSession());
+        // The engine's config is the server actually up, even if the
+        // selection already moved on to the next switch.
+        final working = _vpnService.currentConfig ?? _selectedServer;
+        if (working != null) unawaited(_rememberWorkingServer(working));
       }
+    } else if (status == VpnStatus.disconnected) {
+      _stopTimer();
+      _connectionDuration = Duration.zero;
+      _downloadSpeedBytes = 0;
+      _uploadSpeedBytes = 0;
+      _lastEngineRx = 0;
+      _lastEngineTx = 0;
+      _trafficStats.resetSession();
+      _stopHeartbeat(reportDisconnect: true);
+      _resumingTraffic = false;
+      unawaited(_clearSession());
+    } else if (status == VpnStatus.error) {
+      _errorMessage = _vpnService.errorMessage;
+      _stopTimer();
+      _stopHeartbeat(reportDisconnect: true);
+      _resumingTraffic = false;
+      unawaited(_clearSession());
+    }
 
-      notifyListeners();
-    });
+    notifyListeners();
   }
 
   bool _restoreHandled = false;
@@ -399,8 +465,12 @@ class AppProvider with ChangeNotifier {
           .whereType<String>()
           .where((String s) => s.isNotEmpty)
           .toList(growable: false);
-      _installedPackageCache = names;
-      _installedPackageCacheTime = now;
+      // Only this app in the list means the OS withheld the rest (app-list
+      // permission still missing on MIUI/HyperOS): ask again next time.
+      if (names.length > 1) {
+        _installedPackageCache = names;
+        _installedPackageCacheTime = now;
+      }
       return names;
     } catch (_) {
       return cached ?? const <String>[];
@@ -672,8 +742,8 @@ class AppProvider with ChangeNotifier {
   /// payment URL).
   Future<void> refreshUserState() => _refreshUserState();
 
-  /// Picks the best server. While a tunnel is up a catalogue reload keeps
-  /// the server it actually uses ([force] is the user's explicit "Auto").
+  /// Points the auto selection at the server auto-pick will try first. While
+  /// a tunnel is up a catalogue reload keeps the server it actually uses.
   Future<void> _autoSelectBestServer({bool force = false}) async {
     if (_disposed || _servers.isEmpty) return;
     _applyRestoredServer();
@@ -686,30 +756,21 @@ class AppProvider with ChangeNotifier {
       return;
     }
 
-    ServerConfig? best;
-    try {
-      // Free-tier: prefer non-premium servers but keep premium ones as
-      // fallback candidates (tapping them opens the premium gate).
-      final ranked = _servers.toList()
-        ..sort((a, b) {
-          if (!_isPremium && a.premium != b.premium) return a.premium ? 1 : -1;
-          final loadA = _serverLoadByIp[a.address] ?? 50;
-          final loadB = _serverLoadByIp[b.address] ?? 50;
-          if (a.recommend != b.recommend) return a.recommend ? -1 : 1;
-          if (loadA != loadB) return loadA.compareTo(loadB);
-          return b.priority.compareTo(a.priority);
-        });
-
-      if (ranked.isNotEmpty) {
-        best = ranked.first;
-      } else {
-        best = _servers.first;
-      }
-    } catch (_) {
-      if (_servers.isNotEmpty) best = _servers.first;
-    }
-
-    _selectedServer = best;
+    final order = autoPickOrder(
+      _servers,
+      isPremium: _isPremium,
+      loadByAddress: _serverLoadByIp,
+      lastWorkingId: _lastWorkingServerId,
+    );
+    // Nothing usable (a free account facing PRO-only servers): still show
+    // the best one so connecting opens the paywall.
+    _selectedServer = order.isNotEmpty
+        ? order.first
+        : rankServers(
+            _servers,
+            isPremium: _isPremium,
+            loadByAddress: _serverLoadByIp,
+          ).first;
     _isAutoSelect = true;
     notifyListeners();
   }
@@ -734,26 +795,36 @@ class AppProvider with ChangeNotifier {
     final wasConnected =
         _vpnStatus == VpnStatus.connected || _vpnStatus == VpnStatus.connecting;
     final isSameServer = _selectedServer?.id == target.id;
+    // A running auto-pick may be trying this very server: the user's choice
+    // still ends the search.
+    final searching = _autoPick != null;
 
     _selectedServer = target;
     _isAutoSelect = false;
     notifyListeners();
 
-    if (wasConnected && !isSameServer) unawaited(_reconnect());
+    if (wasConnected && (!isSameServer || searching)) unawaited(_reconnect());
   }
 
+  /// The picker's "Auto server pick" entry.
   void toggleAutoSelect() {
-    final wasConnected =
-        _vpnStatus == VpnStatus.connected || _vpnStatus == VpnStatus.connecting;
-    final previous = _selectedServer;
-
+    final wasAuto = _isAutoSelect;
     _isAutoSelect = true;
-    _autoSelectBestServer(force: true).then((_) {
-      final next = _selectedServer;
-      if (!wasConnected || next == null || next.id == previous?.id) return;
-      if (isLockedForUser(next)) return;
-      unawaited(_reconnect());
-    });
+    final current = _selectedServer;
+    if (_vpnStatus == VpnStatus.connected && current != null) {
+      // The live tunnel already proves its server works: keep it, it is
+      // what auto-pick tries first from now on.
+      unawaited(_rememberWorkingServer(current));
+      notifyListeners();
+      return;
+    }
+    if (_vpnStatus == VpnStatus.connecting) {
+      // A manual attempt is in flight: hand it over to the search.
+      notifyListeners();
+      if (!wasAuto) unawaited(_reconnect());
+      return;
+    }
+    unawaited(_autoSelectBestServer(force: true));
   }
 
   /// Server switch / split-tunnel change: always ends in a reconnect.
@@ -764,13 +835,16 @@ class AppProvider with ChangeNotifier {
   /// [_reconnectGeneration] and stops the retry.
   Future<void> _reconnect() async {
     final generation = ++_reconnectGeneration;
+    _endAutoPick();
     bool stale() => _disposed || generation != _reconnectGeneration;
     await _vpnService.disconnect();
     await Future.delayed(const Duration(milliseconds: 500));
     if (stale()) return;
     final started = DateTime.now();
+    // Auto-pick already retries a server and moves on by itself.
+    final searched = _isAutoSelect;
     await connectVpn();
-    if (stale() || _vpnService.status != VpnStatus.error) return;
+    if (searched || stale() || _vpnService.status != VpnStatus.error) return;
     // Only a quick failure means the old engine was still stopping; a
     // server that timed out would just make the user wait twice as long.
     if (DateTime.now().difference(started) > const Duration(seconds: 4)) {
@@ -816,12 +890,9 @@ class AppProvider with ChangeNotifier {
       }
     }
 
+    if (_isAutoSelect) return _runAutoPick();
+
     ServerConfig? target = _selectedServer;
-    if (_isAutoSelect) {
-      if (target == null) await _autoSelectBestServer();
-      if (_disposed) return;
-      target = _selectedServer;
-    }
 
     if (target == null) {
       _errorMessage = 'no_server_selected';
@@ -855,29 +926,14 @@ class AppProvider with ChangeNotifier {
       if (_selectedServer?.id == fresh.id) _selectedServer = fresh;
     }
 
-    // Per-app VPN mask. `blocked` drives the AWG path (injected as
-    // ExcludedApplications); the GW engine takes the mask as an
-    // excluded/allowed pair so the include mode maps to allowedApps
-    // instead of an inverted exclude list.
-    List<String>? blocked;
-    List<String>? gwExcluded;
-    List<String>? gwAllowed;
-    if (_splitTunnel.isActive) {
-      final List<String> installed = await _listInstalledPackages();
-      if (_disposed) return;
-      blocked = _splitTunnel.buildBlockedApps(installed);
-      if (_splitTunnel.config.mode == SplitTunnelMode.exclude) {
-        gwExcluded = List<String>.from(_splitTunnel.config.packages);
-      } else {
-        gwAllowed = List<String>.from(_splitTunnel.config.packages);
-      }
-    }
+    final masks = await _appMasks();
+    if (_disposed) return;
 
     final success = await _vpnService.connect(
       target,
-      blockedApps: blocked,
-      excludedApps: gwExcluded,
-      allowedApps: gwAllowed,
+      blockedApps: masks.blocked,
+      excludedApps: masks.excluded,
+      allowedApps: masks.allowed,
     );
     if (_disposed) return;
     if (!success) {
@@ -886,8 +942,219 @@ class AppProvider with ChangeNotifier {
     }
   }
 
+  /// Per-app VPN mask. `blocked` drives the AWG and VLESS engines (an
+  /// exclude list); GW takes an excluded/allowed pair so the include mode
+  /// maps to allowedApps instead of an inverted exclude list.
+  Future<_AppMasks> _appMasks() async {
+    if (!_splitTunnel.isActive) {
+      return (blocked: null, excluded: null, allowed: null);
+    }
+    final List<String> installed = await _listInstalledPackages();
+    final blocked = _splitTunnel.buildBlockedApps(installed);
+    final selected = List<String>.from(_splitTunnel.config.packages);
+    return _splitTunnel.config.mode == SplitTunnelMode.exclude
+        ? (blocked: blocked, excluded: selected, allowed: null)
+        : (blocked: blocked, excluded: null, allowed: selected);
+  }
+
+  /// "Auto server pick": really connects to the servers one by one, the last
+  /// working one first, until a tunnel comes up, and stays on that server.
+  ///
+  /// Every user action that changes the connection (cancel, disconnect, a
+  /// manual server, logout) bumps [_reconnectGeneration] and ends it.
+  Future<void> _runAutoPick() async {
+    final generation = _reconnectGeneration;
+    final account = _accountGeneration;
+    bool stale() =>
+        _disposed ||
+        generation != _reconnectGeneration ||
+        account != _accountGeneration;
+
+    _errorMessage = null;
+    _autoPick = const AutoPickProgress();
+    _vpnStatus = VpnStatus.connecting;
+    _reviewPrompt.onVpnStatus(VpnStatus.connecting);
+    notifyListeners();
+
+    // PRO VLESS entries fetched before an upgrade carry no link yet.
+    if (_isPremium && _servers.any((s) => s.isLocked)) {
+      await loadServers();
+      if (stale()) return;
+    }
+    final candidates = autoPickOrder(
+      _servers,
+      isPremium: _isPremium,
+      loadByAddress: _serverLoadByIp,
+      lastWorkingId: _lastWorkingServerId,
+    );
+    if (candidates.isEmpty) {
+      _finishAutoPick(
+        error: _servers.any(isLockedForUser)
+            ? 'premium_required'
+            : 'no_servers_available',
+        attempted: false,
+      );
+      return;
+    }
+
+    final online = await _internetProbe();
+    if (stale()) return;
+    if (!online) {
+      _finishAutoPick(error: 'no_internet', attempted: false);
+      return;
+    }
+    final granted = await _vpnService.ensurePermission();
+    if (stale()) return;
+    if (!granted) {
+      _finishAutoPick(error: 'vpn_permission_denied', attempted: false);
+      return;
+    }
+    final masks = await _appMasks();
+    if (stale()) return;
+
+    for (var i = 0; i < candidates.length; i++) {
+      final server = _current(candidates[i]);
+      _selectedServer = server;
+      _autoPick = AutoPickProgress(
+        current: i + 1,
+        total: candidates.length,
+        server: server,
+      );
+      notifyListeners();
+
+      final verdict = await _tryAutoPickCandidate(server, masks, stale);
+      if (stale()) return;
+      switch (verdict) {
+        case _Attempt.connected:
+          _finishAutoPick(connectedTo: server);
+          return;
+        case _Attempt.abort:
+          _finishAutoPick(error: _vpnService.errorMessage);
+          return;
+        case _Attempt.failed:
+          break;
+      }
+      if (i < candidates.length - 1) {
+        await Future<void>.delayed(_autoPickSettle);
+        if (stale()) return;
+      }
+    }
+
+    // Every server failed: tell a dropped network apart from dead servers.
+    final stillOnline = await _internetProbe();
+    if (stale()) return;
+    _finishAutoPick(error: stillOnline ? 'auto_pick_failed' : 'no_internet');
+  }
+
+  Future<_Attempt> _tryAutoPickCandidate(
+    ServerConfig server,
+    _AppMasks masks,
+    bool Function() stale,
+  ) async {
+    for (var attempt = 0; attempt < 2; attempt++) {
+      final started = DateTime.now();
+      final connected = await _connectWithinBudget(server, masks, stale);
+      if (stale()) return _Attempt.failed;
+      if (connected == true) return _Attempt.connected;
+      // A server that used up its whole budget is dead, not unlucky.
+      if (connected == null) break;
+      final error = _vpnService.errorMessage;
+      if (error == 'vpn_permission_denied' || error == 'platform_unsupported') {
+        return _Attempt.abort;
+      }
+      // Only a quick failure can be the previous engine still stopping; a
+      // server that timed out would just make the search twice as long.
+      if (DateTime.now().difference(started) > const Duration(seconds: 3)) {
+        break;
+      }
+      await Future<void>.delayed(_autoPickSettle * 2);
+      if (stale()) return _Attempt.failed;
+    }
+    return _Attempt.failed;
+  }
+
+  /// One connect capped at [_autoPickAttemptTimeout]: true when the tunnel
+  /// came up, false when it failed, null when the budget ran out (the attempt
+  /// is cancelled and its engine torn down before the next server starts).
+  Future<bool?> _connectWithinBudget(
+    ServerConfig server,
+    _AppMasks masks,
+    bool Function() stale,
+  ) async {
+    Future<void>? cancelling;
+    final budget = Timer(_autoPickAttemptTimeout, () {
+      // A user action may already have started another connect.
+      if (!stale()) cancelling = _vpnService.cancelConnect();
+    });
+    bool connected;
+    try {
+      connected = await _vpnService.connect(
+        server,
+        blockedApps: masks.blocked,
+        excludedApps: masks.excluded,
+        allowedApps: masks.allowed,
+      );
+    } finally {
+      budget.cancel();
+    }
+    final pending = cancelling;
+    if (pending != null) {
+      await pending;
+      return null;
+    }
+    return connected;
+  }
+
+  void _finishAutoPick({
+    ServerConfig? connectedTo,
+    String? error,
+    bool attempted = true,
+  }) {
+    _autoPick = null;
+    if (connectedTo != null) {
+      _selectedServer = connectedTo;
+      _onVpnStatus(VpnStatus.connected);
+      return;
+    }
+    _errorMessage = error ?? 'auto_pick_failed';
+    // A search that never reached a server is no failed connection.
+    final status = attempted ? VpnStatus.error : VpnStatus.disconnected;
+    _vpnStatus = status;
+    _reviewPrompt.onVpnStatus(status);
+    notifyListeners();
+  }
+
+  /// Stops publishing a running search; the caller then drives the engine.
+  void _endAutoPick() {
+    if (_autoPick == null) return;
+    _autoPick = null;
+    notifyListeners();
+  }
+
+  Future<void> _loadLastWorkingServer() async {
+    String? saved;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      saved = prefs.getString(_lastWorkingPrefsKey);
+    } catch (_) {}
+    if (_disposed || saved == null || _lastWorkingServerId != null) return;
+    _lastWorkingServerId = saved;
+    if (_isAutoSelect && !_tunnelUp && _servers.isNotEmpty) {
+      await _autoSelectBestServer();
+    }
+  }
+
+  Future<void> _rememberWorkingServer(ServerConfig server) async {
+    _lastWorkingServerId = server.id;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_lastWorkingPrefsKey, server.id);
+    } catch (_) {}
+  }
+
   Future<void> disconnectVpn() async {
     _reconnectGeneration++;
+    _endAutoPick();
     await _vpnService.disconnect();
   }
 
@@ -895,6 +1162,7 @@ class AppProvider with ChangeNotifier {
   /// in flight — cancel it instead of waiting for the handshake.
   Future<void> cancelConnect() async {
     _reconnectGeneration++;
+    _endAutoPick();
     await _vpnService.cancelConnect();
   }
 
@@ -912,6 +1180,7 @@ class AppProvider with ChangeNotifier {
   Future<void> resetSession() async {
     _accountGeneration++;
     _reconnectGeneration++;
+    _autoPick = null;
     _serverLoad = null;
     _reloadQueued = false;
     _lastSuccessfulLoad = null;
@@ -951,9 +1220,19 @@ class AppProvider with ChangeNotifier {
     _activeProtocol = null;
     _restoredServerId = null;
     _resumingTraffic = false;
+    _lastWorkingServerId = null;
     _reviewPrompt.forgetSession();
     unawaited(_clearSession());
+    unawaited(_forgetWorkingServer());
     notifyListeners();
+  }
+
+  /// The next account may get other servers (personal AWG configs).
+  Future<void> _forgetWorkingServer() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_lastWorkingPrefsKey);
+    } catch (_) {}
   }
 
   void clearError() {
@@ -1038,3 +1317,12 @@ class AppProvider with ChangeNotifier {
     super.dispose();
   }
 }
+
+/// Split-tunnel masks for one connect, see [AppProvider._appMasks].
+typedef _AppMasks = ({
+  List<String>? blocked,
+  List<String>? excluded,
+  List<String>? allowed,
+});
+
+enum _Attempt { connected, failed, abort }

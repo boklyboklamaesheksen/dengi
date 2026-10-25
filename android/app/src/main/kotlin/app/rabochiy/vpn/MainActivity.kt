@@ -5,14 +5,18 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.graphics.Color
+import android.net.Uri
 import android.net.VpnService
 import android.os.Bundle
+import android.provider.Settings
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import com.witvpn.vlee.VleeManager
 import com.witvpn.vlee.model.VleeServerConfig
 import app.rabochiy.vpn.play.PlayStoreBridge
@@ -43,6 +47,9 @@ class MainActivity : FlutterFragmentActivity() {
         private const val VLEE_METHOD_CHANNEL = "app.rabochiy.vpn/vlee"
         private const val VLEE_EVENT_CHANNEL = "app.rabochiy.vpn/vlee/status"
         private const val VLEE_VPN_REQUEST = 0x1A62
+
+        /** MIUI/HyperOS runtime permission guarding the installed-app list. */
+        private const val APP_LIST_PERMISSION = "com.android.permission.GET_INSTALLED_APPS"
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -51,6 +58,22 @@ class MainActivity : FlutterFragmentActivity() {
     // it registers an ActivityResultLauncher, which is only allowed before
     // the activity is STARTED.
     private val playStore = PlayStoreBridge(this)
+
+    /** Pending `requestAppListAccess` call, answered by the launcher below. */
+    private var pendingAppListResult: MethodChannel.Result? = null
+
+    // Property initializer for the same reason as [playStore].
+    private val appListPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        val pending = pendingAppListResult
+        pendingAppListResult = null
+        try {
+            pending?.success(granted)
+        } catch (e: Exception) {
+            Log.w("MainActivity", "App-list permission result undeliverable", e)
+        }
+    }
     private var statsJob: Job? = null
     private var lastRxBytes: Long = 0
     private var lastTxBytes: Long = 0
@@ -109,10 +132,12 @@ class MainActivity : FlutterFragmentActivity() {
         vleeStatusSink = null
         try {
             pendingPermissionResult?.success(false)
+            pendingAppListResult?.success(false)
         } catch (e: Exception) {
             Log.w("MainActivity", "Permission channel already closed", e)
         }
         pendingPermissionResult = null
+        pendingAppListResult = null
         playStore.dispose()
         mainHandler.removeCallbacksAndMessages(null)
         scope.cancel()
@@ -143,6 +168,9 @@ class MainActivity : FlutterFragmentActivity() {
                         try { result.success(getLaunchablePackages()) }
                         catch (e: Exception) { result.error("ERR", e.message, null) }
                     }
+                    "appListAccess" -> result.success(appListAccess())
+                    "requestAppListAccess" -> requestAppListAccess(result)
+                    "openAppListSettings" -> result.success(openAppListSettings())
                     else -> result.notImplemented()
                 }
             }
@@ -499,6 +527,76 @@ class MainActivity : FlutterFragmentActivity() {
         } else {
             Log.w("MainActivity", "Got VPN permission result with no pending caller (granted=$granted)")
         }
+    }
+
+    /**
+     * MIUI/HyperOS define their own runtime permission for the installed-app
+     * list: without it PackageManager returns only this app, and once refused
+     * the system never asks again by itself (Xiaomi's adaptation guide).
+     */
+    private fun appListPermissionSupported(): Boolean = try {
+        packageManager.getPermissionInfo(APP_LIST_PERMISSION, 0).packageName ==
+            "com.lbe.security.miui"
+    } catch (_: PackageManager.NameNotFoundException) {
+        false
+    }
+
+    private fun appListAccess(): Map<String, Boolean> {
+        val supported = appListPermissionSupported()
+        val granted = !supported ||
+            ContextCompat.checkSelfPermission(this, APP_LIST_PERMISSION) ==
+            PackageManager.PERMISSION_GRANTED
+        return mapOf("supported" to supported, "granted" to granted)
+    }
+
+    private fun requestAppListAccess(result: MethodChannel.Result) {
+        if (appListAccess()["granted"] == true) {
+            result.success(true)
+            return
+        }
+        // A newer request owns the answer; release the older caller.
+        pendingAppListResult?.success(false)
+        pendingAppListResult = result
+        try {
+            appListPermission.launch(APP_LIST_PERMISSION)
+        } catch (e: Exception) {
+            Log.w("MainActivity", "App-list permission request failed", e)
+            pendingAppListResult = null
+            result.success(false)
+        }
+    }
+
+    /**
+     * Where the user can grant the app-list permission after refusing it:
+     * MIUI's permission editor when present, the app's system settings page
+     * otherwise.
+     */
+    private fun openAppListSettings(): Boolean {
+        val details = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.fromParts("package", packageName, null),
+        )
+        val candidates = if (appListPermissionSupported()) {
+            listOf(
+                "com.miui.permcenter.permissions.PermissionsEditorActivity",
+                "com.miui.permcenter.permissions.AppPermissionsEditorActivity",
+            ).map { activity ->
+                Intent("miui.intent.action.APP_PERM_EDITOR")
+                    .setClassName("com.miui.securitycenter", activity)
+                    .putExtra("extra_pkgname", packageName)
+            } + details
+        } else {
+            listOf(details)
+        }
+        for (intent in candidates) {
+            try {
+                startActivity(intent)
+                return true
+            } catch (e: Exception) {
+                Log.w("MainActivity", "Settings screen unavailable: ${intent.component}", e)
+            }
+        }
+        return false
     }
 
     /** Returns packages that have a launcher activity (apps the user sees in app drawer). */

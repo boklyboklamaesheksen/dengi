@@ -66,13 +66,29 @@ class AppLocalizationsRu extends AppLocalizations {
   String get clickToSelect => 'Нажмите, чтобы выбрать';
 
   @override
-  String get autoSelectBest => 'Авто · лучший сервер';
+  String get autoPickTitle => 'Автоподбор серверов';
 
   @override
   String get autoSelect => 'Автовыбор';
 
   @override
-  String get optimized => 'Оптимизация скорости';
+  String get autoPickSubtitle => 'Сам найдёт рабочий сервер';
+
+  @override
+  String get autoPickDescription =>
+      'Переберёт все серверы GW, VLESS и AmneziaWG и подключит к рабочему';
+
+  @override
+  String get autoPickChecking => 'Проверка';
+
+  @override
+  String get autoPickWorking => 'Рабочий сервер';
+
+  @override
+  String get autoPickLastWorking => 'Последний рабочий';
+
+  @override
+  String get autoPickSearchingUpper => 'ПОДБОР СЕРВЕРА…';
 
   @override
   String get manualSelection => 'Ручной выбор';
@@ -200,6 +216,12 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get supportOpen => 'Открыть';
 
+  @override
+  String get supportChatAction => 'Написать в чат';
+
+  @override
+  String get supportNewsAction => 'Подписаться';
+
   // ── Traffic stats ────────────────────────────────────────────────────
   @override
   String get statsTitle => 'Статистика трафика';
@@ -324,6 +346,26 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get splitTunnelDisclosureButton => 'Понятно';
 
+  @override
+  String get splitTunnelDisclosureLater => 'Не сейчас';
+
+  @override
+  String get splitTunnelAccessTitle => 'Нет доступа к списку приложений';
+
+  @override
+  String get splitTunnelAccessBody =>
+      'Без этого разрешения система показывает только наше приложение, и выбрать нечего. Список не покидает ваше устройство.';
+
+  @override
+  String get splitTunnelAccessAllow => 'Разрешить доступ';
+
+  @override
+  String get splitTunnelAccessSettings => 'Открыть настройки';
+
+  @override
+  String get splitTunnelAccessSettingsHint =>
+      'В настройках откройте «Разрешения», разрешите доступ к списку установленных приложений и вернитесь сюда.';
+
   // ── Splash / Onboarding ──────────────────────────────────────────────
   @override
   String get splashSaveRecoveryPhrase => 'Сохраните фразу восстановления';
@@ -384,6 +426,14 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get errorServerUnreachable =>
       'Сервер не отвечает. Попробуйте другой сервер или проверьте интернет.';
+
+  @override
+  String get errorAutoPickFailed =>
+      'Не удалось найти рабочий сервер. Проверьте интернет и попробуйте ещё раз.';
+
+  @override
+  String get errorNoInternet =>
+      'Нет подключения к интернету. Включите Wi-Fi или мобильные данные и попробуйте снова.';
 
   @override
   String errorGeneric(String details) => 'Ошибка: $details';
@@ -618,6 +668,18 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get premiumBadgeBest => 'Выгодно';
+
+  @override
+  String get premiumIncluded => 'Что входит в PRO';
+
+  @override
+  String get premiumTrustInstant => 'Мгновенная активация';
+
+  @override
+  String get premiumTrustSecure => 'Защищённая оплата';
+
+  @override
+  String get premiumTrustSupport => 'Помощь в Telegram';
 
   @override
   String get accountPaymentOpenError =>

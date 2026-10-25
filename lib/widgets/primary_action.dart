@@ -82,16 +82,22 @@ class PrimaryAction extends StatelessWidget {
             size: 20,
           ),
         const SizedBox(width: 10),
-        AnimatedDefaultTextStyle(
-          duration: RabochiyDurations.tabSwitch,
-          curve: RabochiyCurves.brisk,
-          style: TextStyle(
-            color: contentColor,
-            fontWeight: FontWeight.w800,
-            fontSize: 14,
-            letterSpacing: 1.6,
+        // Long labels ("Нажмите, чтобы отменить") shrink instead of overflowing.
+        Flexible(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: AnimatedDefaultTextStyle(
+              duration: RabochiyDurations.tabSwitch,
+              curve: RabochiyCurves.brisk,
+              style: TextStyle(
+                color: contentColor,
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+                letterSpacing: 1.6,
+              ),
+              child: Text(_label),
+            ),
           ),
-          child: Text(_label),
         ),
       ],
     );

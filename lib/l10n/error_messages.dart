@@ -25,6 +25,10 @@ String localiseError(String? code, AppLocalizations l10n) {
       return l10n.errorPlatformUnsupported;
     case 'awg_handshake_timeout':
       return l10n.errorServerUnreachable;
+    case 'auto_pick_failed':
+      return l10n.errorAutoPickFailed;
+    case 'no_internet':
+      return l10n.errorNoInternet;
     default:
       // Unknown code or a raw native error message. Raw text may carry the
       // backend host or a node IP: network failures get the generic

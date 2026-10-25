@@ -16,6 +16,9 @@
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:node="remove" />
+    <!-- MIUI/HyperOS hide every other app from PackageManager until the user
+         grants their "installed apps" permission; other systems ignore it. -->
+    <uses-permission android:name="com.android.permission.GET_INSTALLED_APPS" />
 
     <queries>
         <intent>

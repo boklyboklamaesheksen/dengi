@@ -7,6 +7,7 @@ import '../motion/glass.dart';
 import '../motion/press_feedback.dart';
 import '../providers/app_provider.dart';
 import '../screens/server_list_screen.dart';
+import '../services/vpn_service.dart';
 import 'glass_card.dart';
 
 /// Pressable card that shows the currently selected tunnel location. Taps
@@ -28,8 +29,21 @@ class LocationTile extends StatelessWidget {
         String flag = server?.flag ?? '🌐';
 
         if (isAuto && server != null) {
-          title = l10n.autoSelectBest;
-          subtitle = '${l10n.optimized} · ${server.country}';
+          title = l10n.autoPickTitle;
+          final place = server.country != 'Unknown'
+              ? server.country
+              : server.cleanName;
+          final pick = provider.autoPick;
+          if (pick != null && pick.total > 0) {
+            subtitle =
+                '${l10n.autoPickChecking} ${pick.current}/${pick.total} · $place';
+          } else if (provider.vpnStatus == VpnStatus.connected) {
+            subtitle = '${l10n.autoPickWorking} · $place';
+          } else if (provider.lastWorkingServerId == server.id) {
+            subtitle = '${l10n.autoPickLastWorking} · $place';
+          } else {
+            subtitle = l10n.autoPickSubtitle;
+          }
         } else if (!isAuto && server != null) {
           title = server.country != 'Unknown' ? server.country : server.cleanName;
           subtitle = l10n.manualSelection;

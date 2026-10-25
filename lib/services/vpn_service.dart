@@ -443,6 +443,15 @@ class VpnService {
     }
   }
 
+  /// Asks for the system VPN consent before a series of connects (auto-pick)
+  /// so the dialog never eats into a server's time budget. Platforms without
+  /// a native engine have nothing to grant; their connect reports that.
+  Future<bool> ensurePermission() async {
+    if (_disposed) return false;
+    if (!_isPlatformSupported) return true;
+    return _requestPermission();
+  }
+
   Future<bool> _requestPermission() async {
     try {
       final granted =
