@@ -376,10 +376,10 @@ VPN doplňuje HTTPS, ale nenahrazuje bezpečnostní aktualizace ani opatrnost v�
 Коды языков ниже соответствуют языкам страницы в Play Console. Каждый текст короче 500 символов. Нативный SIGSEGV не объявляется исправленным без подтверждения на устройствах.
 
 <en-US>
-Added 12 European interface languages. Fixed traffic counters on long sessions and periodic statistics saving. Moved VPN statistics work off the main thread and simplified screen scaling. Renamed the app to Zapret VPN.
+The app can now update itself through Google Play and may ask you to rate it after a few VPN sessions. Fixed: the Disconnect button could get stuck on the 'Disconnecting…' screen; an unavailable VLESS server now fails in seconds and cancels instantly; after a restart the app remembers your VPN and shows the real status if Android turns it off. PRO servers are marked with a star and no longer drop your connection.
 </en-US>
 <ru-RU>
-Добавлены 12 европейских языков. Исправлены счётчики трафика в долгих сессиях и сохранение статистики. Опрос VPN-статистики перенесён с главного потока, упрощено масштабирование экрана. Приложение переименовано в «Запрет VPN».
+Приложение теперь может обновляться через Google Play и после нескольких сессий VPN может попросить оценить его. Исправлено: кнопка «Отключить» больше не застревает на экране «Отключение…»; недоступный VLESS-сервер теперь даёт ошибку за несколько секунд, а отмена срабатывает сразу; после перезапуска приложение помнит включённый VPN и честно показывает статус, если система его отключила. PRO-серверы отмечены звездой и не разрывают текущее соединение.
 </ru-RU>
 <fr-FR>
 Ajout de 12 langues européennes. Correction des compteurs de trafic lors des longues sessions et de l’enregistrement des statistiques. Traitement des statistiques VPN hors du thread principal et mise à l’échelle de l’écran simplifiée.
